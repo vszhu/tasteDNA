@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { computeGroupRecommendation } from "@/lib/group/ranking";
+import { prepareGroupMedicationChecks } from "./medication-checks";
 import {
   GroupSessionError,
   type GroupRecommendationEngine,
@@ -8,7 +9,7 @@ import {
 } from "./types";
 
 export const productionGroupRecommendationEngine: GroupRecommendationEngine = {
-  algorithmVersion: "fair-group-v1.0.0",
+  algorithmVersion: "fair-group-v1.1.0-meds",
   compute: computeGroupRecommendation,
 };
 
@@ -37,8 +38,9 @@ export async function computeGroupSessionRecommendation(
   engine: GroupRecommendationEngine = productionGroupRecommendationEngine,
 ): Promise<RecommendationSnapshot> {
   const input = await repository.loadComputationInput(userId, sessionId);
-  const inputHash = groupRecommendationInputHash(input.identity);
-  const recommendation = engine.compute(input.rankingInput);
+  const checked = prepareGroupMedicationChecks(input.rankingInput, input.medicationAccounts, input.medicationVersions);
+  const inputHash = groupRecommendationInputHash({ identity: input.identity, medicationVersions: checked.versions, medicationRulesVersion: checked.summary.rulesVersion });
+  const recommendation = engine.compute(checked.input);
   if (!recommendation) {
     throw new GroupSessionError(
       "missing-input",
@@ -53,6 +55,7 @@ export async function computeGroupSessionRecommendation(
     sessionId,
     engine.algorithmVersion,
     inputHash,
-    recommendation,
+    { ...recommendation, medicationSummary: checked.summary },
+    checked.versions,
   );
 }

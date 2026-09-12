@@ -21,6 +21,18 @@ beforeEach(() => { state.menu = null; state.medications = []; state.storageError
 afterEach(cleanup);
 
 describe("medication workspace integration", () => {
+  it("lets users find a newly covered medication by brand and select its exact form", () => {
+    render(createElement(MedicationsPage));
+    expect(screen.getByText("Choose from 12 medicines to redraw connections.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Manage list/ }));
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search medication or brand" }), { target: { value: "Synthroid" } });
+    const matches = within(screen.getByRole("group", { name: "Covered medication matches" }));
+    expect(matches.getAllByRole("button")).toHaveLength(1);
+    fireEvent.click(matches.getByRole("button", { name: "Add Levothyroxine, Oral tablets" }));
+    expect(state.addMedication).toHaveBeenCalledWith("levothyroxine-tablets");
+    expect(screen.getByRole("searchbox", { name: "Search medication or brand" }).getAttribute("value")).toBe("");
+  });
+
   it("lets visitors explore example medicines without changing their medication list or current menu", () => {
     render(createElement(MedicationsPage));
     fireEvent.click(screen.getByRole("button", { name: "Example Simvastatin, Oral tablets" }));

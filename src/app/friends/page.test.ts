@@ -9,6 +9,7 @@ const state = vi.hoisted(() => ({
   session: { status: "signed-in", user: { id: "account-a", email: "ada@example.test", displayName: "Ada" } },
   list: vi.fn(), request: vi.fn(), respond: vi.fn(),
 }));
+vi.mock("@/components/providers/medication-provider", () => ({ useMedications: () => ({ hydrated: true, savedAccount: null, hasUnsavedChanges: false, accountError: null }) }));
 vi.mock("@/components/providers/session-provider", () => ({ useSession: () => state.session }));
 vi.mock("@/lib/friendships/client", async (original) => ({
   ...await original<typeof import("@/lib/friendships/client")>(),

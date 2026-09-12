@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, Clock, Mail, RefreshCw, UserPlus, Users, X } from "lucide-react";
+import { GroupMedicationCard } from "@/components/medications/group-medication-card";
 import { useSession } from "@/components/providers/session-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -199,6 +200,8 @@ function FriendsAccount({ user }: { user: SessionUser }) {
         <Link href="/sign-in" className="font-semibold underline underline-offset-4">Switch account</Link>
         <button type="button" disabled={refreshing || sending || respondingId !== null} onClick={() => void refresh()} className="ml-auto flex items-center gap-1.5 font-semibold disabled:opacity-50"><RefreshCw className={cn("size-3.5", refreshing && "animate-spin")} /> {refreshing ? "Refreshing…" : "Refresh friends"}</button>
       </div>
+
+      <GroupMedicationCard />
 
       <form onSubmit={submit} className="mt-8 flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">

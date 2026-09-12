@@ -37,7 +37,7 @@ function venueSummary(venue: Venue): VenueSummary {
 
 function orderedDishUtilities(utility: RestaurantUtility, venue: Venue) {
   const menuOrder = new Map(venue.menuItems.map((item) => [item.id, item.menuOrder]));
-  return [...utility.dishUtilities].sort(
+  return utility.dishUtilities.filter((entry) => !entry.excluded).sort(
     (left, right) => right.utility - left.utility || (menuOrder.get(left.menuItemId) ?? 0) - (menuOrder.get(right.menuItemId) ?? 0),
   );
 }
@@ -50,7 +50,14 @@ export function scoreRestaurantForMember(member: GroupDecisionMember, venue: Ven
     menuItem,
     profile: member.profile,
     mealPreferenceState: member.member.mealPreferenceState,
-  }));
+  })).map((utility) => member.medicationExcludedItemIds?.includes(utility.menuItemId) ? {
+    ...utility,
+    utility: 0,
+    contextAdjustment: -utility.baseScore,
+    excluded: true,
+    exclusionReason: "Needs review against private medication guidance.",
+    factors: [{ label: "Private medication review required", contribution: -utility.baseScore, kind: "constraint" as const }],
+  } : utility);
   const eligible = dishUtilities.filter((utility) => !utility.excluded).sort((left, right) => right.utility - left.utility);
   const bestDishUtility = eligible[0]?.utility ?? 0;
   const topThree = eligible.slice(0, 3).map((utility) => utility.utility);

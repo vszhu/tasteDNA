@@ -1,4 +1,5 @@
 import type { GroupRankingInput } from "@/lib/group/ranking";
+import type { MedicationAccount } from "@/lib/medications/account";
 import type {
   DiningSession,
   DiningSessionMember,
@@ -23,6 +24,7 @@ export interface GroupSessionDetail {
   members: SessionMemberSummary[];
   ownMealPreferenceState?: MealPreferenceState;
   latestRecommendation?: RecommendationSnapshot;
+  recommendationNeedsRefresh?: boolean;
 }
 
 export interface CreateGroupSessionInput {
@@ -35,6 +37,8 @@ export interface CreateGroupSessionInput {
 export interface GroupSessionComputationInput {
   rankingInput: GroupRankingInput;
   identity: unknown;
+  medicationAccounts: MedicationAccount[];
+  medicationVersions: Record<string, string>;
 }
 
 export type InvitationResponseAction = "accept" | "decline";
@@ -65,6 +69,7 @@ export interface GroupSessionRepository {
     algorithmVersion: string,
     inputHash: string,
     recommendation: GroupRecommendation,
+    medicationVersions: Record<string, string>,
   ): Promise<RecommendationSnapshot>;
 }
 

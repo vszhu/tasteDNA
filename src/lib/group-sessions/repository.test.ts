@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import { SupabaseGroupSessionRepository } from "./repository";
+import { GROUP_GOLDEN_FIXTURES } from "@/types/group.fixtures";
+import { computeGroupRecommendation } from "@/lib/group/ranking";
+import { MEDICATION_RULES_VERSION } from "@/lib/medications/catalog";
+import { medicationVersionFingerprint } from "./medication-checks";
 
 const USER_ID = "c1000000-0000-4000-8000-000000000001";
 const FRIEND_ID = "c1000000-0000-4000-8000-000000000002";
@@ -25,6 +29,40 @@ function asClient(from: (table: string) => unknown): SupabaseClient {
 }
 
 describe("SupabaseGroupSessionRepository", () => {
+  it.each(["current", "changed-list", "changed-rules", "legacy"])("checks %s snapshots without exposing private lists", async (version) => {
+    const revision = "c4000000-0000-4000-8000-000000000001";
+    const recommendation = { ...computeGroupRecommendation(GROUP_GOLDEN_FIXTURES[0])!, sessionId: SESSION_ID,
+      ...(version === "legacy" ? {} : { medicationSummary: { checkedMembers: 1, uncheckedMembers: 0, flaggedDishOptions: 1, withheldVenues: 0, rulesVersion: version === "changed-rules" ? "old" : MEDICATION_RULES_VERSION, revisionFingerprint: medicationVersionFingerprint({ [USER_ID]: version === "changed-list" ? "old" : revision }) } }) };
+    const medicationQuery = query([{ user_id: USER_ID, use_in_groups: true, revision }]);
+    const userClient = asClient((table) => {
+      if (table === "group_sessions") return query([], { id: SESSION_ID, creator_id: USER_ID, name: "Lunch", scheduled_for: null, status: "decided", created_at: NOW, updated_at: NOW });
+      if (table === "group_session_members") return query([{ session_id: SESSION_ID, user_id: USER_ID, status: "accepted", accepted_at: NOW, declined_at: null, created_at: NOW, updated_at: NOW }]);
+      if (table === "group_session_candidates") return query([{ venue_id: VENUE_ID }]);
+      if (table === "group_session_meal_preferences") return query([], null);
+      if (table === "group_recommendation_results") return query([], { id: "c5000000-0000-4000-8000-000000000001", algorithm_version: "v1", input_hash: "hash", result_snapshot: recommendation, created_at: NOW });
+      throw new Error(table);
+    });
+    const admin = asClient((table) => {
+      if (table === "group_session_meal_preferences") return query([]);
+      if (table === "users") return query([{ id: USER_ID, display_name: "Owner" }]);
+      if (table === "user_medication_profiles") return medicationQuery;
+      throw new Error(table);
+    });
+    const detail = await new SupabaseGroupSessionRepository(userClient, admin).getForUser(USER_ID, SESSION_ID);
+    expect(Boolean(detail?.latestRecommendation)).toBe(version === "current");
+    expect(Boolean(detail?.recommendationNeedsRefresh)).toBe(version !== "current");
+    expect(medicationQuery.select).toHaveBeenCalledWith("user_id,use_in_groups,revision");
+    expect(medicationQuery.in).toHaveBeenCalledWith("user_id", [USER_ID]);
+    expect(JSON.stringify(detail)).not.toContain(revision);
+  });
+
+  it("rejects a persistence race instead of returning an outdated meal", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: { code: "40001" } });
+    const repository = new SupabaseGroupSessionRepository(asClient(() => query([])), { rpc } as unknown as SupabaseClient);
+    await expect(repository.persistRecommendation(USER_ID, SESSION_ID, "v1", "hash", computeGroupRecommendation(GROUP_GOLDEN_FIXTURES[0])!, { [USER_ID]: "none" })).rejects.toMatchObject({ code: "invalid-state" });
+    expect(rpc).toHaveBeenCalledWith("persist_medication_group_recommendation", expect.objectContaining({ p_medication_versions: { [USER_ID]: "none" } }));
+  });
+
   it("returns only the caller's meal-state JSON while exposing roster readiness", async () => {
     const session = {
       id: SESSION_ID,

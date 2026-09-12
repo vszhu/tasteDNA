@@ -28,6 +28,7 @@ const state = vi.hoisted(() => ({
   friends: { list: vi.fn() },
 }));
 
+vi.mock("@/components/providers/medication-provider", () => ({ useMedications: () => ({ hydrated: true, savedAccount: null, hasUnsavedChanges: false, accountError: null }) }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: state.push }),
   useParams: () => ({ id: SESSION_ID }),
@@ -148,5 +149,24 @@ describe("real group-session page wiring", () => {
     render(createElement(SessionResultsPage));
     expect((await screen.findByTestId("real-result")).textContent).toBe("Real winner");
     expect(screen.queryByText(/sample scenario/i)).toBeNull();
+  });
+
+  it("removes the prior account's group result immediately on an account switch", async () => {
+    state.group.get.mockResolvedValueOnce({ ...sessionDetail(), latestRecommendation: snapshot() });
+    const view = render(createElement(SessionResultsPage));
+    await screen.findByTestId("real-result");
+    state.group.get.mockImplementation(() => new Promise(() => {}));
+    state.session = { status: "signed-in", user: { id: FRIEND_ID, email: "friend@example.test", displayName: "Friend" } };
+    view.rerender(createElement(SessionResultsPage));
+    expect(screen.queryByTestId("real-result")).toBeNull();
+    expect(screen.getByRole("status").textContent).toContain("Loading");
+  });
+
+  it("asks for recomputation when a saved medication revision invalidated the result", async () => {
+    state.group.get.mockResolvedValue({ ...sessionDetail(), recommendationNeedsRefresh: true });
+    render(createElement(SessionResultsPage));
+    await screen.findByText("This meal needs a fresh check.");
+    expect(screen.queryByTestId("real-result")).toBeNull();
+    expect(screen.getByRole("link", { name: "Manage my medication settings" }).getAttribute("href")).toBe("/medications/settings");
   });
 });
