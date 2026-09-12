@@ -93,8 +93,12 @@ On Windows PowerShell, use `Copy-Item .env.example .env.local` instead of `cp` i
 | `OPENAI_MENU_FALLBACK_MODEL` | No | Backup used only after an unusable primary result; defaults to `gpt-5.6-terra`. |
 | `OPENAI_MENU_TIMEOUT_MS` | No | Timeout for each menu model attempt; defaults to 30 seconds. |
 | `NEXT_PUBLIC_SUPABASE_URL` | No | Browser Supabase project URL. |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No | Public Supabase anon key; RLS still controls access. |
-| `SUPABASE_SERVICE_ROLE_KEY` | No | Reserved for server-side persistence jobs. Never expose it to the browser. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | No | Public Supabase publishable key; RLS still controls access. |
+| `SUPABASE_URL` | No | Optional server-only Supabase URL; falls back to `NEXT_PUBLIC_SUPABASE_URL`. |
+| `SUPABASE_SECRET_KEY` | No | Privileged key for server-side persistence jobs. Never expose it to the browser. |
+| `CMU_DINING_API_URL` | No | CMU Dining feed URL used only by the manual sync route. |
+| `CMU_DINING_TIMEOUT_MS` | No | Upstream sync timeout; defaults to 8 seconds. |
+| `CMU_DINING_SYNC_SECRET` | No | Bearer secret protecting the manual CMU Dining sync route. |
 | `TASTEDNA_DEMO_MODE` | No | Set to `true` to force fallback extraction even when OpenAI is configured. |
 
 ## OpenAI setup
@@ -109,9 +113,14 @@ OpenAI calls only occur behind `src/app/api/menu/extract/route.ts`. The primary 
 ## Supabase setup
 
 1. Create a Supabase project.
-2. In the SQL editor, apply `supabase/migrations/202609110001_initial_tastedna.sql` (or run `supabase db push` with the CLI).
-3. Add the Supabase URL and anon key to `.env.local`.
-4. Add your preferred Supabase Auth flow, then replace the local provider adapter with authenticated reads and upserts.
+2. Apply the migrations (or run `supabase db push` with the CLI).
+3. Add the project URL and publishable key to `.env.local` for browser access.
+4. Add `SUPABASE_SECRET_KEY` only to the server environment when privileged persistence is needed.
+5. Add your preferred Supabase Auth flow, then replace the local provider adapter with authenticated reads and upserts.
+
+The implementation temporarily accepts the legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
+`SUPABASE_SERVICE_ROLE_KEY` names as fallbacks, but new setups should use publishable and
+secret keys.
 
 The migration installs `pgcrypto` and `vector`, creates User, Dish, DishFeatures, Rating, TasteProfile, Menu, MenuItem, and Recommendation tables, adds indexes, and enables row-level security. Production OpenAI embeddings use 1,536-dimensional `text-embedding-3-small` vectors. The 46 starter foods live in typed source data so the demo bundle never needs a database round trip; a production sync can upsert them into `dishes` and `dish_features`.
 
