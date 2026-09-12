@@ -201,7 +201,10 @@ function computeBaseGroupRecommendation(input: GroupRankingInput): GroupRecommen
   const winnerScore = rankedCandidates[0];
   const winnerVenue = venueById.get(winnerScore.venue.id);
   if (!winnerVenue) return null;
-  const runnerUpScore = venueScores.find((score) => score.venue.id !== winnerScore.venue.id);
+  // A runner-up must be a venue that was eligible to win. Floor-rejected
+  // venues remain in venueScores and explanation facts, but are not presented
+  // as the next group choice.
+  const runnerUpScore = rankedCandidates.find((score) => score.venue.id !== winnerScore.venue.id);
   const winnerAssignments = assignments(winnerScore, winnerVenue);
   const compromiseRequired = floorClearers.length === 0;
 
