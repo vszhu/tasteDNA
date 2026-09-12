@@ -14,7 +14,10 @@ import { TasteProvider, useTaste } from "./taste-provider";
 import { MedicationProvider, useMedications } from "./medication-provider";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => navigation,
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock("@/lib/db/supabase", () => ({ getSupabaseBrowserClient: () => null }));
 vi.mock("@/components/providers/session-provider", () => ({ useSession: () => ({ status: "signed-out", user: null }) }));
 

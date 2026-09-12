@@ -1,129 +1,151 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Info } from "lucide-react";
+import { AlertCircle, ArrowLeft, Clock, RefreshCw, Sparkles, Users } from "lucide-react";
 import { GroupResultsView } from "@/components/group/group-results-view";
-import { applyPreferenceAnswer, type PreferenceAnswer } from "@/components/group/preference-question";
+import type { PreferenceAnswer } from "@/components/group/preference-question";
 import { PreferenceQuestionCard } from "@/components/group/preference-question-card";
-import { computeGroupRecommendation } from "@/lib/group/ranking";
-import { EMPTY_MEAL_PREFERENCE_STATE } from "@/lib/session/meal-preferences";
-import { GROUP_GOLDEN_FIXTURES, type GroupGoldenFixture } from "@/types/group.fixtures";
-import type { GroupDecisionMember, PreferenceQuestion } from "@/types/group";
+import { useSession } from "@/components/providers/session-provider";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { createGroupSessionClient, GroupSessionClientError } from "@/lib/group-sessions/client";
+import type { GroupSessionDetail } from "@/lib/group-sessions/types";
+import { EMPTY_MEAL_PREFERENCE_STATE, setTagPreference } from "@/lib/session/meal-preferences";
 import { cn } from "@/lib/utils";
 
-const SCENARIO_LABELS: Record<GroupGoldenFixture["id"], string> = {
-  "clear-winner": "Clear winner",
-  "misery-floor": "Fairness saves the day",
-  "all-fail-compromise": "Best of a bad bunch",
-  "near-tie": "Near tie",
-  "stale-menu": "Stale menu",
-  "preference-flip": "Meal preference flips the pick",
-};
+const groupSessionClient = createGroupSessionClient();
 
-/**
- * A mock stand-in for the real engine's PreferenceQuestion output — the
- * engine never returns one today. Only the preference-flip scenario gets a
- * question, since it's the one fixture actually designed to change outcome
- * based on one member's answer (see group.fixtures.ts: winnerWithoutPreference
- * vs winnerWithPreference). Robust decisions never get a question, matching
- * "hide the component entirely for robust decisions."
- */
-const MOCK_QUESTIONS: Partial<Record<GroupGoldenFixture["id"], PreferenceQuestion>> = {
-  "preference-flip": { id: "q-preference-flip", memberId: "alex", tag: "spicy", prompt: "Feeling like something spicy today?" },
-};
-
-function initialMembers(fixture: GroupGoldenFixture, question: PreferenceQuestion | undefined): GroupDecisionMember[] {
-  if (!question) return fixture.members;
-  // Reset the targeted member's preferences so the demo starts unanswered,
-  // instead of the fixture's already-flipped baseline.
-  return fixture.members.map((decisionMember) =>
-    decisionMember.member.userId === question.memberId
-      ? { ...decisionMember, member: { ...decisionMember.member, mealPreferenceState: EMPTY_MEAL_PREFERENCE_STATE } }
-      : decisionMember,
-  );
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof GroupSessionClientError ? error.message : fallback;
 }
 
-/**
- * Presentation-only results view. There's no reveal API yet — and computing
- * a real group recommendation needs every member's private TasteProfile,
- * which shouldn't be resolved client-side anyway — so this previews the
- * real ranking engine (`computeGroupRecommendation`) against the shared
- * golden fixtures. Swap the fixture lookup for a fetch to the real reveal
- * endpoint once it exists; `GroupResultsView` itself needs no changes.
- */
 export default function SessionResultsPage() {
   const params = useParams<{ id: string }>();
-  const [scenarioId, setScenarioId] = useState<GroupGoldenFixture["id"]>("clear-winner");
+  const sessionId = params.id;
+  const { user, status } = useSession();
+  const [detail, setDetail] = useState<GroupSessionDetail | null | undefined>(undefined);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [computing, setComputing] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const fixture = useMemo(() => GROUP_GOLDEN_FIXTURES.find((entry) => entry.id === scenarioId)!, [scenarioId]);
-  const question = MOCK_QUESTIONS[scenarioId];
+  const load = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const next = await groupSessionClient.get(sessionId, signal);
+      setDetail(next);
+      setLoadError(null);
+    } catch (error) {
+      if (signal?.aborted) return;
+      setDetail(null);
+      setLoadError(errorMessage(error, "We couldn’t load this group result."));
+    }
+  }, [sessionId]);
 
-  // Keyed per-scenario so switching scenarios and back preserves an answer,
-  // and so no reset effect is needed when the scenario changes.
-  const [answers, setAnswers] = useState<Partial<Record<GroupGoldenFixture["id"], PreferenceAnswer>>>({});
-  const answer = answers[scenarioId];
+  useEffect(() => {
+    if (status !== "signed-in" || !user) return;
+    const controller = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial authenticated API hydration
+    void load(controller.signal);
+    const refresh = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    const timer = window.setInterval(refresh, 15000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [load, status, user]);
 
-  const baselineMembers = useMemo(() => initialMembers(fixture, question), [fixture, question]);
-  const members: GroupDecisionMember[] = useMemo(
-    () => (question && answer ? applyPreferenceAnswer(baselineMembers, question, answer) : baselineMembers),
-    [baselineMembers, question, answer],
+  const memberNames = useMemo(
+    () => Object.fromEntries(detail?.members.map((member) => [member.userId, member.displayName]) ?? []),
+    [detail],
   );
 
-  const recommendation = useMemo(() => computeGroupRecommendation({ session: fixture.session, venues: fixture.venues, members }), [fixture, members]);
-  const memberNames = useMemo(() => Object.fromEntries(members.map((decisionMember) => [decisionMember.member.userId, decisionMember.member.displayName])), [members]);
-
-  function handleAnswer(nextAnswer: PreferenceAnswer) {
-    setAnswers((current) => ({ ...current, [scenarioId]: nextAnswer }));
+  async function compute() {
+    setComputing(true);
+    setActionError(null);
+    try {
+      const result = await groupSessionClient.compute(sessionId);
+      setDetail((current) => current ? { ...current, latestRecommendation: result, session: { ...current.session, status: "revealed" } } : current);
+    } catch (error) {
+      setActionError(errorMessage(error, "We couldn’t compute the group recommendation."));
+    } finally {
+      setComputing(false);
+    }
   }
+
+  async function answerQuestion(answer: PreferenceAnswer) {
+    if (!detail?.latestRecommendation?.recommendation.preferenceQuestion || !user) return;
+    const question = detail.latestRecommendation.recommendation.preferenceQuestion;
+    const nextPreference = setTagPreference(
+      detail.ownMealPreferenceState ?? EMPTY_MEAL_PREFERENCE_STATE,
+      question.tag,
+      answer === "yes" ? "desired" : "avoided",
+    );
+    const updated = await groupSessionClient.updateMealPreferences(sessionId, nextPreference);
+    if (updated.session.createdByUserId === user.id) {
+      const result = await groupSessionClient.compute(sessionId);
+      setDetail({ ...updated, latestRecommendation: result, session: { ...updated.session, status: "revealed" } });
+    } else {
+      setDetail(updated);
+    }
+  }
+
+  if (status === "signed-out" || !user) {
+    return <section className="mx-auto max-w-lg px-4 py-16 text-center"><Users className="mx-auto size-9 text-[var(--tomato)]" /><h1 className="mt-5 text-4xl">Sign in to see this result.</h1><Link href="/sign-in" className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>Sign in</Link></section>;
+  }
+
+  if (status === "loading" || detail === undefined) {
+    return <div role="status" className="mx-auto max-w-3xl px-4 py-16 text-center text-sm text-[var(--muted)]">Loading the group result…</div>;
+  }
+
+  if (detail === null) {
+    return <section className="mx-auto max-w-lg px-4 py-16 text-center"><h1 className="text-4xl">Result unavailable.</h1><p role="alert" className="mt-3 text-[var(--muted)]">{loadError ?? "You may not have access to this session."}</p><div className="mt-7 flex justify-center gap-3"><Button onClick={() => void load()}><RefreshCw className="size-4" /> Retry</Button><Link href={`/sessions/${sessionId}`} className={buttonVariants({ variant: "outline" })}>Back to session</Link></div></section>;
+  }
+
+  const isCreator = detail.session.createdByUserId === user.id;
+  const myMember = detail.members.find((member) => member.userId === user.id);
+  const canView = myMember?.status === "joined" || myMember?.status === "responded";
+  const snapshot = detail.latestRecommendation;
+  const question = snapshot?.recommendation.preferenceQuestion;
+  const targetedToMe = question?.memberId === user.id;
+  const currentAnswer: PreferenceAnswer | undefined = question && detail.ownMealPreferenceState?.desiredTags.includes(question.tag)
+    ? "yes"
+    : question && detail.ownMealPreferenceState?.avoidedTags.includes(question.tag)
+      ? "no"
+      : undefined;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-9 sm:px-6 sm:py-14">
-      <Link href={`/sessions/${params.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)] hover:text-[var(--ink)]"><ArrowLeft className="size-4" /> Back to session</Link>
-
-      <p className="mt-6 flex items-center gap-2 rounded-2xl border border-[#e7d29f] bg-[#fff8e7] p-4 text-sm text-[#71561d]">
-        <Info className="size-4 shrink-0" /> Previewing the real ranking engine against a sample scenario — there&rsquo;s no reveal API yet to score your actual session. Group previews do not use medication lists. Medication checks apply to the solo menu decoder.
-      </p>
-
-      <div className="mt-6 flex flex-wrap gap-2">
-        {GROUP_GOLDEN_FIXTURES.map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            aria-pressed={entry.id === scenarioId}
-            onClick={() => setScenarioId(entry.id)}
-            className={cn(
-              "rounded-full border px-4 py-2 text-sm font-semibold transition-all",
-              entry.id === scenarioId ? "border-[var(--tomato)] bg-[var(--tomato)] text-white" : "border-[var(--line)] bg-white hover:border-[var(--ink)]",
-            )}
-          >
-            {SCENARIO_LABELS[entry.id]}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href={`/sessions/${sessionId}`} className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)] hover:text-[var(--ink)]"><ArrowLeft className="size-4" /> Back to session</Link>
+        <Button size="sm" variant="ghost" onClick={() => void load()}><RefreshCw className="size-3.5" /> Refresh</Button>
       </div>
 
-      {question && (
-        <div className="mt-6">
-          <PreferenceQuestionCard
-            key={scenarioId}
-            question={question}
-            memberDisplayName={memberNames[question.memberId] ?? question.memberId}
-            initialAnswer={answer}
-            onAnswer={handleAnswer}
-          />
-        </div>
+      <div className="mt-7 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold tracking-[.18em] text-[var(--tomato)]">REAL GROUP RESULT</p><h1 className="mt-2 text-4xl sm:text-5xl">{detail.session.title}</h1></div>{isCreator && canView && <Button variant="accent" disabled={computing} onClick={() => void compute()}>{computing ? "Computing…" : snapshot ? "Recompute" : "Compute result"} <Sparkles className="size-4" /></Button>}</div>
+
+      {actionError && <p role="alert" className="mt-6 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700"><AlertCircle className="mt-0.5 size-4 shrink-0" /> {actionError}</p>}
+
+      {!canView ? (
+        <div className="mt-8 rounded-2xl border border-[var(--line)] bg-white p-6 text-center"><h2 className="text-2xl">Accept the invitation first.</h2><p className="mt-2 text-sm text-[var(--muted)]">Results are visible only to accepted members.</p><Link href={`/sessions/${sessionId}`} className={cn(buttonVariants({ variant: "accent" }), "mt-5")}>Open invitation</Link></div>
+      ) : !snapshot ? (
+        <div className="mt-8 rounded-2xl border border-[var(--line)] bg-white p-6 text-center"><Clock className="mx-auto size-7 text-[var(--tomato)]" /><h2 className="mt-4 text-2xl">No result yet.</h2><p className="mt-2 text-sm text-[var(--muted)]">{isCreator ? "Compute when the group is ready. Every accepted member needs a saved TasteDNA profile, and at least one candidate needs a shared menu." : "The creator will reveal the recommendation when everyone is ready."}</p></div>
+      ) : (
+        <>
+          <p className="mt-6 text-xs text-[var(--muted)]">Computed {new Date(snapshot.computedAt).toLocaleString()} · {snapshot.algorithmVersion}</p>
+
+          {question && targetedToMe && (
+            <div className="mt-6"><PreferenceQuestionCard key={`${snapshot.id}:${currentAnswer ?? "unanswered"}`} question={question} memberDisplayName={memberNames[user.id] ?? "You"} initialAnswer={currentAnswer} onAnswer={answerQuestion} successMessage={isCreator ? "Saved — the recommendation was recomputed." : "Saved — ask the creator to recompute the result."} /></div>
+          )}
+          {question && !targetedToMe && <p className="mt-6 rounded-2xl border border-[#e7d29f] bg-[#fff8e7] p-4 text-sm text-[#71561d]">This is a close decision. Waiting for {memberNames[question.memberId] ?? "a group member"} to answer one meal-preference question.</p>}
+
+          <div className="mt-8"><GroupResultsView recommendation={snapshot.recommendation} memberNames={memberNames} /></div>
+        </>
       )}
-
-      <div className="mt-8">
-        {recommendation ? (
-          <GroupResultsView recommendation={recommendation} memberNames={memberNames} />
-        ) : (
-          <div className="rounded-2xl border border-[var(--line)] bg-white p-6 text-center text-sm text-[var(--muted)]">
-            None of this scenario&rsquo;s candidate venues have a digitized menu, so no recommendation could be computed.
-          </div>
-        )}
-      </div>
     </div>
   );
 }

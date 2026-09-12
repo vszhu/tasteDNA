@@ -1,5 +1,7 @@
 # Developer 3 Platform Handoff: Task 5 Friendship API
 
+> Current integration note (2026-09-12): the real friendship browser client and `/friends` UI are now merged into the application, and group-session creation consumes its accepted-friend results. The historical backend-only notes below describe the state when Task 5 first landed.
+
 Last updated: 2026-09-12
 
 Branch: `codex/platform-friendship-api`

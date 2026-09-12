@@ -13,9 +13,10 @@ export default function VenuesPage() {
   const { venues, loadState, usingFallback } = useVenues();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const complete = isCandidateSetComplete(selectedIds);
+  const complete = !usingFallback && isCandidateSetComplete(selectedIds);
 
   function handleToggle(id: string) {
+    if (usingFallback) return;
     setSelectedIds((current) => toggleCandidate(current, id, venues));
   }
 
@@ -42,7 +43,7 @@ export default function VenuesPage() {
       </p>
       {usingFallback && loadState === "ready" && (
         <p className="mt-3 flex items-center gap-2 text-xs font-semibold text-[#a87a1f]">
-          <Info className="size-3.5 shrink-0" /> Showing demo menus while CMU venues finish being digitized.
+          <Info className="size-3.5 shrink-0" /> Showing browse-only demo menus. Connect Supabase and sync venues to start a persistent group session.
         </p>
       )}
 
@@ -58,7 +59,15 @@ export default function VenuesPage() {
               <p className="py-16 text-center text-sm text-[var(--muted)]">No CMU venues are available yet. Check back soon.</p>
             ) : (
               venues.map((venueEntry) => (
-                <VenueCard key={venueEntry.id} venue={venueEntry} selected={selectedIds.includes(venueEntry.id)} onToggle={handleToggle} onHover={setHoveredId} />
+                <VenueCard
+                  key={venueEntry.id}
+                  venue={venueEntry}
+                  selected={selectedIds.includes(venueEntry.id)}
+                  onToggle={handleToggle}
+                  onHover={setHoveredId}
+                  candidateDisabled={usingFallback}
+                  menuHref={!usingFallback ? `/decode?venueId=${encodeURIComponent(venueEntry.id)}&venueName=${encodeURIComponent(venueEntry.name)}&returnTo=${encodeURIComponent("/venues")}` : undefined}
+                />
               ))
             )}
           </div>

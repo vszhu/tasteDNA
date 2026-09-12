@@ -1,13 +1,4 @@
-/**
- * Temporary, UI-scoped auth/friends contracts.
- *
- * The real backend (Supabase magic-link auth, `friendships` table) hasn't
- * landed yet — this is exactly the kind of typed mock the shared plan doc
- * calls for so UI work isn't blocked on it. Everything here is deliberately
- * small and mirrors the shape a real API would return. Swapping the mock
- * adapter in `mock-adapter.ts` for a real one should not require changing
- * any component that consumes these types.
- */
+/** Browser-safe identity projected from a verified Supabase user. */
 
 export interface SessionUser {
   id: string;

@@ -139,6 +139,12 @@ Authenticated menu extraction requests may include a `venueId` form field to pub
 
 Shared-menu persistence requires `SUPABASE_SECRET_KEY` on the server. Anonymous requests, and authenticated requests without `venueId`, continue through the existing one-off decoder without database writes.
 
+## Group dining
+
+The group flow is connected end to end to Supabase. A signed-in creator chooses three to five database venues with shared menus, optionally invites accepted friends, and receives a persistent session link. Invitees open that link to accept or decline, and accepted members can save meal-only preferences without changing their standing TasteDNA profiles. The room refreshes across accounts, the creator can update invitations and candidates, and compute/recompute calls the server-side fairness engine with private member profiles and current shared menus. Accepted members see only the derived result; another member's ratings, profile JSON, and meal-state JSON are never returned.
+
+If a database venue has no menu yet, use **Add menu to use** on its venue card. The decoder sends that venue's UUID with the authenticated extraction request and returns to the venue/session picker after storing the shared menu. Checked-in demo venue fixtures remain available during outages, but the UI deliberately prevents using their non-persistent data to create a real session.
+
 The migration installs `pgcrypto` and `vector`, creates User, Dish, DishFeatures, Rating, TasteProfile, Menu, MenuItem, and Recommendation tables, adds indexes, and enables row-level security. Production OpenAI embeddings use 1,536-dimensional `text-embedding-3-small` vectors. The 46 starter foods live in typed source data so the demo bundle never needs a database round trip; a production sync can upsert them into `dishes` and `dish_features`.
 
 ## Demo mode
@@ -150,6 +156,8 @@ The application automatically uses demo-safe behavior when credentials are missi
 - Pasted menus use a deterministic line and keyword parser.
 - Embeddings use a normalized, deterministic local projection.
 - State persists in the browser.
+
+The anonymous solo demo remains local. Friendships and group sessions intentionally require configured Supabase authentication and do not fall back to local mock collaboration.
 
 Fallback responses are marked in the results UI. They are isolated in `src/lib/menu/sample.ts`, `src/lib/menu/process.ts`, and `src/lib/embeddings/deterministic.ts`, rather than mixed into production API code.
 

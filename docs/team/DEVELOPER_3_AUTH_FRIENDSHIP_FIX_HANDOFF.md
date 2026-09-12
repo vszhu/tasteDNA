@@ -1,5 +1,7 @@
 # Developer 3 Post-merge Handoff: Auth and Friendship Integration Fix
 
+> Current integration note (2026-09-12): the session creation UI now consumes accepted friendships through the real API. The old social and group-session localStorage adapters have been removed.
+
 Last updated: 2026-09-12
 
 Branch: `codex/platform-auth-friendship-fix`

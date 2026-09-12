@@ -6,7 +6,7 @@ Branch: `codex/platform-group-session-api`
 
 Base: latest `origin/main` at `aa0a30d`
 
-State: implemented and verified locally; not committed, pushed, merged, or deployed
+State: backend and product UI integrated locally; deployment state must still be checked explicitly
 
 Read this with [the Tasks 1–4 handoff](./DEVELOPER_3_TASK_4_HANDOFF.md), [the Task 5 friendship handoff](./DEVELOPER_3_TASK_5_HANDOFF.md), and `src/types/group.ts`.
 
@@ -94,40 +94,43 @@ Only the creator may trigger compute/recompute. This prevents every accepted mem
 
 All accepted members require a saved TasteDNA profile. At least one candidate must have a usable shared menu. Missing inputs return `409` with a safe actionable message instead of producing fixture results or silently invoking ingestion/sync.
 
-## UI integration status
+## Product UI integration
 
-The Task 6 backend is real, but Developer 1's existing pages still use `mockSessionAdapter` and fixture results:
+The visible group flow now uses `src/lib/group-sessions/client.ts` and the authenticated routes above. The localStorage session and friendship adapters were removed.
 
-- `src/app/sessions/new/page.tsx`
-- `src/app/sessions/[id]/page.tsx`
-- `src/app/sessions/[id]/results/page.tsx`
+- `src/app/sessions/new/page.tsx` loads accepted friendships from the real API and creates a persistent UUID session from real database venue UUIDs.
+- `src/app/sessions/[id]/page.tsx` refreshes shared state, handles invitation acceptance/decline, saves the caller's meal state, lets the creator add accepted friends and replace candidates, copies the session link, and triggers real compute/recompute.
+- `src/app/sessions/[id]/results/page.tsx` renders only the stored recommendation snapshot. It no longer offers golden-fixture scenarios.
+- A targeted decision question saves the targeted member's meal preference. If that member is the creator the result is recomputed immediately; otherwise the UI truthfully asks the creator to recompute.
+- Database venues remain visible before they have menus. **Add menu to use** routes through the existing authenticated decoder with `venueId`, persists a shared menu, and returns to the picker.
+- Demo venue fallback data is still visible during database outages, but it is deliberately blocked from persistent session creation because it is not authoritative collaboration state.
 
-Do not treat the mock UI as evidence that the API failed. A later UI integration should replace those adapter calls with the routes above and remove the fixture result preview. The friendship UI fix exists separately in commit `5f563ac` on `feat/dev2-task6`; it was not duplicated into this branch.
+The nearby user-created venue feature remains a separate optional local mock and is not eligible as a group candidate until its Task 7 backend exists and a shared menu is attached.
 
 ## Verification
 
-- Focused Task 6 unit tests: 3 files, 14 tests passed.
-- Full application suite: 48 files, 245 tests passed.
+- Focused backend Task 6 unit tests: 3 files, 14 tests passed.
+- Browser-client and page-wiring regression tests cover persistent creation, invitation acceptance, caller-owned meal-state writes, safe response parsing, and rendering the stored server result.
+- Full application suite after UI integration: 53 files, 271 tests passed.
 - Database suite: 5 pgTAP files, 96 tests passed, including 13 new Task 6 transaction/authorization tests.
 - ESLint: passed.
 - TypeScript (`npx tsc --noEmit`): passed.
-- Production build: passed and emitted all six Task 6 route paths.
+- Production build: passed and emitted all six Task 6 route paths plus the connected session pages.
+- Browser sanity check: the signed-out session gate rendered correctly, and browse-only fallback venues were visibly disabled instead of being presented as persistent candidates.
 - No live OpenAI, CMU, or hosted Supabase mutation was used by automated tests.
 
 Database validation used an isolated temporary PostgreSQL 17 Supabase stack on ports 55420–55422. It was stopped and removed after testing. The user's preserved PostgreSQL 15 local volume remains untouched; the ordinary stack still cannot start under the current CLI's PostgreSQL 17.6 image.
 
 ## Deployment steps remaining
 
-1. Review and commit only the Task 6 files on `codex/platform-group-session-api`; no commit or push was performed here.
-2. Merge the friendship UI fix separately if desired; it is not a Task 6 migration dependency.
-3. Before deploying application code, run:
+1. Before deploying application code, run:
 
    ```powershell
    npx supabase@latest db push --dry-run
    ```
 
-4. Confirm the pending list is expected. The hosted project may still need both `202609120003_friendship_api.sql` and `202609120004_group_session_api.sql`; migrations must apply in order.
-5. Run `npx supabase@latest db push`, then deploy/redeploy with `SUPABASE_SECRET_KEY` configured only in the server environment.
-6. Test with two accounts and real shared menus: friendship acceptance, session creation, invitation acceptance/decline, isolated meal check-ins, creator candidate replacement, compute, result visibility, and outsider denial.
+2. Confirm the pending list is expected. The hosted project may still need both `202609120003_friendship_api.sql` and `202609120004_group_session_api.sql`; migrations must apply in order.
+3. Run `npx supabase@latest db push`, then deploy/redeploy with `SUPABASE_SECRET_KEY` configured only in the server environment.
+4. Test with two accounts and real shared menus: friendship acceptance, session creation, invitation acceptance/decline, isolated meal check-ins, creator candidate replacement, compute, result visibility, and outsider denial.
 
 Never infer hosted migration state from this repository or handoff. The Task 6 migration was tested locally but was not pushed remotely.

@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { VENUE_FIXTURES } from "./fixtures";
-import { isSelectable } from "./selection";
 import { mockNearbyVenuesAdapter } from "@/lib/nearby-venues/mock-adapter";
 import type { Venue } from "@/types/group";
 
 export type VenuesLoadState = "loading" | "ready";
 
 /**
- * Fetches real CMU venues from /api/venues, falling back to demo fixtures if
- * none are selectable yet or the request fails, then appends any venues a
- * user has manually pinned nearby (Task 6) — no dedicated backend for those
- * exists yet either, so they come from the same kind of local mock store.
+ * Fetches real CMU venues from /api/venues. Database venues remain visible
+ * even before menus are attached so a signed-in user can digitize those menus
+ * and make the venues eligible for a persistent group session. The checked-in
+ * demo data is used only when the API itself reports its fixture fallback or
+ * cannot be reached.
  */
 export function useVenues(): { venues: Venue[]; loadState: VenuesLoadState; usingFallback: boolean } {
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -28,7 +28,8 @@ export function useVenues(): { venues: Venue[]; loadState: VenuesLoadState; usin
         if (!response.ok) throw new Error("Venue request failed");
         const data = (await response.json()) as Venue[];
         if (cancelled) return;
-        if (data.some((venue) => isSelectable(venue))) {
+        const source = response.headers.get("X-TasteDNA-Venue-Source");
+        if (source === "database") {
           setVenues([...data, ...nearby]);
           setUsingFallback(false);
         } else {

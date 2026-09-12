@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AlertCircle, Check, Clock, ShoppingBag, UtensilsCrossed } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,14 +19,19 @@ export function VenueCard({
   selected,
   onToggle,
   onHover,
+  menuHref,
+  candidateDisabled = false,
 }: {
   venue: Venue;
   selected: boolean;
   onToggle: (id: string) => void;
   onHover: (id: string | null) => void;
+  menuHref?: string;
+  candidateDisabled?: boolean;
 }) {
   const availability = getVenueAvailability(venueEntry);
   const selectable = isSelectable(venueEntry);
+  const canSelect = selectable && !candidateDisabled;
   const status = AVAILABILITY_COPY[availability];
   const StatusIcon = status.icon;
 
@@ -49,26 +55,34 @@ export function VenueCard({
             <StatusIcon className="size-3.5 shrink-0" /> {status.label}
           </p>
         )}
-        <button
-          type="button"
-          disabled={!selectable}
-          aria-pressed={selected}
-          onClick={() => onToggle(venueEntry.id)}
-          className={cn(
-            "mt-4 flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50",
-            selected ? "border-[var(--tomato)] bg-[var(--tomato)] text-white" : "border-[var(--line)] bg-white hover:border-[var(--ink)]",
-          )}
-        >
-          {selected ? (
-            <>
-              <Check className="size-4" /> Selected
-            </>
-          ) : selectable ? (
-            "Add as candidate"
-          ) : (
-            "Unavailable"
-          )}
-        </button>
+        {!selectable && menuHref ? (
+          <Link href={menuHref} className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--tomato)] transition-all hover:border-[var(--tomato)]">
+            <UtensilsCrossed className="size-4" /> Add menu to use
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled={!canSelect}
+            aria-pressed={selected}
+            onClick={() => onToggle(venueEntry.id)}
+            className={cn(
+              "mt-4 flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50",
+              selected ? "border-[var(--tomato)] bg-[var(--tomato)] text-white" : "border-[var(--line)] bg-white hover:border-[var(--ink)]",
+            )}
+          >
+            {selected ? (
+              <>
+                <Check className="size-4" /> Selected
+              </>
+            ) : candidateDisabled ? (
+              "Demo only"
+            ) : selectable ? (
+              "Add as candidate"
+            ) : (
+              "Unavailable"
+            )}
+          </button>
+        )}
       </CardContent>
     </Card>
   );
