@@ -1,5 +1,6 @@
 import type { AuthError, AuthUser, SupabaseClient } from "@supabase/supabase-js";
 import type { SessionUser } from "./types";
+import { safeNextPath } from "./callback";
 
 export type MagicLinkResult =
   | { ok: true }
@@ -11,9 +12,9 @@ export type PasswordAuthResult =
 
 export interface AuthAdapter {
   getCurrentUser(): Promise<SessionUser | null>;
-  requestMagicLink(email: string): Promise<MagicLinkResult>;
+  requestMagicLink(email: string, next?: string): Promise<MagicLinkResult>;
   signInWithPassword(email: string, password: string): Promise<PasswordAuthResult>;
-  signUp(email: string, password: string): Promise<PasswordAuthResult>;
+  signUp(email: string, password: string, next?: string): Promise<PasswordAuthResult>;
   signOut(): Promise<void>;
   subscribe(listener: (user: SessionUser | null) => void): () => void;
 }
@@ -68,8 +69,8 @@ export function createSupabaseAuthAdapter(
   client: SupabaseClient,
   redirectOrigin = typeof window === "undefined" ? "" : window.location.origin,
 ): AuthAdapter {
-  const emailRedirectTo = redirectOrigin
-    ? `${redirectOrigin}/auth/callback?next=/friends`
+  const emailRedirectTo = (next?: string) => redirectOrigin
+    ? `${redirectOrigin}/auth/callback?${new URLSearchParams({ next: safeNextPath(next ?? null) })}`
     : undefined;
   return {
     async getCurrentUser() {
@@ -78,10 +79,10 @@ export function createSupabaseAuthAdapter(
       return sessionUserFromSupabase(data.user);
     },
 
-    async requestMagicLink(email) {
+    async requestMagicLink(email, next) {
       const { error } = await client.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo },
+        options: { emailRedirectTo: emailRedirectTo(next) },
       });
 
       if (error) {
@@ -104,11 +105,11 @@ export function createSupabaseAuthAdapter(
       return { ok: true, needsConfirmation: false };
     },
 
-    async signUp(email, password) {
+    async signUp(email, password, next) {
       const { data, error } = await client.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
-        options: { emailRedirectTo },
+        options: { emailRedirectTo: emailRedirectTo(next) },
       });
       if (error) return { ok: false, message: passwordErrorMessage(error) };
       return { ok: true, needsConfirmation: !data.session };

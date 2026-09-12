@@ -14,6 +14,7 @@ import { createGroupSessionClient, GroupSessionClientError } from "@/lib/group-s
 import type { GroupSessionDetail } from "@/lib/group-sessions/types";
 import { EMPTY_MEAL_PREFERENCE_STATE, setTagPreference } from "@/lib/session/meal-preferences";
 import { cn } from "@/lib/utils";
+import { signInPath } from "@/lib/auth/callback";
 
 const groupSessionClient = createGroupSessionClient();
 
@@ -103,7 +104,7 @@ function SessionResultsAccount() {
   }
 
   if (status === "signed-out" || !user) {
-    return <section className="mx-auto max-w-lg px-4 py-16 text-center"><Users className="mx-auto size-9 text-[var(--tomato)]" /><h1 className="mt-5 text-4xl">Sign in to see this result.</h1><Link href="/sign-in" className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>Sign in</Link></section>;
+    return <section className="mx-auto max-w-lg px-4 py-16 text-center"><Users className="mx-auto size-9 text-[var(--tomato)]" /><h1 className="mt-5 text-4xl">Sign in to see this result.</h1><Link href={signInPath(`/sessions/${sessionId}/results`)} className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>Sign in</Link></section>;
   }
 
   if (status === "loading" || detail === undefined) {

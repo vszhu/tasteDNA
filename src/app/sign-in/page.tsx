@@ -1,24 +1,42 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Mail, Sparkles } from "lucide-react";
 import { useSession } from "@/components/providers/session-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { isValidEmail } from "@/lib/auth/friend-rules";
+import { safeNextPath } from "@/lib/auth/callback";
 import { cn } from "@/lib/utils";
 
 type Mode = "sign-in" | "sign-up" | "email-link";
 const inputClass = "mt-2 w-full rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-[var(--tomato)]/40";
 
 export default function SignInPage() {
+  return <Suspense fallback={<p role="status" className="px-4 py-16 text-center">Loading sign-in…</p>}><SignInForm /></Suspense>;
+}
+
+function SignInForm() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const next = searchParams.has("next") ? safeNextPath(searchParams.get("next")) : undefined;
   const { user, status, requestMagicLink, signInWithPassword, signUp, signOut } = useSession();
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => searchParams.get("error") === "invalid-link"
+    ? "That email link expired or could not be verified. Sign in again to continue."
+    : searchParams.get("error") === "not-configured" ? "Sign-in is temporarily unavailable. Please try again later." : null);
+  const [continueAfterSignIn, setContinueAfterSignIn] = useState(false);
+
+  useEffect(() => {
+    // Wait for the provider's verified user and public-profile bootstrap.
+    // Existing logins stay on this screen so the recipient can switch accounts.
+    if (continueAfterSignIn && status === "signed-in" && user && next) router.replace(next);
+  }, [continueAfterSignIn, status, user, next, router]);
 
   function changeMode(next: Mode) {
     setMode(next);
@@ -37,16 +55,17 @@ export default function SignInPage() {
     try {
       const address = email.trim().toLowerCase();
       if (mode === "email-link") {
-        const result = await requestMagicLink(address);
+        const result = await requestMagicLink(address, next);
         if (result.ok) setNotice("Check your inbox for a sign-in link. If a link can be sent to this address, it may take a minute to arrive.");
         else setError(result.message);
       } else {
-        const result = await (mode === "sign-up" ? signUp(address, password) : signInWithPassword(address, password));
+        const result = await (mode === "sign-up" ? signUp(address, password, next) : signInWithPassword(address, password));
         if (!result.ok) { setError(result.message); return; }
         setPassword("");
         if (result.needsConfirmation) {
           setNotice("Check your inbox to confirm your email, then sign in with your password. If you already have an account, sign in instead.");
         } else {
+          setContinueAfterSignIn(true);
           setNotice("Sign-in complete. Opening your account…");
         }
       }
@@ -58,6 +77,7 @@ export default function SignInPage() {
   }
 
   async function switchAccount() {
+    setContinueAfterSignIn(false);
     setSending(true);
     setError(null);
     try {
@@ -83,8 +103,8 @@ export default function SignInPage() {
         <div className="w-full">
           <h1 className="text-4xl">You&rsquo;re signed in as {user.displayName}.</h1>
           <p className="mt-3 text-[var(--muted)]">{user.email}</p>
-          <Link href="/friends" className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>
-            Go to friends <ArrowRight className="size-4" />
+          <Link href={next ?? "/friends"} className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>
+            {next?.startsWith("/sessions/") ? "Continue to your meal" : "Go to friends"} <ArrowRight className="size-4" />
           </Link>
           <div className="mt-5"><button type="button" onClick={switchAccount} disabled={sending} className="text-sm font-semibold underline underline-offset-4 disabled:opacity-50">{sending ? "Signing out…" : "Sign out / switch account"}</button></div>
           {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
@@ -99,6 +119,7 @@ export default function SignInPage() {
         <p className="text-xs font-bold tracking-[.18em] text-[var(--tomato)]">YOUR TASTEDNA ACCOUNT</p>
         <h1 className="mt-3 text-4xl sm:text-5xl">Good food. Better company.</h1>
         <p className="mt-4 text-[var(--muted)]">Connect with friends and plan meals together. Your solo TasteDNA doesn&rsquo;t need an account.</p>
+        {next?.startsWith("/sessions/") && <p className="mt-4 rounded-2xl bg-white p-4 text-sm font-semibold">Sign in with the account that was invited. We’ll bring you back to the meal.</p>}
 
         <div className="mt-7 flex gap-2" aria-label="Account access">
           {([ ["sign-in", "Sign in"], ["sign-up", "Create account"] ] as const).map(([value, label]) => (

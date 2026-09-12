@@ -4,6 +4,8 @@ For cross-feature instructions and the next live-test steps, read [LLM_HANDOFF.m
 
 The app now has password sign-in and sign-up alongside email magic links. Successful signup without a session shows an email-confirmation message. Signed-in users can identify their account, sign out, and switch accounts. Auth changes create the public user profile needed by taste persistence and friendships, including password logins that do not visit the email callback route.
 
+Meal invitation sign-in now retains the requested destination and returns after verified authentication. Existing logins can switch accounts without losing the link; signup/email callbacks preserve it too. Read [INVITE_LINK_HANDOFF.md](INVITE_LINK_HANDOFF.md) for that repair and its separate live verification.
+
 The friends page still uses the real friendship HTTP API introduced in #25. It now resets when the authenticated user changes, cancels stale reads, refreshes when the page regains focus and every 15 seconds while visible, and has a manual refresh button. Request, accept, and decline operations refresh the list. Failed reads show a retryable error instead of a misleading empty list. Concurrent mutations are disabled.
 
 ## Validation

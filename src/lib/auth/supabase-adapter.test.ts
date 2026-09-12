@@ -51,7 +51,7 @@ describe("Supabase auth adapter", () => {
     await expect(adapter.requestMagicLink("ada@example.test")).resolves.toEqual({ ok: true });
     expect(signInWithOtp).toHaveBeenCalledWith({
       email: "ada@example.test",
-      options: { emailRedirectTo: "http://localhost:3000/auth/callback?next=/friends" },
+      options: { emailRedirectTo: "http://localhost:3000/auth/callback?next=%2Ffriends" },
     });
     await adapter.signOut();
     expect(signOut).toHaveBeenCalledOnce();
@@ -70,6 +70,23 @@ describe("Supabase auth adapter", () => {
     });
   });
 
+  it("preserves the meal in both confirmation and magic-link callback URLs", async () => {
+    const signInWithOtp = vi.fn().mockResolvedValue({ error: null });
+    const signUp = vi.fn().mockResolvedValue({ data: { session: null }, error: null });
+    const adapter = createSupabaseAuthAdapter(authClient({ signInWithOtp, signUp }), "https://taste.example.test");
+    const next = "/sessions/c2000000-0000-4000-8000-000000000001";
+    await adapter.requestMagicLink("ada@example.test", next);
+    await adapter.signUp("ada@example.test", "example-passphrase", next);
+    for (const call of [signInWithOtp.mock.calls[0][0], signUp.mock.calls[0][0]]) {
+      const callback = new URL(call.options.emailRedirectTo);
+      expect(callback.origin).toBe("https://taste.example.test");
+      expect(callback.pathname).toBe("/auth/callback");
+      expect(callback.searchParams.get("next")).toBe(next);
+    }
+    await adapter.requestMagicLink("ada@example.test", "https://attacker.test");
+    expect(new URL(signInWithOtp.mock.calls[1][0].options.emailRedirectTo).searchParams.get("next")).toBe("/friends");
+  });
+
   it("maps the restricted test-mailer error", () => {
     expect(magicLinkErrorMessage({ code: "email_address_not_authorized" })).toContain(
       "test mailer",
@@ -85,7 +102,7 @@ it("keeps email confirmation distinct from an authenticated signup", async () =>
   const signUp = vi.fn().mockResolvedValue({ data: { user: user(), session: null }, error: null });
   const adapter = createSupabaseAuthAdapter(authClient({ signUp }), "https://taste.example.test");
   await expect(adapter.signUp(" ADA@EXAMPLE.TEST ", "example-passphrase")).resolves.toEqual({ ok: true, needsConfirmation: true });
-  expect(signUp).toHaveBeenCalledWith({ email: "ada@example.test", password: "example-passphrase", options: { emailRedirectTo: "https://taste.example.test/auth/callback?next=/friends" } });
+  expect(signUp).toHaveBeenCalledWith({ email: "ada@example.test", password: "example-passphrase", options: { emailRedirectTo: "https://taste.example.test/auth/callback?next=%2Ffriends" } });
   signUp.mockResolvedValue({ data: { user: user(), session: { access_token: "test-session" } }, error: null });
   await expect(adapter.signUp("ada@example.test", "example-passphrase")).resolves.toEqual({ ok: true, needsConfirmation: false });
 });

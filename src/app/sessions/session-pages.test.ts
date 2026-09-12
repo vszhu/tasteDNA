@@ -6,6 +6,8 @@ import NewSessionPage from "./new/page";
 import SessionRoomPage from "./[id]/page";
 import SessionResultsPage from "./[id]/results/page";
 import type { GroupSessionDetail, RecommendationSnapshot } from "@/lib/group-sessions/types";
+import type { SessionUser } from "@/lib/auth/types";
+import { GroupSessionClientError } from "@/lib/group-sessions/client";
 
 const USER_ID = "c1000000-0000-4000-8000-000000000001";
 const FRIEND_ID = "c1000000-0000-4000-8000-000000000002";
@@ -20,7 +22,7 @@ const NOW = "2026-09-12T12:00:00.000Z";
 const state = vi.hoisted(() => ({
   push: vi.fn(),
   search: new URLSearchParams(),
-  session: { status: "signed-in", user: { id: "c1000000-0000-4000-8000-000000000001", email: "ada@example.test", displayName: "Ada" } },
+  session: { status: "signed-in", user: { id: "c1000000-0000-4000-8000-000000000001", email: "ada@example.test", displayName: "Ada" } as SessionUser | null },
   group: {
     create: vi.fn(), get: vi.fn(), invite: vi.fn(), respond: vi.fn(),
     updateMealPreferences: vi.fn(), replaceCandidates: vi.fn(), compute: vi.fn(),
@@ -120,9 +122,57 @@ beforeEach(() => {
   state.session = { status: "signed-in", user: { id: USER_ID, email: "ada@example.test", displayName: "Ada" } };
   state.friends.list.mockResolvedValue([]);
 });
-afterEach(() => cleanup());
+afterEach(() => { cleanup(); vi.unstubAllEnvs(); });
 
 describe("real group-session page wiring", () => {
+  it.each([
+    ["room", SessionRoomPage, `/sessions/${SESSION_ID}`],
+    ["results", SessionResultsPage, `/sessions/${SESSION_ID}/results`],
+    ["new meal", NewSessionPage, `/sessions/new?venues=${VENUE_IDS.join(",")}`],
+  ] as const)("retains the %s destination when the recipient needs to sign in", (_name, Page, next) => {
+    state.session = { status: "signed-out", user: null };
+    render(createElement(Page));
+    const href = screen.getByRole("link", { name: "Sign in" }).getAttribute("href")!;
+    const url = new URL(href, "https://taste.example.test");
+    expect(url.pathname).toBe("/sign-in");
+    const destination = new URL(url.searchParams.get("next")!, url.origin);
+    const expected = new URL(next, url.origin);
+    expect(destination.pathname).toBe(expected.pathname);
+    expect([...destination.searchParams]).toEqual([...expected.searchParams]);
+  });
+
+  it("lets the wrong account switch without losing the invitation", async () => {
+    state.group.get.mockRejectedValue(new GroupSessionClientError("Session not found.", 404));
+    render(createElement(SessionRoomPage));
+    const link = await screen.findByRole("link", { name: "Switch account" });
+    expect(new URL(link.getAttribute("href")!, "https://taste.example.test").searchParams.get("next")).toBe(`/sessions/${SESSION_ID}`);
+    expect(screen.getByText(/Signed in as ada@example.test/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Accept" })).toBeNull();
+  });
+
+  it("keeps a usable visible link when the browser denies clipboard access", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://taste.example.test");
+    const writeText = vi.fn().mockRejectedValue(new Error("Permission denied"));
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
+    state.group.get.mockResolvedValue(sessionDetail());
+    render(createElement(SessionRoomPage));
+    fireEvent.click(await screen.findByRole("button", { name: "Copy link" }));
+    expect((await screen.findByRole("alert")).textContent).toContain("Select and copy the invite link below");
+    const link = screen.getByRole("textbox", { name: "Session invite link" }) as HTMLInputElement;
+    expect(link.value).toBe(`https://taste.example.test/sessions/${SESSION_ID}`);
+    expect(link.readOnly).toBe(true);
+    expect(writeText).toHaveBeenCalledWith(link.value);
+  });
+
+  it("lets an old laptop invite open on the configured live site when local group storage is unavailable", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://taste.example.test");
+    state.group.get.mockRejectedValue(new GroupSessionClientError("Group session storage is not configured.", 503));
+    render(createElement(SessionRoomPage));
+    const link = await screen.findByRole("link", { name: "Open this meal on the live site" });
+    expect(link.getAttribute("href")).toBe(`https://taste.example.test/sessions/${SESSION_ID}`);
+    expect(screen.queryByRole("button", { name: "Accept" })).toBeNull();
+  });
+
   it("creates through the API and navigates to the persisted UUID", async () => {
     state.group.create.mockResolvedValue(sessionDetail());
     render(createElement(NewSessionPage));

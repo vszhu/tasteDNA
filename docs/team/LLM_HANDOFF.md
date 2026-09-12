@@ -14,6 +14,7 @@ Read this before modifying the medication, account, friendship, or group flows. 
 | --- | --- |
 | Medication map, menu screening, privacy | [MEDICATION_CHECKS.md](../MEDICATION_CHECKS.md) |
 | Password accounts and friendship refresh | [FRIENDSHIP_PASSWORD_FLOW_HANDOFF.md](FRIENDSHIP_PASSWORD_FLOW_HANDOFF.md) |
+| Meal invite links, sign-in return paths, and local-to-live sharing | [INVITE_LINK_HANDOFF.md](INVITE_LINK_HANDOFF.md) |
 | Friendship endpoints, auth configuration, hosted migration dependency | [DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md](DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md), [DEVELOPER_3_TASK_5_HANDOFF.md](DEVELOPER_3_TASK_5_HANDOFF.md) |
 | Persistence, menus, and platform integration | [DEVELOPER_3_TASK_4_HANDOFF.md](DEVELOPER_3_TASK_4_HANDOFF.md) |
 | Real group-session API and UI integration | [DEVELOPER_3_TASK_6_HANDOFF.md](DEVELOPER_3_TASK_6_HANDOFF.md) |
@@ -47,6 +48,7 @@ The Task 6 backend and UI integration are now in `main`. Do not reimplement them
 - Rejected relationships currently remain terminal because of the unique unordered-pair schema. Do not assume a declined pair can be reused for another request without an explicit product/schema change.
 - The session pages now use the real clients in `src/lib/group-sessions/client.ts` and `src/lib/friendships/client.ts`; the old mock adapters were removed. Preserve this integration and verify the live service separately from local UI tests.
 - The backend lives in `src/app/api/group-sessions/` and `src/lib/group-sessions/`. Keep raw member profiles and other members' meal preferences private on the server; only the creator can compute the derived recommendation. Read the Task 6 handoff before changing these routes or the connected UI.
+- Preserve a validated `next` destination through invite sign-in, account switching, signup/email callbacks, and callback errors. Password navigation waits for verified provider state. A copied URL never grants membership. See [INVITE_LINK_HANDOFF.md](INVITE_LINK_HANDOFF.md) for the reproduced failure, public URL configuration, and browser verification status.
 
 ### Medication map and taste data
 

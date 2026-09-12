@@ -15,6 +15,7 @@ import { createFriendshipClient, FriendshipClientError } from "@/lib/friendships
 import type { FriendshipApiSummary } from "@/lib/friendships/types";
 import { createGroupSessionClient, GroupSessionClientError } from "@/lib/group-sessions/client";
 import { cn } from "@/lib/utils";
+import { signInPath } from "@/lib/auth/callback";
 
 const friendshipClient = createFriendshipClient();
 const groupSessionClient = createGroupSessionClient();
@@ -95,7 +96,7 @@ function NewSessionForm() {
           <Users className="mx-auto size-9 text-[var(--tomato)]" />
           <h1 className="mt-5 text-4xl">Sign in to start a session.</h1>
           <p className="mt-3 text-[var(--muted)]">Group dining sessions need a signed-in creator.</p>
-          <Link href="/sign-in" className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>Sign in</Link>
+          <Link href={signInPath(`/sessions/new?${searchParams}`)} className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>Sign in</Link>
         </div>
       </section>
     );

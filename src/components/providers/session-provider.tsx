@@ -14,9 +14,9 @@ import { getSupabaseBrowserClient } from "@/lib/db/supabase";
 interface SessionContextValue {
   user: SessionUser | null;
   status: SessionStatus;
-  requestMagicLink: (email: string) => Promise<MagicLinkResult>;
+  requestMagicLink: (email: string, next?: string) => Promise<MagicLinkResult>;
   signInWithPassword: (email: string, password: string) => Promise<PasswordAuthResult>;
-  signUp: (email: string, password: string) => Promise<PasswordAuthResult>;
+  signUp: (email: string, password: string, next?: string) => Promise<PasswordAuthResult>;
   signOut: () => Promise<void>;
 }
 
@@ -75,15 +75,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     return adapterRef.current.signInWithPassword(email, password);
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string): Promise<PasswordAuthResult> => {
+  const signUp = useCallback(async (email: string, password: string, next?: string): Promise<PasswordAuthResult> => {
     if (!adapterRef.current) return { ok: false, message: "Supabase sign-in is not configured." };
-    return adapterRef.current.signUp(email, password);
+    return adapterRef.current.signUp(email, password, next);
   }, []);
 
-  const requestMagicLink = useCallback(async (email: string): Promise<MagicLinkResult> => {
+  const requestMagicLink = useCallback(async (email: string, next?: string): Promise<MagicLinkResult> => {
     const adapter = adapterRef.current;
     if (!adapter) return { ok: false, message: "Supabase sign-in is not configured." };
-    return adapter.requestMagicLink(email);
+    return adapter.requestMagicLink(email, next);
   }, []);
 
   const signOut = useCallback(async () => {
