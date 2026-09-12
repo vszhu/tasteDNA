@@ -87,6 +87,8 @@ Private profile writes/deletes and membership transitions expire stored results.
 
 Apply the migration **before** deploying this integration; do not silently fall back to taste-only group results when private settings cannot be loaded. See [the expansion and group handoff](team/MEDICATION_CATALOG_EXPANSION_HANDOFF.md) for release order and test evidence.
 
+Production migration `202609120005` was applied and recorded on September 12, 2026 after its absence caused account saves to fail. Deployed two-account tests now verify saving, reload/sign-in restoration, isolation, group consent, and result invalidation when a friend's saved list changes. The tested shared menus lack ingredient details, so nonempty lists correctly require review. Successful live group assignments were verified with explicit empty lists, and opt-out changed coverage from 2/2 to 1/2. Complete-ingredient per-dish filtering remains automated-test evidence. See the handoff for cleanup and remaining test limits.
+
 ## Verification
 
 ```sh

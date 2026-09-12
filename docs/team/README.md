@@ -2,7 +2,7 @@
 
 This folder splits TasteDNA into three areas that can be developed in parallel with minimal merge conflicts.
 
-**LLMs: start with [LLM_HANDOFF.md](LLM_HANDOFF.md).** It links the feature guides, records merged medication/auth/friendship changes, and distinguishes passing local checks from blocked live verification.
+**LLMs: start with [LLM_HANDOFF.md](LLM_HANDOFF.md).** It links the feature guides, records merged medication/auth/friendship changes, and distinguishes local checks, completed production verification, and remaining limits.
 
 | Developer | Area | Guide | Branch prefix |
 | --- | --- | --- | --- |
