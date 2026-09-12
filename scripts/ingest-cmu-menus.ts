@@ -3,6 +3,11 @@
  *
  *   npx tsx scripts/ingest-cmu-menus.ts --dry-run   # no network, prints a plan
  *   npx tsx scripts/ingest-cmu-menus.ts             # enriches + writes to Supabase
+ *   npx tsx scripts/ingest-cmu-menus.ts --only=entropy   # one venue (name substring)
+ *   npx tsx scripts/ingest-cmu-menus.ts --force     # re-ingest venues that already have a dataset menu
+ *
+ * Venues that already have a current menu from this dataset are skipped, so an
+ * interrupted run can be resumed without re-enriching or duplicating versions.
  *
  * Reads scripts/data/cmu-dining-menus.json, matches each restaurant to a row in
  * public.venues, turns its bare item names into full dish records, embeds them
@@ -41,6 +46,20 @@ interface DatasetRestaurant {
 }
 
 interface VenueRow { id: string; name: string; source_metadata: unknown }
+
+const DATASET_SOURCE_PROVIDER = "cmu-dining-dataset-v2";
+
+/** Venues that already carry a current (valid_until is null) menu from this dataset. */
+async function loadStoredDatasetMenus(client: SupabaseClient) {
+  const { data, error } = await client
+    .from("menus")
+    .select("venue_id,version")
+    .eq("source_provider", DATASET_SOURCE_PROVIDER)
+    .is("valid_until", null)
+    .not("venue_id", "is", null);
+  if (error) throw new Error(`Unable to read existing shared menus: ${error.message}`);
+  return new Map((data ?? []).map((row) => [row.venue_id as string, row.version as number]));
+}
 
 function loadEnvLocal() {
   let raw: string;
@@ -146,6 +165,8 @@ async function main() {
   const dryRun = args.has("--dry-run");
   const uploaderArg = process.argv.find((value) => value.startsWith("--uploader="))?.split("=")[1];
   const onlyFull = args.has("--only-full-menus");
+  const force = args.has("--force");
+  const onlyFilter = process.argv.find((value) => value.startsWith("--only="))?.slice("--only=".length);
 
   loadEnvLocal();
 
@@ -156,7 +177,8 @@ async function main() {
 
   const restaurants = dataset.restaurants
     .filter((restaurant) => (restaurant.items?.length ?? 0) > 0)
-    .filter((restaurant) => !onlyFull || restaurant.menu_coverage === "full_or_near_full");
+    .filter((restaurant) => !onlyFull || restaurant.menu_coverage === "full_or_near_full")
+    .filter((restaurant) => !onlyFilter || canonical(restaurant.name).includes(canonical(onlyFilter)));
 
   console.log(`Dataset ${dataset.generated_date}: ${restaurants.length} restaurants with items.`);
 
@@ -185,9 +207,11 @@ async function main() {
   }
 
   const repository = client ? new SupabaseSharedMenuRepository(client) : null;
+  const storedMenus = client && !force ? await loadStoredDatasetMenus(client) : new Map<string, number>();
   const unmatched: string[] = [];
   let created = 0;
   let reused = 0;
+  let skipped = 0;
   let totalItems = 0;
 
   for (const restaurant of restaurants) {
@@ -199,6 +223,13 @@ async function main() {
 
     const names = [...new Set((restaurant.items ?? []).map((item) => item.trim()).filter(Boolean))];
     console.log(`\n${restaurant.name} -> ${venue.name} (${names.length} items)`);
+
+    const storedVersion = storedMenus.get(venue.id);
+    if (storedVersion !== undefined) {
+      skipped += 1;
+      console.log(`  skipped: menu v${storedVersion} already stored from this dataset (use --force to replace)`);
+      continue;
+    }
 
     const dishes = dryRun
       ? names.map(offlineDish)
@@ -216,7 +247,7 @@ async function main() {
       venueId: venue.id,
       uploadedBy: uploader.id,
       sourceType: "text",
-      sourceProvider: dryRun ? "cmu-dataset-dry-run" : "cmu-dining-dataset-v2",
+      sourceProvider: dryRun ? "cmu-dataset-dry-run" : DATASET_SOURCE_PROVIDER,
       sourceUri: restaurant.menu_url ?? null,
       sourceMetadata: {
         rawImageStored: false,
@@ -245,14 +276,26 @@ async function main() {
   console.log(`\n${"=".repeat(60)}`);
   console.log(`Menus processed : ${restaurants.length - unmatched.length}`);
   console.log(`Dishes          : ${totalItems}`);
-  if (!dryRun) console.log(`New versions    : ${created}   Unchanged: ${reused}`);
+  if (!dryRun) console.log(`New versions    : ${created}   Unchanged: ${reused}   Skipped: ${skipped}`);
   if (unmatched.length) {
     console.log(`\nUnmatched venues (${unmatched.length}) - add to VENUE_NAME_OVERRIDES:`);
     for (const name of unmatched) console.log(`  - ${name}`);
   }
 }
 
+function describeCause(cause: unknown) {
+  if (!cause || typeof cause !== "object") return String(cause);
+  const record = cause as Record<string, unknown>;
+  return ["code", "message", "details", "hint"]
+    .filter((key) => record[key] != null && record[key] !== "")
+    .map((key) => `${key}: ${String(record[key])}`)
+    .join("\n    ");
+}
+
 main().catch((error) => {
   console.error("\nIngestion failed:", error instanceof Error ? error.message : error);
+  if (error instanceof Error && error.cause !== undefined) {
+    console.error("  Underlying error:\n    " + describeCause(error.cause));
+  }
   process.exit(1);
 });
