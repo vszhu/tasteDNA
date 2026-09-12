@@ -1,6 +1,6 @@
 # Meal invitation links
 
-Read [LLM_HANDOFF.md](LLM_HANDOFF.md) and [DEVELOPER_3_TASK_6_HANDOFF.md](DEVELOPER_3_TASK_6_HANDOFF.md) before changing group authorization. This repair starts from main `9f6714f` and preserves the private medication integration.
+Read [LLM_HANDOFF.md](LLM_HANDOFF.md) and [DEVELOPER_3_TASK_6_HANDOFF.md](DEVELOPER_3_TASK_6_HANDOFF.md) before changing group authorization. This repair started from main `9f6714f`, merged in [PR #33](https://github.com/vszhu/tasteDNA/pull/33) as `ad0a796`, and preserves the private medication integration.
 
 ## Reproduced problem
 
@@ -24,6 +24,9 @@ The laptop app also lacks privileged group-server configuration. A localhost ses
 - Full application suite: **367 tests in 60 files passed**. ESLint and the production build passed.
 - Automated coverage includes verified-login timing, account switching, signup/email callback destinations, expired-link retry, unsafe redirects, room/result/new-meal sign-in links, clipboard failure, device-only links, and the local-to-live recovery link. Existing invitation acceptance and account isolation tests remain included.
 - Local Chrome: switched from the CMU account to Gmail while keeping the meal destination; password login automatically returned to the exact session URL. The local 503 recovery link then opened the live pending invitation and displayed **Accept** to the intended recipient.
-- Hosted deployment and full post-fix acceptance verification are pending at this checkpoint. Update this section after they finish; a unit test or a merge alone does not establish live success.
+- Vercel's preview build passed, but its protected URL required team access in the wedge Chrome profile. No access request was sent and no deployment protection was changed. Public-site verification followed the normal merge and successful production deployment of `ad0a796`.
+- Production Chrome, using the requested CMU sender and Gmail recipient: opened the copied invite while Gmail was signed out in the wedge profile; both the header and page sign-in links retained the session path. Password login returned automatically to the exact pending invitation, where Gmail clicked **Accept**. The recipient saw both accounts **Joined**, then reloaded to verify persistence. The sender was reauthenticated after deployment and also saw both accounts **Joined**.
+- Production **Copy link** displayed the new read-only **Session invite link** field; its URL matched the clipboard and the same persisted meal. The named `Invite link test · ozc to Gmail` session remains available with accepted membership.
+- No live signup-confirmation or magic-link email was sent during this repair. Their return-path behavior and expired-link recovery were verified through adapter/callback tests. The laptop still needs server-only configuration to run its own group backend; its configured public-link recovery was browser-tested.
 
 No medication selections, taste ratings, existing friendships, or unrelated users were changed during this repair. Keep test sessions clearly named; never reset someone else's list to force a recommendation.
