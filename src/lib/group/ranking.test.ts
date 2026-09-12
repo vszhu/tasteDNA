@@ -79,6 +79,12 @@ function venue(id: string, embeddings: number[][]): Venue {
   };
 }
 
+function spicyVenue(id: string, embedding: number[]): Venue {
+  const candidate = venue(id, [embedding]);
+  candidate.menuItems[0].dish.features.spicy = 1;
+  return candidate;
+}
+
 function session(venues: Venue[]): DiningSession {
   return {
     id: "session",
@@ -214,5 +220,43 @@ describe("fair group ranking", () => {
       kind: "compromise",
       venueId: "least-bad",
     }));
+  });
+
+  it("returns high confidence and no question for a robust winner", () => {
+    const alex = member("alex", [1, 0]);
+    const winner = venue("winner", [[1, 0]]);
+    const poorFit = venue("poor-fit", [[-1, 0]]);
+
+    const result = computeGroupRecommendation({ session: session([winner, poorFit]), venues: [winner, poorFit], members: [alex] });
+
+    expect(result?.decisionConfidence).toEqual({ level: "high", winnerMargin: 100, isFragile: false });
+    expect(result?.preferenceQuestion).toBeUndefined();
+  });
+
+  it("asks the preference whose answer can flip a fragile winner", () => {
+    const alex = member("alex", [1, 0]);
+    const comfort = venue("comfort", [[1, 0]]);
+    const spice = spicyVenue("spice", [0.9, Math.sqrt(1 - 0.9 ** 2)]);
+    const result = computeGroupRecommendation({ session: session([comfort, spice]), venues: [comfort, spice], members: [alex] });
+
+    expect(result?.winner.id).toBe("comfort");
+    expect(result?.decisionConfidence).toEqual({ level: "low", winnerMargin: 3, isFragile: true });
+    expect(result?.preferenceQuestion).toEqual({
+      id: "session:alex:spicy",
+      memberId: "alex",
+      tag: "spicy",
+      prompt: "Would you like something spicy for this meal?",
+    });
+  });
+
+  it("uses a stable question choice for identical tied inputs", () => {
+    const alex = member("alex", [1, 0]);
+    const comfort = venue("comfort", [[1, 0]]);
+    const spice = spicyVenue("spice", [0.9, Math.sqrt(1 - 0.9 ** 2)]);
+    const input = { session: session([comfort, spice]), venues: [comfort, spice], members: [alex] };
+
+    expect(computeGroupRecommendation(input)?.preferenceQuestion).toEqual(
+      computeGroupRecommendation(input)?.preferenceQuestion,
+    );
   });
 });

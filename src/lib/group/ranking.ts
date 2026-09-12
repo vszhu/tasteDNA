@@ -10,6 +10,7 @@ import type {
   VenueSummary,
 } from "@/types/group";
 import { scoreDishForMeal } from "@/lib/recommendation/meal-utility";
+import { assessDecisionConfidence, generateDecisionQuestion } from "./decision";
 
 export const GROUP_RANKING_WEIGHTS = {
   bestDish: 0.7,
@@ -183,7 +184,7 @@ function explanationFacts(
  * Selects a restaurant fairly from actual dishes. If no venue clears the misery
  * floor, returns the best compromise and labels it instead of returning nothing.
  */
-export function computeGroupRecommendation(input: GroupRankingInput): GroupRecommendation | null {
+function computeBaseGroupRecommendation(input: GroupRankingInput): GroupRecommendation | null {
   const activeMembers = input.members.filter((member) => member.member.status !== "declined");
   if (activeMembers.length === 0) return null;
 
@@ -225,4 +226,23 @@ export function computeGroupRecommendation(input: GroupRankingInput): GroupRecom
       compromiseRequired,
     ),
   };
+}
+
+/**
+ * Selects a fair group recommendation and, only for fragile decisions, returns
+ * one deterministic meal-preference question with the largest simulated impact.
+ */
+export function computeGroupRecommendation(input: GroupRankingInput): GroupRecommendation | null {
+  const recommendation = computeBaseGroupRecommendation(input);
+  if (!recommendation) return null;
+
+  const decisionConfidence = assessDecisionConfidence(recommendation);
+  const preferenceQuestion = generateDecisionQuestion({
+    sessionId: input.session.id,
+    members: input.members,
+    recommendation,
+    simulate: (members) => computeBaseGroupRecommendation({ ...input, members }),
+  });
+
+  return { ...recommendation, decisionConfidence, preferenceQuestion };
 }
