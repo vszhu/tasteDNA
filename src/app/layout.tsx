@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppShell } from "@/components/layout/app-shell";
+import { SessionProvider } from "@/components/providers/session-provider";
 import { TasteProvider } from "@/components/providers/taste-provider";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <TasteProvider><AppShell>{children}</AppShell></TasteProvider>
+        <SessionProvider><TasteProvider><AppShell>{children}</AppShell></TasteProvider></SessionProvider>
       </body>
     </html>
   );
