@@ -1,6 +1,10 @@
 import type { AuthUser, SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
-import { createSupabaseAuthAdapter, sessionUserFromSupabase } from "./supabase-adapter";
+import {
+  createSupabaseAuthAdapter,
+  magicLinkErrorMessage,
+  sessionUserFromSupabase,
+} from "./supabase-adapter";
 
 function user(overrides: Partial<AuthUser> = {}): AuthUser {
   return {
@@ -51,6 +55,25 @@ describe("Supabase auth adapter", () => {
     });
     await adapter.signOut();
     expect(signOut).toHaveBeenCalledOnce();
+  });
+
+  it("explains provider email limits without exposing provider messages", async () => {
+    const signInWithOtp = vi.fn().mockResolvedValue({
+      error: { code: "over_email_send_rate_limit", status: 429 },
+    });
+    const adapter = createSupabaseAuthAdapter(authClient({ signInWithOtp }), "http://localhost:3000");
+
+    await expect(adapter.requestMagicLink("ada@example.test")).resolves.toEqual({
+      ok: false,
+      message:
+        "The sign-in email limit was reached. Wait a while and try again, or configure custom SMTP in Supabase.",
+    });
+  });
+
+  it("maps the restricted test-mailer error", () => {
+    expect(magicLinkErrorMessage({ code: "email_address_not_authorized" })).toContain(
+      "test mailer",
+    );
   });
 
   it("falls back to the email prefix when metadata has no display name", () => {

@@ -6,31 +6,46 @@ import { Check, Clock, Mail, UserPlus, Users, X } from "lucide-react";
 import { useSession } from "@/components/providers/session-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { mockFriendsAdapter } from "@/lib/auth/mock-adapter";
 import { isValidEmail } from "@/lib/auth/friend-rules";
-import type { Friend } from "@/lib/auth/types";
+import {
+  createFriendshipClient,
+  FriendshipClientError,
+} from "@/lib/friendships/client";
+import type { FriendshipApiSummary } from "@/lib/friendships/types";
 import { cn } from "@/lib/utils";
 
 const NEUTRAL_SEND_MESSAGE = "If that email has an account, they'll see your request.";
+const friendshipClient = createFriendshipClient();
 
-function FriendRow({ friend, onRespond }: { friend: Friend; onRespond?: (id: string, action: "accept" | "reject") => void }) {
+function FriendRow({
+  friend,
+  responding,
+  onRespond,
+}: {
+  friend: FriendshipApiSummary;
+  responding?: boolean;
+  onRespond?: (id: string, action: "accept" | "reject") => void;
+}) {
+  const pendingIncoming = friend.status === "pending" && friend.direction === "incoming";
+  const pendingOutgoing = friend.status === "pending" && friend.direction === "outgoing";
+
   return (
     <Card>
       <CardContent className="flex items-center justify-between gap-3 p-4">
         <div className="min-w-0">
-          <p className="truncate font-bold">{friend.user.displayName}</p>
-          <p className="truncate text-xs text-[var(--muted)]">{friend.user.email}</p>
+          <p className="truncate font-bold">{friend.friendDisplayName}</p>
+          <p className="truncate text-xs text-[var(--muted)]">TasteDNA member</p>
         </div>
-        {friend.status === "pending-incoming" && onRespond ? (
+        {pendingIncoming && onRespond ? (
           <div className="flex shrink-0 gap-2">
-            <button type="button" aria-label={`Accept ${friend.user.displayName}`} onClick={() => onRespond(friend.friendshipId, "accept")} className="grid size-9 place-items-center rounded-full bg-[var(--tomato)] text-white transition-transform active:scale-95">
+            <button type="button" disabled={responding} aria-label={`Accept ${friend.friendDisplayName}`} onClick={() => onRespond(friend.friendshipId, "accept")} className="grid size-9 place-items-center rounded-full bg-[var(--tomato)] text-white transition-transform active:scale-95 disabled:cursor-wait disabled:opacity-60">
               <Check className="size-4" />
             </button>
-            <button type="button" aria-label={`Decline ${friend.user.displayName}`} onClick={() => onRespond(friend.friendshipId, "reject")} className="grid size-9 place-items-center rounded-full border border-[var(--line)] transition-transform active:scale-95">
+            <button type="button" disabled={responding} aria-label={`Decline ${friend.friendDisplayName}`} onClick={() => onRespond(friend.friendshipId, "reject")} className="grid size-9 place-items-center rounded-full border border-[var(--line)] transition-transform active:scale-95 disabled:cursor-wait disabled:opacity-60">
               <X className="size-4" />
             </button>
           </div>
-        ) : friend.status === "pending-outgoing" ? (
+        ) : pendingOutgoing ? (
           <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[var(--muted)]"><Clock className="size-3.5" /> Pending</span>
         ) : (
           <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[#315e4b]"><Check className="size-3.5" /> Friends</span>
@@ -42,14 +57,26 @@ function FriendRow({ friend, onRespond }: { friend: Friend; onRespond?: (id: str
 
 export default function FriendsPage() {
   const { user, status } = useSession();
-  const [friends, setFriends] = useState<Friend[] | null>(null);
+  const [friends, setFriends] = useState<FriendshipApiSummary[] | null>(null);
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
+  const [respondingId, setRespondingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
 
   const refresh = useCallback(async () => {
-    const list = await mockFriendsAdapter.listFriends();
-    setFriends(list);
+    try {
+      const list = await friendshipClient.list();
+      setFriends(list);
+    } catch (error) {
+      setFriends([]);
+      setFeedback({
+        tone: "error",
+        text:
+          error instanceof FriendshipClientError
+            ? error.message
+            : "Friendships are temporarily unavailable. Please try again.",
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -61,22 +88,42 @@ export default function FriendsPage() {
     event.preventDefault();
     if (!isValidEmail(email)) { setFeedback({ tone: "error", text: "Enter a valid email address." }); return; }
     setSending(true);
-    const result = await mockFriendsAdapter.sendFriendRequest(email);
-    setSending(false);
-    if (result.ok || result.reason === "already-pending" || result.reason === "already-friends") {
-      setFeedback({ tone: "ok", text: NEUTRAL_SEND_MESSAGE });
+    setFeedback(null);
+    try {
+      const message = await friendshipClient.request(email);
+      setFeedback({ tone: "ok", text: message || NEUTRAL_SEND_MESSAGE });
       setEmail("");
       await refresh();
-    } else if (result.reason === "self") {
-      setFeedback({ tone: "error", text: "That's your own email." });
-    } else {
-      setFeedback({ tone: "error", text: "Enter a valid email address." });
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        text:
+          error instanceof FriendshipClientError
+            ? error.message
+            : "Friendships are temporarily unavailable. Please try again.",
+      });
+    } finally {
+      setSending(false);
     }
   }
 
   async function respond(friendshipId: string, action: "accept" | "reject") {
-    const updated = await mockFriendsAdapter.respondToRequest(friendshipId, action);
-    setFriends(updated);
+    setRespondingId(friendshipId);
+    setFeedback(null);
+    try {
+      await friendshipClient.respond(friendshipId, action);
+      await refresh();
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        text:
+          error instanceof FriendshipClientError
+            ? error.message
+            : "Friendships are temporarily unavailable. Please try again.",
+      });
+    } finally {
+      setRespondingId(null);
+    }
   }
 
   if (status === "loading") {
@@ -96,8 +143,12 @@ export default function FriendsPage() {
     );
   }
 
-  const incoming = (friends ?? []).filter((friend) => friend.status === "pending-incoming");
-  const outgoing = (friends ?? []).filter((friend) => friend.status === "pending-outgoing");
+  const incoming = (friends ?? []).filter(
+    (friend) => friend.status === "pending" && friend.direction === "incoming",
+  );
+  const outgoing = (friends ?? []).filter(
+    (friend) => friend.status === "pending" && friend.direction === "outgoing",
+  );
   const accepted = (friends ?? []).filter((friend) => friend.status === "accepted");
 
   return (
@@ -137,7 +188,7 @@ export default function FriendsPage() {
           {incoming.length > 0 && (
             <section>
               <h2 className="text-xs font-bold tracking-[.14em] text-[var(--muted)]">WAITING ON YOU</h2>
-              <div className="mt-3 space-y-2">{incoming.map((friend) => <FriendRow key={friend.friendshipId} friend={friend} onRespond={respond} />)}</div>
+              <div className="mt-3 space-y-2">{incoming.map((friend) => <FriendRow key={friend.friendshipId} friend={friend} responding={respondingId === friend.friendshipId} onRespond={respond} />)}</div>
             </section>
           )}
           <section>
