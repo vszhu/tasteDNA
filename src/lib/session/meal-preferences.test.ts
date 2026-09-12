@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { cycleTagPreference, EMPTY_MEAL_PREFERENCE_STATE, setMaxPrice, tagPreference, toggleExcludedIngredient, toggleExcludedProteinType } from "./meal-preferences";
+import { cycleTagPreference, EMPTY_MEAL_PREFERENCE_STATE, setMaxPrice, setTagPreference, tagPreference, toggleExcludedIngredient, toggleExcludedProteinType } from "./meal-preferences";
 
 describe("meal-preferences source", () => {
   it("never imports the persistent taste engine or taste provider", () => {
@@ -55,6 +55,24 @@ describe("toggleExcludedIngredient / toggleExcludedProteinType", () => {
     const state = toggleExcludedProteinType(EMPTY_MEAL_PREFERENCE_STATE, "chicken");
     expect(state.excludedProteinTypes).toEqual(["chicken"]);
     expect(state.excludedIngredients).toEqual([]);
+  });
+});
+
+describe("setTagPreference", () => {
+  it("sets a tag directly to desired, avoided, or neutral regardless of current state", () => {
+    let state = setTagPreference(EMPTY_MEAL_PREFERENCE_STATE, "spicy", "desired");
+    expect(tagPreference(state, "spicy")).toBe("desired");
+    state = setTagPreference(state, "spicy", "avoided");
+    expect(tagPreference(state, "spicy")).toBe("avoided");
+    expect(state.desiredTags).toEqual([]);
+    state = setTagPreference(state, "spicy", "neutral");
+    expect(tagPreference(state, "spicy")).toBe("neutral");
+  });
+
+  it("leaves other tags untouched", () => {
+    const state = setTagPreference(cycleTagPreference(EMPTY_MEAL_PREFERENCE_STATE, "filling"), "spicy", "desired");
+    expect(tagPreference(state, "filling")).toBe("desired");
+    expect(tagPreference(state, "spicy")).toBe("desired");
   });
 });
 

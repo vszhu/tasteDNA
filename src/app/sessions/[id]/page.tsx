@@ -216,6 +216,12 @@ export default function SessionRoomPage() {
           {submitting ? "Saving…" : iAmReady ? "Update my check-in" : "I’m ready"} <Check className="size-4" />
         </Button>
       </section>
+
+      <div className="mt-6 text-center">
+        <Link href={`/sessions/${sessionId}/results`} className="text-sm font-semibold text-[var(--tomato)] hover:underline">
+          Preview how results would look →
+        </Link>
+      </div>
     </div>
   );
 }

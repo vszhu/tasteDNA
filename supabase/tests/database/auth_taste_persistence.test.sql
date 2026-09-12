@@ -63,8 +63,16 @@ set local role anon;
 select set_config('request.jwt.claim.sub', '', true);
 select set_config('request.jwt.claims', '{}', true);
 
-select is((select count(*) from public.ratings), 0::bigint, 'anonymous users cannot read ratings');
-select is((select count(*) from public.taste_profiles), 0::bigint, 'anonymous users cannot read profiles');
+select is(
+  has_table_privilege('anon', 'public.ratings', 'SELECT'),
+  false,
+  'anonymous users have no rating table access'
+);
+select is(
+  has_table_privilege('anon', 'public.taste_profiles', 'SELECT'),
+  false,
+  'anonymous users have no profile table access'
+);
 
 select * from finish();
 rollback;

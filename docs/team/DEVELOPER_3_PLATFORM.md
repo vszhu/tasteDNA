@@ -4,6 +4,8 @@ Your job is to connect TasteDNA to outside services safely: OpenAI menu extracti
 
 Read [README.md](../../README.md), [the team workflow](./README.md), and the root `AGENTS.md` before asking an LLM to edit code.
 
+For the actual state of Tasks 1–4, including deviations from the task brief and requirements inherited by later work, also read [DEVELOPER_3_TASK_4_HANDOFF.md](./DEVELOPER_3_TASK_4_HANDOFF.md).
+
 ## Files you own
 
 You may edit these without extra coordination:
@@ -70,4 +72,3 @@ Work only on the TasteDNA platform task described below. You may edit the API, m
 - Paid services are mocked in automated tests.
 - Tests, lint, and build pass.
 - The PR changes only the files needed for this task.
-
