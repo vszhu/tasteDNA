@@ -1,0 +1,3314 @@
+{
+  "113": {
+    "The Good Egg": null,
+    "Power Protein Wrap": null,
+    "Egg Whites & Cheddar": [
+      "egg whites",
+      "cheddar cheese",
+      "bread",
+      "butter"
+    ],
+    "Egg Whites, Cheddar & Avocado": [
+      "egg whites",
+      "cheddar cheese",
+      "avocado",
+      "bread",
+      "butter"
+    ],
+    "2 Egg & Cheddar": [
+      "eggs",
+      "cheddar cheese",
+      "bread",
+      "butter"
+    ],
+    "Toasted Bagel & Cream Cheese": [
+      "bagel",
+      "cream cheese"
+    ],
+    "Hot Oatmeal": [
+      "oats",
+      "water",
+      "salt"
+    ],
+    "Fruit Cup": [
+      "melon",
+      "grapes",
+      "pineapple",
+      "berries"
+    ],
+    "Yogurt Parfait": [
+      "yogurt",
+      "granola",
+      "berries",
+      "honey"
+    ],
+    "Orange Juice": [
+      "oranges",
+      "water"
+    ],
+    "Chocolate Chip Cookie": [
+      "wheat flour",
+      "butter",
+      "sugar",
+      "eggs",
+      "chocolate chips",
+      "baking soda"
+    ],
+    "Candy Cookie": [
+      "wheat flour",
+      "butter",
+      "sugar",
+      "eggs",
+      "candy-coated chocolate",
+      "baking soda"
+    ],
+    "Reese's Peanut Butter Cup Cookie": [
+      "wheat flour",
+      "butter",
+      "sugar",
+      "eggs",
+      "peanut butter",
+      "milk chocolate",
+      "baking soda"
+    ],
+    "Palmier": [
+      "wheat flour",
+      "butter",
+      "sugar",
+      "salt"
+    ],
+    "Plain Croissant": [
+      "wheat flour",
+      "butter",
+      "milk",
+      "yeast",
+      "sugar",
+      "salt"
+    ],
+    "Chocolate Croissant": [
+      "wheat flour",
+      "butter",
+      "milk",
+      "yeast",
+      "sugar",
+      "chocolate"
+    ],
+    "Almond Croissant": [
+      "wheat flour",
+      "butter",
+      "milk",
+      "yeast",
+      "sugar",
+      "almonds",
+      "eggs"
+    ],
+    "Apple Croissant": [
+      "wheat flour",
+      "butter",
+      "milk",
+      "yeast",
+      "sugar",
+      "apples",
+      "cinnamon"
+    ],
+    "Warm Spinach & Cheese Croissant": [
+      "croissant",
+      "spinach",
+      "cheese",
+      "butter"
+    ],
+    "Warm Ham & Cheese Croissant": [
+      "croissant",
+      "ham",
+      "cheese"
+    ],
+    "Blueberry Muffin": [
+      "wheat flour",
+      "blueberries",
+      "sugar",
+      "eggs",
+      "milk",
+      "butter",
+      "baking powder"
+    ],
+    "Corn Muffin": [
+      "cornmeal",
+      "wheat flour",
+      "sugar",
+      "eggs",
+      "milk",
+      "butter",
+      "baking powder"
+    ],
+    "Chocolate Chip Muffin": [
+      "wheat flour",
+      "chocolate chips",
+      "sugar",
+      "eggs",
+      "milk",
+      "butter",
+      "baking powder"
+    ],
+    "Triple Berry Muffin": [
+      "wheat flour",
+      "blueberries",
+      "raspberries",
+      "strawberries",
+      "sugar",
+      "eggs",
+      "milk",
+      "butter",
+      "baking powder"
+    ],
+    "Cinnamon Chip Scone": [
+      "wheat flour",
+      "butter",
+      "sugar",
+      "cream",
+      "eggs",
+      "cinnamon chips",
+      "baking powder"
+    ],
+    "Plain Bagel": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt"
+    ],
+    "Sesame Bagel": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt",
+      "sesame seeds"
+    ],
+    "Asiago Cheese Bagel": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt",
+      "asiago cheese"
+    ],
+    "Jalapeno Cheddar Bagel": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt",
+      "jalapeno",
+      "cheddar cheese"
+    ],
+    "Everything Bagel": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt",
+      "sesame seeds",
+      "poppy seeds",
+      "dried onion",
+      "dried garlic"
+    ],
+    "Skinny Wheat Bagel": [
+      "whole wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt"
+    ],
+    "Cinnamon Swirl Roll": [
+      "wheat flour",
+      "butter",
+      "milk",
+      "eggs",
+      "yeast",
+      "sugar",
+      "cinnamon",
+      "icing"
+    ],
+    "Double Chocolate Brownie": [
+      "wheat flour",
+      "cocoa powder",
+      "chocolate",
+      "sugar",
+      "butter",
+      "eggs"
+    ],
+    "Brownie Bites": [
+      "wheat flour",
+      "cocoa powder",
+      "chocolate",
+      "sugar",
+      "butter",
+      "eggs"
+    ],
+    "Sweet Cheese Danish": [
+      "wheat flour",
+      "butter",
+      "cream cheese",
+      "milk",
+      "sugar",
+      "eggs",
+      "yeast"
+    ],
+    "Seasonal Danish": null,
+    "Lemon Pound Cake": [
+      "wheat flour",
+      "butter",
+      "eggs",
+      "sugar",
+      "lemon",
+      "baking powder"
+    ],
+    "Rustic Baguette": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "salt"
+    ],
+    "Asiago Breadstick": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "olive oil",
+      "asiago cheese",
+      "salt"
+    ],
+    "Chewy Marshmallow Bar": [
+      "crisp rice cereal",
+      "marshmallow",
+      "butter"
+    ],
+    "Cheese & Fruit Box": [
+      "cheese",
+      "grapes",
+      "apples",
+      "crackers"
+    ],
+    "Fruit, Eggs & Nuts Box": [
+      "fruit",
+      "eggs",
+      "nuts"
+    ],
+    "Hummus Box": [
+      "chickpeas",
+      "tahini",
+      "olive oil",
+      "lemon juice",
+      "garlic",
+      "pita",
+      "vegetables"
+    ],
+    "Italian Wedding Soup": [
+      "chicken broth",
+      "meatballs",
+      "small pasta",
+      "spinach",
+      "carrots",
+      "celery",
+      "onion"
+    ],
+    "Cheesy Chicken Tortilla Soup": [
+      "chicken",
+      "chicken broth",
+      "cheddar cheese",
+      "tomato",
+      "corn",
+      "tortilla strips",
+      "onion",
+      "chili peppers"
+    ],
+    "Tomato Basil Bisque": [
+      "tomato",
+      "basil",
+      "cream",
+      "butter",
+      "onion",
+      "vegetable broth"
+    ],
+    "Chicken Noodle Soup": [
+      "chicken",
+      "chicken broth",
+      "wheat noodles",
+      "carrots",
+      "celery",
+      "onion"
+    ],
+    "Baked Stuffed Potato Soup": [
+      "potatoes",
+      "milk",
+      "cream",
+      "cheddar cheese",
+      "bacon",
+      "onion",
+      "broth"
+    ],
+    "Clam Chowder": [
+      "clams",
+      "potatoes",
+      "cream",
+      "milk",
+      "onion",
+      "celery",
+      "butter"
+    ],
+    "Turkey Chili": [
+      "turkey",
+      "beans",
+      "tomato",
+      "onion",
+      "chili powder",
+      "cumin"
+    ],
+    "Macaroni & Cheese": [
+      "macaroni pasta",
+      "cheddar cheese",
+      "milk",
+      "butter",
+      "wheat flour"
+    ],
+    "Broccoli Cheddar Soup": [
+      "broccoli",
+      "cheddar cheese",
+      "milk",
+      "cream",
+      "onion",
+      "carrots",
+      "broth"
+    ],
+    "Lemon Orzo Chicken Soup": [
+      "chicken",
+      "orzo pasta",
+      "chicken broth",
+      "lemon",
+      "carrots",
+      "celery",
+      "onion"
+    ],
+    "Garden Veggie Soup": [
+      "vegetable broth",
+      "tomato",
+      "carrots",
+      "celery",
+      "onion",
+      "green beans",
+      "potatoes"
+    ],
+    "Chicken Cobb Avocado Salad": [
+      "chicken",
+      "lettuce",
+      "avocado",
+      "bacon",
+      "eggs",
+      "tomato",
+      "blue cheese",
+      "dressing"
+    ],
+    "Southwest Chicken Salad": [
+      "chicken",
+      "lettuce",
+      "black beans",
+      "corn",
+      "tomato",
+      "tortilla strips",
+      "dressing"
+    ],
+    "Chicken Caesar Asiago Salad": [
+      "chicken",
+      "romaine lettuce",
+      "asiago cheese",
+      "croutons",
+      "Caesar dressing"
+    ],
+    "Caesar Salad Without Chicken": [
+      "romaine lettuce",
+      "parmesan cheese",
+      "croutons",
+      "Caesar dressing"
+    ],
+    "Mediterranean Salad": [
+      "lettuce",
+      "cucumber",
+      "tomato",
+      "olives",
+      "feta cheese",
+      "chickpeas",
+      "olive oil",
+      "lemon juice"
+    ],
+    "Newport Turkey Sandwich": [
+      "turkey",
+      "bread",
+      "lettuce",
+      "tomato",
+      "mayonnaise"
+    ],
+    "Toasted Chicken & Avocado Sandwich": [
+      "chicken",
+      "avocado",
+      "bread",
+      "tomato",
+      "lettuce",
+      "mayonnaise"
+    ],
+    "Extra Bacon BLT": [
+      "bacon",
+      "lettuce",
+      "tomato",
+      "bread",
+      "mayonnaise"
+    ],
+    "Chipotle Black Bean Burger with Avocado": [
+      "black beans",
+      "rice",
+      "onion",
+      "breadcrumbs",
+      "chipotle peppers",
+      "avocado",
+      "burger bun",
+      "lettuce",
+      "tomato"
+    ],
+    "Country Grilled Cheese": [
+      "bread",
+      "cheese",
+      "butter"
+    ],
+    "Smoky BBQ Chicken Melt": [
+      "chicken",
+      "barbecue sauce",
+      "cheese",
+      "bread",
+      "butter"
+    ],
+    "Chipotle Turkey & Avocado": [
+      "turkey",
+      "avocado",
+      "chipotle mayonnaise",
+      "bread",
+      "lettuce",
+      "tomato"
+    ],
+    "Caprese Sandwich": [
+      "bread",
+      "mozzarella cheese",
+      "tomato",
+      "basil",
+      "olive oil"
+    ],
+    "Caprese with Chicken": [
+      "chicken",
+      "bread",
+      "mozzarella cheese",
+      "tomato",
+      "basil",
+      "olive oil"
+    ],
+    "Ham & Two Cheese": [
+      "ham",
+      "cheddar cheese",
+      "swiss cheese",
+      "bread"
+    ],
+    "Turkey Club": [
+      "turkey",
+      "bacon",
+      "lettuce",
+      "tomato",
+      "bread",
+      "mayonnaise"
+    ],
+    "ABP's Original Chicken Salad Sandwich": [
+      "chicken",
+      "mayonnaise",
+      "celery",
+      "bread",
+      "lettuce"
+    ],
+    "Classic Tuna Salad Sandwich": [
+      "tuna",
+      "mayonnaise",
+      "celery",
+      "bread",
+      "lettuce"
+    ],
+    "Napa Chicken with Avocado Wrap": [
+      "chicken",
+      "avocado",
+      "tortilla",
+      "lettuce",
+      "tomato",
+      "mayonnaise"
+    ],
+    "Chicken Caesar Wrap": [
+      "chicken",
+      "tortilla",
+      "romaine lettuce",
+      "parmesan cheese",
+      "Caesar dressing"
+    ],
+    "Mediterranean Wrap": [
+      "tortilla",
+      "hummus",
+      "lettuce",
+      "cucumber",
+      "tomato",
+      "olives",
+      "feta cheese"
+    ],
+    "Coffee": [
+      "coffee",
+      "water"
+    ],
+    "French Roast Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Morning Blend Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Hazelnut Coffee": [
+      "coffee",
+      "water",
+      "hazelnut flavoring"
+    ],
+    "Espresso": [
+      "coffee",
+      "water"
+    ],
+    "Caffe Latte": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Cappuccino": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Mocha Latte": [
+      "espresso coffee",
+      "milk",
+      "chocolate sauce"
+    ],
+    "Vanilla Latte": [
+      "espresso coffee",
+      "milk",
+      "vanilla syrup"
+    ],
+    "Caramel Macchiato": [
+      "espresso coffee",
+      "milk",
+      "vanilla syrup",
+      "caramel sauce"
+    ],
+    "Caffe Americano": [
+      "espresso coffee",
+      "water"
+    ],
+    "Chai Latte": [
+      "black tea",
+      "milk",
+      "cinnamon",
+      "cardamom",
+      "ginger",
+      "sugar"
+    ],
+    "Hot Chocolate": [
+      "milk",
+      "cocoa powder",
+      "sugar"
+    ],
+    "Hot Tea": [
+      "tea",
+      "water"
+    ],
+    "Iced Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Iced Tea": [
+      "tea",
+      "water"
+    ],
+    "Lemonade": [
+      "lemon juice",
+      "water",
+      "sugar"
+    ]
+  },
+  "210": {
+    "Avocado Toast": [
+      "bread",
+      "avocado",
+      "lemon juice",
+      "salt",
+      "black pepper"
+    ],
+    "Smoked Salmon and Dill Toast": [
+      "bread",
+      "smoked salmon",
+      "cream cheese",
+      "dill",
+      "lemon"
+    ],
+    "Harissa-Roasted Carrot Toast": [
+      "bread",
+      "carrots",
+      "harissa",
+      "olive oil",
+      "salt"
+    ],
+    "Tomato Confit Toast": [
+      "bread",
+      "tomato",
+      "olive oil",
+      "garlic",
+      "herbs"
+    ],
+    "Whipped Mascarpone and Berries Toast": [
+      "bread",
+      "mascarpone cheese",
+      "berries",
+      "sugar"
+    ]
+  },
+  "179": {
+    "Seed Funding": null,
+    "Return On Ingredients": null,
+    "Greek Options": null,
+    "Capital Greens": null,
+    "Market Mix": null,
+    "Build Your Own Bowl": null
+  },
+  "204": {
+    "Double Shot Espresso": [
+      "coffee",
+      "water"
+    ],
+    "Macchiato": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Cortado": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Flat White": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Cappuccino": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Latte": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Americano": [
+      "espresso coffee",
+      "water"
+    ],
+    "Drip Coffee - Hot or Iced": [
+      "coffee",
+      "water"
+    ],
+    "Hot Tea": [
+      "tea",
+      "water"
+    ],
+    "Iced Tea": [
+      "tea",
+      "water"
+    ],
+    "Espresso Tonic": [
+      "espresso coffee",
+      "tonic water",
+      "ice"
+    ],
+    "Mocha": [
+      "espresso coffee",
+      "milk",
+      "chocolate sauce"
+    ],
+    "Hot Cocoa": [
+      "milk",
+      "cocoa powder",
+      "sugar"
+    ],
+    "Chai Latte": [
+      "black tea",
+      "milk",
+      "cinnamon",
+      "cardamom",
+      "ginger",
+      "sugar"
+    ],
+    "Matcha Latte": [
+      "matcha green tea",
+      "milk",
+      "sugar"
+    ],
+    "Seasonal Drink": null,
+    "Baked Goods": null,
+    "Strawberry Banana Smoothie": [
+      "strawberries",
+      "banana",
+      "milk",
+      "yogurt",
+      "ice"
+    ],
+    "Green Smoothie": null,
+    "Breakfast Sandwich": null,
+    "Meatless Breakfast Sandwich": [
+      "bread",
+      "eggs",
+      "cheese",
+      "butter"
+    ],
+    "Grilled Cheese": [
+      "bread",
+      "cheese",
+      "butter"
+    ],
+    "Ham & Cheese Croissant": [
+      "croissant",
+      "ham",
+      "cheese"
+    ],
+    "Portobello Artichoke Sandwich": [
+      "portobello mushrooms",
+      "artichokes",
+      "bread",
+      "olive oil",
+      "garlic"
+    ],
+    "Seasonal Frittata": null,
+    "Steamed Oatmeal": [
+      "oats",
+      "water",
+      "salt"
+    ],
+    "Seasonal Chia Pudding": null,
+    "Chickpea Kale Salad": [
+      "chickpeas",
+      "kale",
+      "olive oil",
+      "lemon juice",
+      "garlic"
+    ],
+    "Chicken Pesto Wrap": [
+      "chicken",
+      "tortilla",
+      "basil pesto",
+      "lettuce",
+      "tomato"
+    ],
+    "Roasted Veggie Hummus Wrap": [
+      "tortilla",
+      "hummus",
+      "zucchini",
+      "bell peppers",
+      "onion",
+      "olive oil"
+    ]
+  },
+  "95": {
+    "Double Shot Espresso": [
+      "coffee",
+      "water"
+    ],
+    "Macchiato": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Cortado": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Flat White": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Cappuccino": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Latte": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Americano": [
+      "espresso coffee",
+      "water"
+    ],
+    "Drip Coffee - Hot or Iced": [
+      "coffee",
+      "water"
+    ],
+    "Hot Tea": [
+      "tea",
+      "water"
+    ],
+    "Iced Tea": [
+      "tea",
+      "water"
+    ],
+    "Espresso Tonic": [
+      "espresso coffee",
+      "tonic water",
+      "ice"
+    ],
+    "Mocha": [
+      "espresso coffee",
+      "milk",
+      "chocolate sauce"
+    ],
+    "Hot Cocoa": [
+      "milk",
+      "cocoa powder",
+      "sugar"
+    ],
+    "Chai Latte": [
+      "black tea",
+      "milk",
+      "cinnamon",
+      "cardamom",
+      "ginger",
+      "sugar"
+    ],
+    "Matcha Latte": [
+      "matcha green tea",
+      "milk",
+      "sugar"
+    ],
+    "Seasonal Drink": null,
+    "Pastries": null,
+    "Baked Goods": null,
+    "Wraps": null,
+    "Yogurt": [
+      "cultured milk"
+    ],
+    "Light Snacks": null
+  },
+  "178": {
+    "Fresh Bagels": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt"
+    ],
+    "Bagel Sandwiches": null,
+    "Potato Boureka": [
+      "puff pastry",
+      "potatoes",
+      "onion",
+      "oil",
+      "salt"
+    ],
+    "Spinach and Cheese Boureka": [
+      "puff pastry",
+      "spinach",
+      "feta cheese",
+      "egg"
+    ],
+    "Mushroom Boureka": [
+      "puff pastry",
+      "mushrooms",
+      "onion",
+      "oil",
+      "salt"
+    ],
+    "Wraps": null,
+    "Salads": null,
+    "Pasta": null,
+    "Classic Cheese Pizza": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "olive oil"
+    ],
+    "Pizza Margherita": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "basil",
+      "olive oil"
+    ],
+    "Vegetable Pizza": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "bell peppers",
+      "mushrooms",
+      "onion"
+    ]
+  },
+  "103": {
+    "Nourish Hot Grab-and-Go Meal": null,
+    "Nourish Cold Grab-and-Go Meal": null,
+    "Fresh-Made Sandwich": null,
+    "Salad": null,
+    "Sushi": null,
+    "Fresh Fruit": null,
+    "Fresh Vegetables": null,
+    "Snacks": null,
+    "Sweets": null,
+    "Bottled Beverages": null
+  },
+  "92": {
+    "Corned Beef Sandwich": [
+      "corned beef",
+      "bread",
+      "mustard"
+    ],
+    "Roast Beef Sandwich": [
+      "roast beef",
+      "bread",
+      "lettuce",
+      "tomato",
+      "mayonnaise"
+    ],
+    "Specialty Meat Sandwich": null,
+    "Ham Sandwich": [
+      "ham",
+      "bread",
+      "lettuce",
+      "tomato",
+      "mayonnaise"
+    ],
+    "Turkey Sandwich": [
+      "turkey",
+      "bread",
+      "lettuce",
+      "tomato",
+      "mayonnaise"
+    ],
+    "Tuna Salad Sandwich": [
+      "tuna",
+      "mayonnaise",
+      "celery",
+      "bread",
+      "lettuce"
+    ],
+    "Chicken Salad Sandwich": [
+      "chicken",
+      "mayonnaise",
+      "celery",
+      "bread",
+      "lettuce"
+    ],
+    "Egg Salad Sandwich": [
+      "eggs",
+      "mayonnaise",
+      "mustard",
+      "bread",
+      "lettuce"
+    ],
+    "Bacon Lettuce Tomato Sandwich": [
+      "bacon",
+      "lettuce",
+      "tomato",
+      "bread",
+      "mayonnaise"
+    ],
+    "Bacon Lettuce Tomato with Cheese": [
+      "bacon",
+      "lettuce",
+      "tomato",
+      "cheese",
+      "bread",
+      "mayonnaise"
+    ],
+    "Double Egg Sandwich with Meat": null,
+    "Grilled Cheese": [
+      "bread",
+      "cheese",
+      "butter"
+    ],
+    "Half Sandwich": null,
+    "The Leonardo": null,
+    "Cheezy Beef Melt": [
+      "beef",
+      "cheese",
+      "bread",
+      "butter"
+    ],
+    "Taste Sensation": null,
+    "The General Assembly": null,
+    "Classic Italian": [
+      "bread",
+      "salami",
+      "ham",
+      "provolone cheese",
+      "lettuce",
+      "tomato",
+      "onion",
+      "oil",
+      "vinegar"
+    ],
+    "Farnam Tuna Melt": [
+      "tuna",
+      "mayonnaise",
+      "celery",
+      "cheese",
+      "bread",
+      "butter"
+    ],
+    "Chicken Salad Melt": [
+      "chicken",
+      "mayonnaise",
+      "celery",
+      "cheese",
+      "bread",
+      "butter"
+    ],
+    "Tempeh Wrap": [
+      "tempeh",
+      "tortilla",
+      "lettuce",
+      "tomato",
+      "dressing"
+    ],
+    "Half Sandwich with Small Soup": null,
+    "Fruit Salad": [
+      "melon",
+      "grapes",
+      "pineapple",
+      "berries"
+    ],
+    "Whole Fruit": null,
+    "Greek Yogurt": [
+      "cultured milk"
+    ],
+    "Yogurt": [
+      "cultured milk"
+    ],
+    "Breakfast Bars": null,
+    "Croissant": [
+      "wheat flour",
+      "butter",
+      "milk",
+      "yeast",
+      "sugar",
+      "salt"
+    ],
+    "Danish": null,
+    "Breakfast Muffin": null,
+    "Bagel with Cream Cheese": [
+      "bagel",
+      "cream cheese"
+    ],
+    "Toast with Butter and Jelly": [
+      "bread",
+      "butter",
+      "fruit jelly"
+    ],
+    "Cereal and Milk": [
+      "cereal",
+      "milk"
+    ],
+    "Egg on English Muffin or Toast": [
+      "eggs",
+      "bread",
+      "butter"
+    ],
+    "Egg on Bagel or Croissant": [
+      "eggs",
+      "bagel or croissant",
+      "butter"
+    ],
+    "Double Egg on Toast": [
+      "eggs",
+      "bread",
+      "butter"
+    ],
+    "Three Pancakes": [
+      "wheat flour",
+      "milk",
+      "eggs",
+      "sugar",
+      "butter",
+      "baking powder"
+    ],
+    "Build-Your-Own Salad": null,
+    "Salad Wrap": null,
+    "Half Salad without Protein": null,
+    "Half Salad with Protein": null,
+    "Chicken Salad": [
+      "chicken",
+      "mayonnaise",
+      "celery",
+      "onion"
+    ],
+    "Tuna Salad": [
+      "tuna",
+      "mayonnaise",
+      "celery",
+      "onion"
+    ],
+    "Broccoli Bacon Salad": [
+      "broccoli",
+      "bacon",
+      "mayonnaise",
+      "sugar",
+      "onion",
+      "vinegar"
+    ],
+    "Pasta Salad": [
+      "pasta",
+      "bell peppers",
+      "tomato",
+      "onion",
+      "oil",
+      "vinegar"
+    ],
+    "Potato Salad": [
+      "potatoes",
+      "mayonnaise",
+      "mustard",
+      "eggs",
+      "celery",
+      "onion"
+    ],
+    "Cole Slaw": [
+      "cabbage",
+      "carrots",
+      "mayonnaise",
+      "sugar",
+      "vinegar"
+    ],
+    "Cucumber, Feta, Kalamata Olives and Tomato Salad": [
+      "cucumber",
+      "feta cheese",
+      "kalamata olives",
+      "tomato",
+      "olive oil"
+    ],
+    "Quinoa Salad": [
+      "quinoa",
+      "cucumber",
+      "tomato",
+      "herbs",
+      "olive oil",
+      "lemon juice"
+    ],
+    "Sesame Noodle Salad": [
+      "wheat noodles",
+      "sesame oil",
+      "soy sauce",
+      "rice vinegar",
+      "sesame seeds",
+      "scallions"
+    ],
+    "Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Hot Chocolate": [
+      "milk",
+      "cocoa powder",
+      "sugar"
+    ],
+    "Hot Tea": [
+      "tea",
+      "water"
+    ],
+    "Cold Brew": [
+      "coffee",
+      "water"
+    ],
+    "Iced Tea": [
+      "tea",
+      "water"
+    ],
+    "Milk": [
+      "milk"
+    ],
+    "Vanilla Soy Milk": [
+      "soy milk",
+      "sugar",
+      "vanilla"
+    ],
+    "Soda": null,
+    "Buffalo Chicken Wrap": [
+      "chicken",
+      "tortilla",
+      "buffalo sauce",
+      "lettuce",
+      "ranch dressing"
+    ],
+    "Southwest Chicken Wrap": [
+      "chicken",
+      "tortilla",
+      "black beans",
+      "corn",
+      "tomato",
+      "lettuce",
+      "dressing"
+    ],
+    "Grilled Veggie Wrap": [
+      "tortilla",
+      "zucchini",
+      "bell peppers",
+      "onion",
+      "mushrooms",
+      "olive oil"
+    ],
+    "Soup of the Day": null,
+    "Entree of the Day": null,
+    "Pasta of the Day": null
+  },
+  "202": {
+    "Steak": [
+      "beef",
+      "oil",
+      "salt",
+      "black pepper"
+    ],
+    "Fresh Fish": null,
+    "Sandwiches": null,
+    "Wings": [
+      "chicken wings",
+      "oil",
+      "salt",
+      "seasoning"
+    ],
+    "Grilled Chicken": [
+      "chicken",
+      "oil",
+      "salt",
+      "black pepper"
+    ],
+    "Salmon": [
+      "salmon",
+      "oil",
+      "salt",
+      "black pepper"
+    ]
+  },
+  "173": {
+    "Build Your Own Sub or Wrap": null,
+    "Portabella & Pepper": [
+      "sub roll",
+      "portobello mushrooms",
+      "bell peppers",
+      "onion",
+      "oil"
+    ],
+    "Chipotle CBR": [
+      "sub roll",
+      "chicken",
+      "bacon",
+      "ranch dressing",
+      "chipotle peppers",
+      "cheese"
+    ],
+    "Sausage and Peppers": [
+      "sub roll",
+      "sausage",
+      "bell peppers",
+      "onion",
+      "oil"
+    ]
+  },
+  "110": {
+    "Braised Tofu in Brown Sauce": [
+      "tofu",
+      "soy sauce",
+      "vegetable broth",
+      "garlic",
+      "ginger",
+      "cornstarch",
+      "oil"
+    ],
+    "Eggplant with Garlic Sauce": [
+      "eggplant",
+      "garlic",
+      "soy sauce",
+      "rice vinegar",
+      "sugar",
+      "chili peppers",
+      "oil"
+    ],
+    "Stir-Fried Broccoli & Garlic": [
+      "broccoli",
+      "garlic",
+      "oil",
+      "soy sauce"
+    ],
+    "General Tso's Chicken": [
+      "chicken",
+      "cornstarch",
+      "soy sauce",
+      "sugar",
+      "rice vinegar",
+      "chili peppers",
+      "garlic",
+      "ginger",
+      "oil"
+    ],
+    "Chicken Teriyaki": [
+      "chicken",
+      "soy sauce",
+      "sugar",
+      "mirin",
+      "ginger",
+      "garlic"
+    ],
+    "Stir-Fried Spicy Chicken": [
+      "chicken",
+      "chili peppers",
+      "garlic",
+      "ginger",
+      "soy sauce",
+      "oil"
+    ],
+    "Braised Fish & Mapo Tofu": [
+      "fish",
+      "tofu",
+      "fermented chili bean paste",
+      "Sichuan peppercorns",
+      "garlic",
+      "ginger",
+      "soy sauce",
+      "oil"
+    ],
+    "Pork Ribs with Black Bean Sauce": [
+      "pork ribs",
+      "fermented black beans",
+      "garlic",
+      "ginger",
+      "soy sauce",
+      "sugar"
+    ],
+    "White Rice": [
+      "rice",
+      "water"
+    ],
+    "Spring Roll": [
+      "wheat wrapper",
+      "cabbage",
+      "carrots",
+      "mushrooms",
+      "oil"
+    ],
+    "Pork Dumpling": [
+      "pork",
+      "wheat wrapper",
+      "cabbage",
+      "ginger",
+      "scallions",
+      "soy sauce"
+    ],
+    "Red Bean Rice Cake": [
+      "glutinous rice flour",
+      "red bean paste",
+      "sugar",
+      "water"
+    ],
+    "Green Salad": [
+      "lettuce",
+      "cucumber",
+      "tomato",
+      "dressing"
+    ],
+    "Noodles": null,
+    "Fried Rice": [
+      "rice",
+      "eggs",
+      "peas",
+      "carrots",
+      "scallions",
+      "soy sauce",
+      "oil"
+    ],
+    "Soup": null,
+    "Milk Tea": [
+      "black tea",
+      "milk",
+      "sugar",
+      "tapioca pearls"
+    ],
+    "Fruit Tea": null,
+    "Specialty Bubble Tea": null,
+    "Fruit Smoothie": null
+  },
+  "206": {
+    "Bulgogi Bowl": [
+      "beef",
+      "rice",
+      "soy sauce",
+      "pear",
+      "sugar",
+      "garlic",
+      "sesame oil",
+      "vegetables"
+    ],
+    "Spicy Pork Bowl": [
+      "pork",
+      "rice",
+      "gochujang",
+      "soy sauce",
+      "sugar",
+      "garlic",
+      "sesame oil",
+      "vegetables"
+    ],
+    "Chicken Bowl": [
+      "chicken",
+      "rice",
+      "soy sauce",
+      "garlic",
+      "sesame oil",
+      "vegetables"
+    ],
+    "Tofu Bowl": [
+      "tofu",
+      "rice",
+      "soy sauce",
+      "garlic",
+      "sesame oil",
+      "vegetables"
+    ],
+    "Korean Corn Dog": [
+      "sausage",
+      "wheat flour",
+      "cornmeal",
+      "milk",
+      "egg",
+      "sugar",
+      "breadcrumbs",
+      "oil"
+    ],
+    "Mandoo (Chicken)": [
+      "chicken",
+      "wheat wrapper",
+      "cabbage",
+      "scallions",
+      "garlic",
+      "soy sauce",
+      "sesame oil"
+    ],
+    "Kimchi": [
+      "cabbage",
+      "radish",
+      "chili flakes",
+      "garlic",
+      "ginger",
+      "salt",
+      "fish sauce"
+    ],
+    "Han Gang Ramyun": [
+      "wheat noodles",
+      "broth",
+      "chili peppers",
+      "garlic",
+      "scallions"
+    ],
+    "Hotteok": [
+      "wheat flour",
+      "yeast",
+      "milk",
+      "sugar",
+      "cinnamon",
+      "nuts",
+      "oil"
+    ],
+    "Water": [
+      "water"
+    ]
+  },
+  "115": {
+    "Potato, Egg & Cheese Burrito": [
+      "tortilla",
+      "potatoes",
+      "eggs",
+      "cheese",
+      "oil"
+    ],
+    "Bacon, Potato, Egg Burrito": [
+      "tortilla",
+      "bacon",
+      "potatoes",
+      "eggs",
+      "oil"
+    ],
+    "French Toast": [
+      "bread",
+      "eggs",
+      "milk",
+      "cinnamon",
+      "sugar",
+      "butter"
+    ],
+    "Egg & Cheese on English Muffin": [
+      "English muffin",
+      "eggs",
+      "cheese",
+      "butter"
+    ],
+    "Bacon, Egg & Cheese on English Muffin": [
+      "English muffin",
+      "bacon",
+      "eggs",
+      "cheese",
+      "butter"
+    ],
+    "Sausage, Egg & Cheese on English Muffin": [
+      "English muffin",
+      "sausage",
+      "eggs",
+      "cheese",
+      "butter"
+    ],
+    "Philly Style Croissant": [
+      "croissant",
+      "beef",
+      "cheese",
+      "onion",
+      "bell peppers"
+    ],
+    "Turkey & Swiss Croissant": [
+      "croissant",
+      "turkey",
+      "swiss cheese"
+    ],
+    "Spicy Italian Croissant": [
+      "croissant",
+      "salami",
+      "ham",
+      "provolone cheese",
+      "hot peppers"
+    ],
+    "Rotating Sweet Croissant": null,
+    "Ham & Cheddar on Pretzel Bun": [
+      "pretzel bun",
+      "ham",
+      "cheddar cheese"
+    ],
+    "Gruyere & Chutney Grilled Cheese": [
+      "bread",
+      "gruyere cheese",
+      "fruit chutney",
+      "butter"
+    ],
+    "Spinach & Artichoke Grilled Cheese": [
+      "bread",
+      "spinach",
+      "artichokes",
+      "cheese",
+      "butter"
+    ],
+    "Turkey & Brie Wrap": [
+      "tortilla",
+      "turkey",
+      "brie cheese",
+      "lettuce"
+    ],
+    "Curried Chickpea Wrap": [
+      "tortilla",
+      "chickpeas",
+      "curry powder",
+      "onion",
+      "lettuce",
+      "oil"
+    ],
+    "Buffalo Popcorn Chicken": [
+      "chicken",
+      "wheat flour",
+      "buttermilk",
+      "buffalo sauce",
+      "oil"
+    ],
+    "Chicken Salad Sandwich": [
+      "chicken",
+      "mayonnaise",
+      "celery",
+      "bread",
+      "lettuce"
+    ],
+    "Egg Salad Sandwich": [
+      "eggs",
+      "mayonnaise",
+      "mustard",
+      "bread",
+      "lettuce"
+    ],
+    "Tuna Salad Sandwich": [
+      "tuna",
+      "mayonnaise",
+      "celery",
+      "bread",
+      "lettuce"
+    ],
+    "Stuffed Shells": [
+      "pasta shells",
+      "ricotta cheese",
+      "mozzarella cheese",
+      "tomato sauce",
+      "parmesan cheese"
+    ],
+    "Meatballs": [
+      "ground beef",
+      "breadcrumbs",
+      "eggs",
+      "onion",
+      "garlic",
+      "herbs"
+    ],
+    "Herb Grilled Chicken & Broccoli": [
+      "chicken",
+      "broccoli",
+      "herbs",
+      "oil",
+      "salt"
+    ],
+    "Mac & Cheese": [
+      "macaroni pasta",
+      "cheddar cheese",
+      "milk",
+      "butter",
+      "wheat flour"
+    ],
+    "Ceci & Kale Salad": [
+      "chickpeas",
+      "kale",
+      "olive oil",
+      "lemon juice",
+      "garlic"
+    ],
+    "Red & Blue Berry Bowl": [
+      "strawberries",
+      "blueberries",
+      "raspberries"
+    ],
+    "Southwestern Wedges Salad": [
+      "iceberg lettuce",
+      "black beans",
+      "corn",
+      "tomato",
+      "avocado",
+      "dressing"
+    ]
+  },
+  "211": {
+    "Fresh Salad": null,
+    "Sandwich": null,
+    "Snack": null
+  },
+  "208": {
+    "Handcrafted Pizza": null,
+    "Fresh Pasta": null,
+    "Antipasti": null,
+    "Stromboli": [
+      "pizza dough",
+      "mozzarella cheese",
+      "tomato sauce",
+      "salami",
+      "ham"
+    ],
+    "Italian Favorites": null
+  },
+  "136": {
+    "Latte": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Flavored Latte": null,
+    "Drip Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Millie's Cold Brew Shake": [
+      "cold brew coffee",
+      "ice cream",
+      "milk"
+    ],
+    "Custom Affogato": null,
+    "Cold-Brew Float": [
+      "cold brew coffee",
+      "ice cream"
+    ],
+    "Draft Cold Brew": [
+      "coffee",
+      "water"
+    ],
+    "Single Scoop Ice Cream": null,
+    "Classic Two-Scoop Ice Cream": null,
+    "Custom Milkshake": null,
+    "Root Beer Float": [
+      "root beer",
+      "vanilla ice cream"
+    ],
+    "Affogato": [
+      "espresso coffee",
+      "vanilla ice cream"
+    ],
+    "Pints To-Go": null,
+    "Chicken Panini": [
+      "bread",
+      "chicken",
+      "cheese",
+      "tomato",
+      "olive oil"
+    ],
+    "Roasted Veggie Panini": [
+      "bread",
+      "zucchini",
+      "bell peppers",
+      "mushrooms",
+      "olive oil"
+    ],
+    "Breakfast Panini": null,
+    "Caponata Panini": [
+      "bread",
+      "eggplant",
+      "tomato",
+      "celery",
+      "olives",
+      "capers",
+      "vinegar",
+      "olive oil"
+    ]
+  },
+  "127": {
+    "Caesar Salad": [
+      "romaine lettuce",
+      "parmesan cheese",
+      "croutons",
+      "Caesar dressing"
+    ],
+    "House Salad": [
+      "lettuce",
+      "cucumber",
+      "tomato",
+      "dressing"
+    ],
+    "Spinach Salad": [
+      "spinach",
+      "tomato",
+      "onion",
+      "dressing"
+    ],
+    "Southwest Bowl": [
+      "rice",
+      "black beans",
+      "corn",
+      "tomato",
+      "lettuce",
+      "avocado",
+      "salsa"
+    ],
+    "Build-Your-Own Deli Sandwich": null,
+    "Build-Your-Own Hot Sandwich": null,
+    "Big Plate": null,
+    "Pasta": null,
+    "Plain Pizza": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "olive oil"
+    ],
+    "Buffalo Chicken Pizza": [
+      "pizza dough",
+      "chicken",
+      "buffalo sauce",
+      "mozzarella cheese",
+      "ranch dressing"
+    ],
+    "Brown Rice": [
+      "brown rice",
+      "water"
+    ],
+    "Steamed Potatoes": [
+      "potatoes",
+      "water"
+    ],
+    "Steamed Vegetables": null,
+    "Sweet Potato Fries": [
+      "sweet potatoes",
+      "oil",
+      "salt"
+    ],
+    "Chocolate Brownie": [
+      "wheat flour",
+      "cocoa powder",
+      "chocolate",
+      "sugar",
+      "butter",
+      "eggs"
+    ],
+    "Marshmallow Treat": [
+      "crisp rice cereal",
+      "marshmallow",
+      "butter"
+    ]
+  },
+  "138": {
+    "Loco Moco Bowl": [
+      "rice",
+      "beef patty",
+      "eggs",
+      "beef gravy"
+    ],
+    "Classic Spam Musubi": [
+      "rice",
+      "Spam pork",
+      "nori",
+      "soy sauce",
+      "sugar"
+    ],
+    "Teriyaki Tofu Musubi": [
+      "tofu",
+      "rice",
+      "nori",
+      "soy sauce",
+      "sugar",
+      "mirin"
+    ],
+    "Garlic Noodles": [
+      "wheat noodles",
+      "garlic",
+      "butter",
+      "soy sauce"
+    ],
+    "Sweet Potato": [
+      "sweet potato"
+    ],
+    "Bok Choy & Cabbage Stir-Fry": [
+      "bok choy",
+      "cabbage",
+      "garlic",
+      "soy sauce",
+      "oil"
+    ],
+    "Sesame Green Beans": [
+      "green beans",
+      "sesame seeds",
+      "sesame oil",
+      "garlic",
+      "soy sauce"
+    ],
+    "Furikake Fries with Chili Aioli": [
+      "potatoes",
+      "oil",
+      "furikake seasoning",
+      "mayonnaise",
+      "chili sauce"
+    ],
+    "Masaladas": [
+      "wheat flour",
+      "milk",
+      "eggs",
+      "yeast",
+      "sugar",
+      "butter",
+      "oil"
+    ],
+    "Haupia Parfait": [
+      "coconut milk",
+      "sugar",
+      "cornstarch",
+      "fruit"
+    ],
+    "Pineapple Passionfruit Beverage": [
+      "pineapple juice",
+      "passionfruit juice",
+      "water",
+      "sugar"
+    ],
+    "Hibiscus Beverage": [
+      "hibiscus",
+      "water",
+      "sugar"
+    ],
+    "Other Seasonal Beverage Flavor": null,
+    "Fountain Drink": null
+  },
+  "207": {
+    "Latin and South American Cuisine": null
+  },
+  "94": {
+    "Espresso": [
+      "coffee",
+      "water"
+    ],
+    "Cappuccino": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Latte": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Drip Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Cold Brew": [
+      "coffee",
+      "water"
+    ],
+    "Nitro Cold Brew": [
+      "coffee",
+      "water"
+    ],
+    "Matcha": [
+      "matcha green tea",
+      "water"
+    ],
+    "Chai": [
+      "black tea",
+      "cinnamon",
+      "cardamom",
+      "ginger",
+      "water"
+    ],
+    "Hot Tea": [
+      "tea",
+      "water"
+    ],
+    "Iced Tea": [
+      "tea",
+      "water"
+    ],
+    "Chocolate Croissant": [
+      "wheat flour",
+      "butter",
+      "milk",
+      "yeast",
+      "sugar",
+      "chocolate"
+    ],
+    "Cheese Pocket": [
+      "wheat flour",
+      "butter",
+      "cream cheese",
+      "milk",
+      "sugar",
+      "eggs",
+      "yeast"
+    ],
+    "Cinnamon Coffee Cake Muffin": [
+      "wheat flour",
+      "butter",
+      "eggs",
+      "sugar",
+      "milk",
+      "cinnamon",
+      "baking powder"
+    ],
+    "Chorizo Breakfast Burrito": [
+      "tortilla",
+      "chorizo",
+      "eggs",
+      "potatoes",
+      "cheese"
+    ],
+    "Curried Chickpea Wrap": [
+      "tortilla",
+      "chickpeas",
+      "curry powder",
+      "onion",
+      "lettuce",
+      "oil"
+    ],
+    "Turkey BLT Wrap": [
+      "tortilla",
+      "turkey",
+      "bacon",
+      "lettuce",
+      "tomato",
+      "mayonnaise"
+    ],
+    "Whole Bean Coffee": [
+      "coffee beans"
+    ]
+  },
+  "186": {
+    "Double Espresso": [
+      "coffee",
+      "water"
+    ],
+    "Macchiato": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Cortado": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Cappuccino": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Drip Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Americano": [
+      "espresso coffee",
+      "water"
+    ],
+    "Iced Americano": [
+      "espresso coffee",
+      "water"
+    ],
+    "Latte": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Iced Latte": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Mocha": [
+      "espresso coffee",
+      "milk",
+      "chocolate sauce"
+    ],
+    "Iced Mocha": [
+      "espresso coffee",
+      "milk",
+      "chocolate sauce"
+    ],
+    "Cold Brew": [
+      "coffee",
+      "water"
+    ],
+    "Vietnamese Cold Brew": [
+      "cold brew coffee",
+      "sweetened condensed milk"
+    ],
+    "Matcha Latte": [
+      "matcha green tea",
+      "milk",
+      "sugar"
+    ],
+    "Honey-Cinnamon Latte": [
+      "espresso coffee",
+      "milk",
+      "honey",
+      "cinnamon"
+    ],
+    "Fresh Baked Pastries": null
+  },
+  "174": {
+    "Mala Tang Hot Pot": null,
+    "Pork Bao Bun": [
+      "wheat flour",
+      "yeast",
+      "pork",
+      "soy sauce",
+      "sugar",
+      "onion"
+    ],
+    "Red Bean Bao Bun": [
+      "wheat flour",
+      "yeast",
+      "red bean paste",
+      "sugar"
+    ],
+    "Steamed Bao Combo": null,
+    "Fried Bao Combo": null,
+    "Fruit Tea": null,
+    "Milk Tea": [
+      "black tea",
+      "milk",
+      "sugar",
+      "tapioca pearls"
+    ],
+    "Smoothie": null,
+    "Specialty Bottled Drink": null
+  },
+  "154": {
+    "Build Your Own Salad": null,
+    "Housemade Soup": null,
+    "Grab-and-Go Food": null
+  },
+  "201": {
+    "Rotating Hot-Bar Entrée": null,
+    "Rotating Hot-Bar Side": null
+  },
+  "108": {
+    "Cereal": null,
+    "Fruit": null,
+    "Egg Dish": null,
+    "Breakfast Meat": null,
+    "Pancakes": [
+      "wheat flour",
+      "milk",
+      "eggs",
+      "sugar",
+      "butter",
+      "baking powder"
+    ],
+    "French Toast": [
+      "bread",
+      "eggs",
+      "milk",
+      "cinnamon",
+      "sugar",
+      "butter"
+    ],
+    "Make-Your-Own Waffle": [
+      "wheat flour",
+      "milk",
+      "eggs",
+      "butter",
+      "sugar",
+      "baking powder"
+    ],
+    "Avoiding-Gluten Breakfast": null,
+    "Hot Entrée": null,
+    "Vegan Entrée": null,
+    "Vegetarian Entrée": null,
+    "Soup": null,
+    "Salad": null,
+    "Made-to-Order Sandwich": null,
+    "Dessert": null,
+    "Beverage": null
+  },
+  "109": {
+    "Burger": [
+      "beef patty",
+      "burger bun",
+      "cheese",
+      "pickles",
+      "onion",
+      "burger sauce"
+    ],
+    "Shawarma": null,
+    "Gyro": null,
+    "Wrap": null,
+    "Salad": null
+  },
+  "180": {
+    "Beef Gyro": [
+      "pita",
+      "beef",
+      "tomato",
+      "onion",
+      "tzatziki sauce"
+    ],
+    "Lamb Gyro": [
+      "pita",
+      "lamb",
+      "tomato",
+      "onion",
+      "tzatziki sauce"
+    ],
+    "Curry": null,
+    "Breakfast Sandwich": null,
+    "Grilled Meat": null,
+    "Hot Meal": null,
+    "Fresh Produce": null,
+    "International Grocery": null,
+    "Snack": null,
+    "Drink": null
+  },
+  "191": {
+    "Chocolate Frosty": null,
+    "Vanilla Thrilla": null,
+    "Cookies n' Cream": null,
+    "Shake Your Coffee": null,
+    "Banana Split": [
+      "strawberries",
+      "banana",
+      "chocolate protein",
+      "milk"
+    ],
+    "Strawberry Fields": [
+      "strawberries",
+      "vanilla protein",
+      "milk"
+    ],
+    "P-B²": [
+      "banana",
+      "chocolate protein",
+      "peanut butter",
+      "milk"
+    ],
+    "Grammy's Goods": [
+      "cookies and cream protein",
+      "peanut butter",
+      "milk"
+    ],
+    "Cold Brew": [
+      "coffee",
+      "water"
+    ],
+    "Green Tea Matcha": [
+      "matcha green tea",
+      "milk"
+    ],
+    "Matcha Mentality": [
+      "matcha green tea",
+      "vanilla protein",
+      "milk"
+    ],
+    "Greens to Go": [
+      "spinach",
+      "banana",
+      "pineapple",
+      "orange juice",
+      "protein"
+    ],
+    "Organic Supershake": [
+      "superfood blend",
+      "banana",
+      "vanilla protein",
+      "peanut butter",
+      "milk"
+    ],
+    "A Perfect 10": [
+      "blueberries",
+      "banana",
+      "vanilla protein",
+      "peanut butter",
+      "milk"
+    ],
+    "Acai Energy": [
+      "acai",
+      "banana",
+      "vanilla protein",
+      "peanut butter",
+      "milk"
+    ],
+    "Chocolate Covered Strawberry": [
+      "strawberries",
+      "acai",
+      "chocolate protein",
+      "milk"
+    ],
+    "Breakfast To Go": [
+      "strawberries",
+      "pineapple",
+      "acai",
+      "orange juice",
+      "vanilla protein"
+    ],
+    "Mea Aloha": [
+      "pineapple",
+      "banana",
+      "acai",
+      "apple juice",
+      "protein"
+    ],
+    "Fruitopia": [
+      "strawberries",
+      "banana",
+      "acai",
+      "apple juice",
+      "protein"
+    ],
+    "Pink Cadillac": [
+      "pitaya",
+      "pineapple",
+      "orange juice",
+      "vanilla protein"
+    ],
+    "Shake Your Smoothie": null,
+    "Chocolate Chip Cookie Dough Protein Balls": [
+      "vanilla protein",
+      "peanut butter",
+      "oats",
+      "chia seeds",
+      "cinnamon",
+      "dark chocolate"
+    ],
+    "Magic Matcha Protein Balls": [
+      "vanilla protein",
+      "peanut butter",
+      "oats",
+      "hemp seeds",
+      "matcha green tea",
+      "coconut flakes"
+    ],
+    "Build Your Bowl": null,
+    "Rawçaí": [
+      "acai",
+      "strawberries",
+      "granola",
+      "banana",
+      "chia seeds",
+      "coconut flakes"
+    ],
+    "Raw-PB": [
+      "acai",
+      "granola",
+      "banana",
+      "dark chocolate",
+      "peanut butter"
+    ],
+    "The Buzz Bowl": [
+      "acai",
+      "pitaya",
+      "pineapple",
+      "granola",
+      "bee pollen",
+      "coconut flakes"
+    ],
+    "Original Acai Bowl": [
+      "acai",
+      "strawberries",
+      "apple juice",
+      "protein",
+      "granola",
+      "coconut flakes",
+      "banana"
+    ],
+    "PB&A": [
+      "acai",
+      "strawberries",
+      "peanut butter",
+      "almond milk",
+      "protein",
+      "granola",
+      "dark chocolate",
+      "banana"
+    ],
+    "Dragon Bowl": [
+      "pitaya",
+      "pineapple",
+      "orange juice",
+      "vanilla protein",
+      "granola",
+      "coconut flakes",
+      "chia seeds"
+    ],
+    "Classic Oatmeal": [
+      "oats",
+      "water",
+      "salt"
+    ],
+    "Overnight Oats": [
+      "oats",
+      "oat milk"
+    ],
+    "Greek Yogurt": [
+      "cultured milk"
+    ],
+    "Peanut Butter Toast": [
+      "whole grain bread",
+      "peanut butter",
+      "banana",
+      "hemp seeds",
+      "cinnamon"
+    ],
+    "Almond Butter Toast": [
+      "whole grain bread",
+      "almond butter",
+      "banana",
+      "hemp seeds",
+      "cinnamon"
+    ],
+    "Avocado Toast": [
+      "whole grain bread",
+      "avocado",
+      "feta cheese",
+      "sun-dried tomatoes",
+      "red pepper",
+      "lemon",
+      "salt"
+    ]
+  },
+  "190": {
+    "Milkshake - Vanilla": [
+      "vanilla ice cream",
+      "milk"
+    ],
+    "Milkshake - Chocolate": [
+      "chocolate ice cream",
+      "milk",
+      "chocolate syrup"
+    ],
+    "Milkshake - Strawberry": [
+      "strawberry ice cream",
+      "milk",
+      "strawberries"
+    ],
+    "Milkshake - Oreo": [
+      "vanilla ice cream",
+      "milk",
+      "Oreo cookies"
+    ],
+    "Banana Split Sundae": [
+      "banana",
+      "ice cream",
+      "chocolate sauce",
+      "whipped cream",
+      "cherry"
+    ],
+    "Hot Fudge Brownie Sundae": [
+      "brownie",
+      "vanilla ice cream",
+      "hot fudge",
+      "whipped cream"
+    ],
+    "Chocolate Chip Cookie Sundae": [
+      "chocolate chip cookie",
+      "vanilla ice cream",
+      "chocolate sauce",
+      "whipped cream"
+    ],
+    "Ice Cream Float": null,
+    "Build Your Own Sundae": null
+  },
+  "188": {
+    "Smash'd Burger": [
+      "beef patty",
+      "burger bun",
+      "cheese",
+      "pickles",
+      "onion",
+      "burger sauce"
+    ],
+    "Smash'd Bacon Burger": [
+      "beef patty",
+      "burger bun",
+      "bacon",
+      "cheese",
+      "pickles",
+      "onion",
+      "burger sauce"
+    ],
+    "BBQ Bacon Burger": [
+      "beef patty",
+      "burger bun",
+      "bacon",
+      "cheese",
+      "barbecue sauce",
+      "onion"
+    ],
+    "Smash'd Deluxe Burger": [
+      "beef patty",
+      "burger bun",
+      "cheese",
+      "lettuce",
+      "tomato",
+      "onion",
+      "pickles",
+      "burger sauce"
+    ],
+    "Smash'd Veggie Burger": [
+      "vegetable patty",
+      "burger bun",
+      "lettuce",
+      "tomato",
+      "onion",
+      "burger sauce"
+    ],
+    "Impossible Burger": [
+      "soy protein patty",
+      "burger bun",
+      "lettuce",
+      "tomato",
+      "onion",
+      "burger sauce"
+    ],
+    "Nashville Sandwich": [
+      "chicken",
+      "wheat flour",
+      "buttermilk",
+      "cayenne pepper",
+      "oil",
+      "bun",
+      "pickles"
+    ],
+    "Korean BBQ Chicken Sandwich": [
+      "chicken",
+      "bun",
+      "soy sauce",
+      "gochujang",
+      "sugar",
+      "garlic",
+      "cabbage"
+    ],
+    "Deluxe Chicken Sandwich": [
+      "chicken",
+      "bun",
+      "lettuce",
+      "tomato",
+      "mayonnaise"
+    ],
+    "Hot Honey Chicken Sandwich": [
+      "chicken",
+      "bun",
+      "honey",
+      "chili peppers",
+      "pickles"
+    ],
+    "3 Piece Chicken Tenders": [
+      "chicken",
+      "wheat flour",
+      "buttermilk",
+      "breadcrumbs",
+      "oil"
+    ],
+    "Pittsburgh Chicken Salad": [
+      "chicken",
+      "lettuce",
+      "tomato",
+      "cheese",
+      "French fries",
+      "dressing"
+    ],
+    "Grilled Cheese": [
+      "bread",
+      "cheese",
+      "butter"
+    ],
+    "Philly Cheesesteak Grilled Cheese": [
+      "bread",
+      "beef",
+      "cheese",
+      "onions",
+      "peppers",
+      "butter"
+    ],
+    "Buffalo Chicken Grilled Cheese": [
+      "bread",
+      "chicken",
+      "buffalo sauce",
+      "cheese",
+      "butter"
+    ],
+    "Cali Grilled Cheese": [
+      "bread",
+      "cheese",
+      "avocado",
+      "tomato",
+      "butter"
+    ],
+    "Portobello Mushroom Grilled Cheese": [
+      "bread",
+      "portobello mushrooms",
+      "cheese",
+      "butter"
+    ],
+    "Chicken Parmesan Grilled Cheese": [
+      "bread",
+      "chicken",
+      "tomato sauce",
+      "mozzarella cheese",
+      "parmesan cheese",
+      "butter"
+    ],
+    "Avocado BLT Grilled Cheese": [
+      "bread",
+      "avocado",
+      "bacon",
+      "lettuce",
+      "tomato",
+      "cheese",
+      "butter"
+    ],
+    "Chicken Wings": [
+      "chicken wings",
+      "oil",
+      "salt",
+      "seasoning"
+    ],
+    "Mozzarella Sticks": [
+      "mozzarella cheese",
+      "wheat flour",
+      "eggs",
+      "breadcrumbs",
+      "oil"
+    ],
+    "Mac N Cheese Wedges": [
+      "macaroni pasta",
+      "cheddar cheese",
+      "milk",
+      "wheat flour",
+      "breadcrumbs",
+      "oil"
+    ],
+    "Fresh Cut Fries": [
+      "potatoes",
+      "oil",
+      "salt"
+    ],
+    "Cajun Fries": [
+      "potatoes",
+      "oil",
+      "paprika",
+      "garlic powder",
+      "cayenne pepper",
+      "salt"
+    ],
+    "Coleslaw": [
+      "cabbage",
+      "carrots",
+      "mayonnaise",
+      "sugar",
+      "vinegar"
+    ],
+    "Pasta Salad": [
+      "pasta",
+      "bell peppers",
+      "tomato",
+      "onion",
+      "oil",
+      "vinegar"
+    ],
+    "Fresh Fruit": null,
+    "Curly Fries": [
+      "potatoes",
+      "wheat flour",
+      "oil",
+      "paprika",
+      "onion powder",
+      "garlic powder",
+      "salt"
+    ],
+    "Side House Salad": [
+      "lettuce",
+      "cucumber",
+      "tomato",
+      "dressing"
+    ],
+    "Side Caesar Salad": [
+      "romaine lettuce",
+      "parmesan cheese",
+      "croutons",
+      "Caesar dressing"
+    ],
+    "Cookies": [
+      "wheat flour",
+      "butter",
+      "sugar",
+      "eggs",
+      "chocolate chips",
+      "baking soda"
+    ],
+    "Sweet Potato Fries": [
+      "sweet potatoes",
+      "oil",
+      "salt"
+    ]
+  },
+  "148": {
+    "Fresh Sandwich": null,
+    "Wrap": null,
+    "Fruit": null,
+    "Vegetables": null,
+    "Salad": null,
+    "Snack": null,
+    "Ice Cream": null,
+    "Cold Beverage": null,
+    "Coffee": [
+      "coffee",
+      "water"
+    ]
+  },
+  "194": {
+    "Ropa Vieja con Arroz Amarillo y Frijoles": [
+      "beef",
+      "tomato",
+      "bell peppers",
+      "onion",
+      "garlic",
+      "cumin",
+      "yellow rice",
+      "beans"
+    ],
+    "Fricase de Pollo con Arroz Amarillo y Frijoles": [
+      "chicken",
+      "tomato",
+      "potatoes",
+      "olives",
+      "onion",
+      "garlic",
+      "yellow rice",
+      "beans"
+    ],
+    "Picadillo a la Habanera con Arroz Amarillo y Frijoles": [
+      "ground beef",
+      "tomato",
+      "onion",
+      "bell peppers",
+      "olives",
+      "raisins",
+      "yellow rice",
+      "beans"
+    ],
+    "Vegetarian Bowl: Yuca con Mojo and Sweet Plantain con Arroz Amarillo y Frijoles": [
+      "yuca",
+      "garlic",
+      "citrus juice",
+      "olive oil",
+      "sweet plantain",
+      "yellow rice",
+      "beans"
+    ],
+    "Cubano-Style Sandwich": [
+      "bread",
+      "roast pork",
+      "ham",
+      "swiss cheese",
+      "pickles",
+      "mustard",
+      "butter"
+    ],
+    "Yuca con Mojo": [
+      "yuca",
+      "garlic",
+      "citrus juice",
+      "olive oil",
+      "salt"
+    ],
+    "Platano Maduro Frito": [
+      "ripe plantain",
+      "oil"
+    ],
+    "Arroz Amarillo con Frijoles": [
+      "rice",
+      "turmeric",
+      "beans",
+      "onion",
+      "garlic",
+      "oil"
+    ]
+  },
+  "82": {
+    "Lamb and Turkey Shawarma Pita": [
+      "pita",
+      "lamb",
+      "turkey",
+      "tomato",
+      "cucumber",
+      "tahini sauce",
+      "spices"
+    ],
+    "Vegan Shawarma Pita": [
+      "pita",
+      "plant-based shawarma",
+      "tomato",
+      "cucumber",
+      "tahini sauce",
+      "spices"
+    ],
+    "Falafel Pita": [
+      "pita",
+      "chickpeas",
+      "parsley",
+      "garlic",
+      "onion",
+      "cumin",
+      "oil",
+      "tahini sauce",
+      "tomato",
+      "cucumber"
+    ],
+    "Classic All Beef Kosher Hotdog in Bun": [
+      "all-beef hot dog",
+      "hot dog bun",
+      "mustard"
+    ],
+    "Shawarma Bowl": [
+      "shawarma meat",
+      "rice",
+      "tomato",
+      "cucumber",
+      "tahini sauce",
+      "spices"
+    ],
+    "Falafel Bowl": [
+      "chickpeas",
+      "parsley",
+      "garlic",
+      "onion",
+      "cumin",
+      "oil",
+      "rice",
+      "tomato",
+      "cucumber",
+      "tahini sauce"
+    ],
+    "Spicy Beef, Caramelized Onion Marmalade & Tahini Hummus Bowl": [
+      "beef",
+      "onion",
+      "chili peppers",
+      "chickpeas",
+      "tahini",
+      "garlic",
+      "lemon juice",
+      "olive oil"
+    ],
+    "\"Sabich\" Fried Eggplant, Tahini and Parsley Hummus Bowl": [
+      "eggplant",
+      "tahini",
+      "parsley",
+      "chickpeas",
+      "lemon juice",
+      "garlic",
+      "oil"
+    ],
+    "Israeli Chopped Salad Hummus Bowl": [
+      "chickpeas",
+      "tahini",
+      "lemon juice",
+      "garlic",
+      "tomato",
+      "cucumber",
+      "parsley",
+      "olive oil"
+    ],
+    "Dirty Fries to Share": null,
+    "Shawarma Platter to Share": null,
+    "Falafel Platter to Share": [
+      "chickpeas",
+      "parsley",
+      "garlic",
+      "onion",
+      "cumin",
+      "oil",
+      "pita",
+      "hummus",
+      "tahini sauce",
+      "vegetables"
+    ],
+    "Israeli Chopped Salad": [
+      "tomato",
+      "cucumber",
+      "onion",
+      "parsley",
+      "lemon juice",
+      "olive oil"
+    ],
+    "Zahtar Pita Fries": [
+      "pita",
+      "zaatar",
+      "sesame seeds",
+      "olive oil"
+    ],
+    "French Fries": [
+      "potatoes",
+      "oil",
+      "salt"
+    ],
+    "Grape Leaves (3)": [
+      "grape leaves",
+      "rice",
+      "onion",
+      "herbs",
+      "lemon juice",
+      "olive oil"
+    ],
+    "Pita": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "salt"
+    ],
+    "Seasonal Fruit": null,
+    "Baklava": [
+      "phyllo pastry",
+      "nuts",
+      "butter",
+      "sugar",
+      "honey"
+    ],
+    "Chips": null,
+    "Fruit Nectars": null,
+    "Fountain Drinks": null,
+    "Water": [
+      "water"
+    ]
+  },
+  "114": {
+    "Samosa": [
+      "wheat flour",
+      "potatoes",
+      "peas",
+      "cumin",
+      "coriander",
+      "oil"
+    ],
+    "Chicken Curry": [
+      "chicken",
+      "tomato",
+      "onion",
+      "garlic",
+      "ginger",
+      "curry spices",
+      "oil"
+    ],
+    "Tandoori Chicken": [
+      "chicken",
+      "yogurt",
+      "lemon juice",
+      "garlic",
+      "ginger",
+      "tandoori spices"
+    ],
+    "Butter Chicken": [
+      "chicken",
+      "tomato",
+      "cream",
+      "butter",
+      "yogurt",
+      "garlic",
+      "ginger",
+      "garam masala"
+    ],
+    "Navrattan": [
+      "mixed vegetables",
+      "paneer",
+      "cashews",
+      "cream",
+      "onion",
+      "tomato",
+      "spices"
+    ],
+    "Matar Paneer": [
+      "paneer",
+      "peas",
+      "tomato",
+      "onion",
+      "cream",
+      "garlic",
+      "ginger",
+      "spices"
+    ],
+    "Saag Paneer": [
+      "paneer",
+      "spinach",
+      "cream",
+      "onion",
+      "garlic",
+      "ginger",
+      "spices"
+    ],
+    "Aloo Matar": [
+      "potatoes",
+      "peas",
+      "tomato",
+      "onion",
+      "cumin",
+      "garlic",
+      "ginger",
+      "oil"
+    ]
+  },
+  "155": {
+    "Orange Chicken Bowl": [
+      "chicken",
+      "rice",
+      "wheat flour",
+      "orange juice",
+      "sugar",
+      "soy sauce",
+      "ginger",
+      "garlic",
+      "oil"
+    ],
+    "Teriyaki Chicken Bowl": [
+      "chicken",
+      "rice",
+      "soy sauce",
+      "sugar",
+      "mirin",
+      "ginger",
+      "garlic",
+      "vegetables"
+    ],
+    "Spicy Teriyaki Chicken Bowl": [
+      "chicken",
+      "rice",
+      "soy sauce",
+      "sugar",
+      "mirin",
+      "chili peppers",
+      "ginger",
+      "garlic",
+      "vegetables"
+    ],
+    "Asian BBQ Beef Bowl": [
+      "beef",
+      "rice",
+      "soy sauce",
+      "sugar",
+      "garlic",
+      "ginger",
+      "sesame oil",
+      "vegetables"
+    ],
+    "Tofu Bowl": [
+      "tofu",
+      "rice",
+      "soy sauce",
+      "garlic",
+      "sesame oil",
+      "vegetables"
+    ],
+    "Sesame Chicken Bowl": [
+      "chicken",
+      "rice",
+      "wheat flour",
+      "soy sauce",
+      "sugar",
+      "rice vinegar",
+      "sesame seeds",
+      "oil"
+    ],
+    "Strawberry Matcha Latte": [
+      "matcha green tea",
+      "strawberries",
+      "milk",
+      "sugar"
+    ],
+    "Signature Boba Milk Tea": [
+      "black tea",
+      "milk",
+      "sugar",
+      "tapioca pearls"
+    ],
+    "Muddy Boba Latte": [
+      "milk",
+      "brown sugar syrup",
+      "tapioca pearls"
+    ],
+    "Blue Ocean Yogurt": null,
+    "Citrus Butterfly Tea": [
+      "butterfly pea flowers",
+      "citrus juice",
+      "water",
+      "sugar"
+    ],
+    "Bubbly Strawberry Refresher": [
+      "strawberries",
+      "sparkling water",
+      "sugar"
+    ]
+  },
+  "209": {
+    "Burger": [
+      "beef patty",
+      "burger bun",
+      "cheese",
+      "pickles",
+      "onion",
+      "burger sauce"
+    ],
+    "Crispy Chicken": [
+      "chicken",
+      "wheat flour",
+      "buttermilk",
+      "oil",
+      "seasoning"
+    ],
+    "Hand-Spun Milkshake": null,
+    "Grab-and-Go Snack": null
+  },
+  "84": {
+    "Hot Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Iced Coffee": [
+      "coffee",
+      "water"
+    ],
+    "Cafe au Lait": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Espresso": [
+      "coffee",
+      "water"
+    ],
+    "Cappuccino": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Latte": [
+      "espresso coffee",
+      "milk"
+    ],
+    "Caramel Macchiato": [
+      "espresso coffee",
+      "milk",
+      "vanilla syrup",
+      "caramel sauce"
+    ],
+    "Mocha": [
+      "espresso coffee",
+      "milk",
+      "chocolate sauce"
+    ],
+    "Hot Tea": [
+      "tea",
+      "water"
+    ],
+    "Specialty Hot Tea": [
+      "tea",
+      "water"
+    ],
+    "Iced Tea": [
+      "tea",
+      "water"
+    ],
+    "Chai Latte": [
+      "black tea",
+      "milk",
+      "cinnamon",
+      "cardamom",
+      "ginger",
+      "sugar"
+    ],
+    "Hot Chocolate": [
+      "milk",
+      "cocoa powder",
+      "sugar"
+    ],
+    "Steamer": [
+      "steamed milk"
+    ],
+    "Large Cinnamon Bun": [
+      "wheat flour",
+      "butter",
+      "milk",
+      "eggs",
+      "yeast",
+      "sugar",
+      "cinnamon",
+      "icing"
+    ],
+    "Chocolate Cheese Danish": [
+      "wheat flour",
+      "butter",
+      "cream cheese",
+      "chocolate",
+      "milk",
+      "sugar",
+      "eggs",
+      "yeast"
+    ],
+    "Chocolate Flaky Horns": [
+      "puff pastry",
+      "chocolate filling"
+    ],
+    "Crispy Fruit Turnover": [
+      "puff pastry",
+      "fruit filling",
+      "sugar"
+    ],
+    "Plain Bagel": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt"
+    ],
+    "Everything Bagel": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt",
+      "sesame seeds",
+      "poppy seeds",
+      "dried onion",
+      "dried garlic"
+    ],
+    "Sesame Bagel": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt",
+      "sesame seeds"
+    ],
+    "Whole Wheat Bagel": [
+      "whole wheat flour",
+      "water",
+      "yeast",
+      "malt",
+      "salt"
+    ],
+    "Bagel with Cream Cheese": [
+      "bagel",
+      "cream cheese"
+    ],
+    "Bagel with Lox & Capers": [
+      "bagel",
+      "cured salmon",
+      "capers"
+    ],
+    "Bagel with Cream Cheese, Lox & Capers": [
+      "bagel",
+      "cream cheese",
+      "cured salmon",
+      "capers"
+    ],
+    "Bagel with Tuna Salad": [
+      "bagel",
+      "tuna",
+      "mayonnaise",
+      "celery"
+    ],
+    "Bagel with Egg Salad": [
+      "bagel",
+      "eggs",
+      "mayonnaise",
+      "mustard"
+    ],
+    "Bagel with Hummus": [
+      "bagel",
+      "chickpeas",
+      "tahini",
+      "lemon juice",
+      "garlic",
+      "olive oil"
+    ],
+    "Potato Boureka": [
+      "puff pastry",
+      "potatoes",
+      "onion",
+      "oil",
+      "salt"
+    ],
+    "Spinach and Cheese Boureka": [
+      "puff pastry",
+      "spinach",
+      "feta cheese",
+      "egg"
+    ],
+    "Mushroom Boureka": [
+      "puff pastry",
+      "mushrooms",
+      "onion",
+      "oil",
+      "salt"
+    ],
+    "Classic Cheese Pizza": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "olive oil"
+    ],
+    "Pizza Margherita": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "basil",
+      "olive oil"
+    ],
+    "Vegetable Pizza": [
+      "pizza dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "bell peppers",
+      "mushrooms",
+      "onion"
+    ]
+  }
+}
