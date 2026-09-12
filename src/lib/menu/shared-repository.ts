@@ -178,7 +178,9 @@ export class SupabaseSharedMenuRepository implements SharedMenuRepository {
 
   async ingest(input: SharedMenuIngestionInput): Promise<SharedMenuIngestionResult> {
     const { data, error } = await this.client.rpc("ingest_shared_menu", rpcInput(input));
-    if (error) throw new Error("Unable to persist the shared menu transaction.");
+    // The message stays generic for API callers; the PostgREST error rides
+    // along as `cause` so operators and scripts can see what actually failed.
+    if (error) throw new Error("Unable to persist the shared menu transaction.", { cause: error });
     const parsed = ingestionResultSchema.safeParse(data);
     if (!parsed.success) throw new Error("The shared menu transaction returned an invalid result.");
     return parsed.data;
