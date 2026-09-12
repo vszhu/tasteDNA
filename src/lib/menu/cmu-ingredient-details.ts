@@ -42,7 +42,7 @@ const ABP_COMPONENTS: Readonly<Record<string, readonly string[]>> = {
 
 /** Read-time repair preserves persisted identities, prices, ordering, and taste data. */
 export function applyConfirmedCmuIngredientDetails(item: MenuItem, source: CmuMenuSource): MenuItem {
-  if (!isOriginalCmuDatasetSource(source) || item.dish.ingredients.length > 0) return item;
+  if (!isOriginalCmuDatasetSource(source)) return item;
   const additional = [...CMU_ADDITIONAL_PUBLISHED_COMPONENTS, ...CMU_CAPITAL_GRAINS_COMPONENTS].find((entry) => entry.datasetId === source.sourceMetadata?.datasetId && entry.sourceUri === source.sourceUri && entry.dishName === item.dish.name);
   const abp = source.sourceMetadata?.datasetId === 113 && source.sourceUri === CMU_ABP_MENU_URL && Object.hasOwn(ABP_COMPONENTS, item.dish.name) ? ABP_COMPONENTS[item.dish.name] : undefined;
   const components = additional?.ingredients ?? abp;

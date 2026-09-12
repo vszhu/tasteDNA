@@ -84,7 +84,7 @@ describe("published CMU ingredient details", () => {
     const item = importedItem();
     item.dish.ingredients = ["grapefruit juice"];
     item.dish.description = "A changed recipe with grapefruit juice.";
-    const result = applyConfirmedCmuIngredientDetails(item, source);
+    const result = applyConfirmedCmuIngredientDetails(item, { ...source, sourceProvider: "user-decoded" });
     expect(result).toBe(item);
     expect(checkDishMedications(result.dish, ["simvastatin"]).status).toBe("avoid");
   });
@@ -105,7 +105,14 @@ describe("published CMU ingredient details", () => {
 
   it("provides a checked group option from real published components without bypassing exclusions", () => {
     const input = structuredClone(GROUP_GOLDEN_FIXTURES[0]);
-    const item = applyConfirmedCmuIngredientDetails(importedItem(), source);
+    // Production already has nonempty AI estimates; published facts must replace
+    // those inferred lists too, not only completely empty arrays.
+    const imported = importedItem();
+    imported.dish.ingredients = ["bacon", "lettuce", "tomato", "mayonnaise", "bread"];
+    imported.dish.features.unknownFields = ["description"];
+    const item = applyConfirmedCmuIngredientDetails(imported, source);
+    expect(item.dish.ingredientSource?.kind).toBe("published-menu");
+    expect(item.dish.ingredients).toContain("toasted rustic baguette");
     const incomplete = importedItem("Hot Oatmeal");
     incomplete.id = "incomplete-oatmeal";
     input.venues = [{ ...input.venues[0], menuItems: [item, incomplete] }];
