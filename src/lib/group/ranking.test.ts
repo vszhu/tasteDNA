@@ -194,6 +194,34 @@ describe("fair group ranking", () => {
     });
   });
 
+  it("reports the next eligible venue as runner-up when a higher raw score fails the floor", () => {
+    const members = [
+      member("alex", [1, 0]),
+      member("blair", [0, 1]),
+      member("casey", [1, 0]),
+    ];
+    const safeWinner = venue("safe-winner", [[1, 1]]);
+    const unsafeHighAverage = venue("unsafe-high-average", [[1, -0.2]]);
+    const eligibleRunner = venue("eligible-runner", [[0, 0]]);
+
+    const result = computeGroupRecommendation({
+      session: session([safeWinner, unsafeHighAverage, eligibleRunner]),
+      venues: [safeWinner, unsafeHighAverage, eligibleRunner],
+      members,
+    });
+
+    expect(result?.winner.id).toBe("safe-winner");
+    expect(result?.venueScores[1]?.venue.id).toBe("unsafe-high-average");
+    expect(result?.venueScores[1]?.clearsMiseryFloor).toBe(false);
+    expect(result?.runnerUp?.id).toBe("eligible-runner");
+    expect(result?.explanationFacts).toContainEqual({
+      kind: "runner-up-gap",
+      value: 25,
+      label: "Lead over eligible-runner: 25",
+      venueId: "eligible-runner",
+    });
+  });
+
   it("returns the best compromise when every venue fails the misery floor", () => {
     const alex = member("alex", [1, 0]);
     const first = venue("first", [[-1, 0]]);
