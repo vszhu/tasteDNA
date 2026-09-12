@@ -53,3 +53,19 @@ export const replaceCandidatesSchema = z
   .strict();
 
 export const sessionIdSchema = z.string().uuid();
+
+const menuReviewVenueSchema = z.object({
+  venueId: z.string().uuid(),
+  venueName: z.string().trim().min(1).max(300),
+  totalDishes: z.number().int().min(0).max(10000),
+  missingIngredientDishes: z.number().int().min(0).max(10000),
+}).strict().refine((venue) => venue.missingIngredientDishes <= venue.totalDishes);
+
+/** A narrow allowlist prevents private account details reaching the shared recovery UI. */
+export const groupMenuReviewSchema = z.object({
+  kind: z.literal("menu-review-required"),
+  venues: z.array(menuReviewVenueSchema).min(1).max(5)
+    .refine((venues) => uniqueStrings(venues.map((venue) => venue.venueId))),
+  checkedMembers: z.number().int().min(1).max(1000),
+  totalMembers: z.number().int().min(1).max(1000),
+}).strict().refine((review) => review.checkedMembers <= review.totalMembers);

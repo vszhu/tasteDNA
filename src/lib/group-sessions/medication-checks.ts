@@ -21,10 +21,13 @@ export function prepareGroupMedicationChecks(input: GroupRankingInput, accounts:
   const byUser = new Map(accounts.map((entry) => [entry.user_id, entry]));
   let checkedMembers = 0;
   let flaggedDishOptions = 0;
+  let hasMedicationLists = false;
   const members = active.map((entry) => {
     const account = byUser.get(entry.member.userId);
     if (!account?.use_in_groups) return entry;
     checkedMembers++;
+    if (account.medications.length === 0) return entry;
+    hasMedicationLists = true;
     const flagged = input.venues.flatMap((venue) => venue.menuItems.flatMap((item) => {
       const check = checkDishMedications(item.dish, account.medications);
       return check.status === "avoid" || check.status === "review" ? [item.id] : [];
@@ -33,13 +36,33 @@ export function prepareGroupMedicationChecks(input: GroupRankingInput, accounts:
     return { ...entry, medicationExcludedItemIds: flagged };
   });
   // Do not pick a restaurant lacking an unflagged option for any opted-in member.
-  const venues = checkedMembers ? input.venues.filter((venue) => venue.menuItems.length > 0 && members.every((entry) =>
+  const venues = hasMedicationLists ? input.venues.filter((venue) => venue.menuItems.length > 0 && members.every((entry) =>
     scoreRestaurantForMember(entry, venue).dishUtilities.some((item) => !item.excluded),
   )) : input.venues;
-  if (checkedMembers && venues.length === 0) throw new GroupSessionError("missing-input", "Every candidate needs a medication or ingredient review for someone in the group. Review the menus and saved lists before choosing; no unchecked dish was assigned.");
+  if (hasMedicationLists && venues.length === 0) {
+    if (!flaggedDishOptions) {
+      throw new GroupSessionError("missing-input", "No candidate has an available dish for every member's meal preferences. Review meal check-ins or change venues.");
+    }
+    throw new GroupSessionError(
+      "missing-input",
+      "The group meal needs a menu or private medication review before dishes can be assigned. Review the menus and saved lists; no unchecked dish was assigned.",
+      {
+        kind: "menu-review-required",
+        venues: input.venues.map((venue) => ({
+          venueId: venue.id,
+          venueName: venue.name,
+          totalDishes: venue.menuItems.length,
+          // Completeness is public menu evidence, independent of anyone's list.
+          missingIngredientDishes: venue.menuItems.filter((item) => checkDishMedications(item.dish, []).needsIngredientDetails).length,
+        })),
+        checkedMembers,
+        totalMembers: active.length,
+      },
+    );
+  }
   const versions = savedVersions ?? medicationVersions(active.map((entry) => entry.member.userId), accounts);
   return {
-    input: checkedMembers ? { ...input, members, venues } : input,
+    input: hasMedicationLists ? { ...input, members, venues } : input,
     versions,
     summary: { checkedMembers, uncheckedMembers: active.length - checkedMembers, flaggedDishOptions, withheldVenues: input.venues.length - venues.length, rulesVersion: MEDICATION_RULES_VERSION, revisionFingerprint: medicationVersionFingerprint(versions) },
   };

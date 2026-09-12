@@ -3,6 +3,7 @@ import { GROUP_GOLDEN_FIXTURES } from "@/types/group.fixtures";
 import { computeGroupRecommendation, scoreRestaurantForMember } from "@/lib/group/ranking";
 import type { MedicationAccount } from "@/lib/medications/account";
 import { medicationVersionFingerprint, medicationVersions, prepareGroupMedicationChecks } from "./medication-checks";
+import { GroupSessionError } from "./types";
 
 function fixture() {
   const input = structuredClone(GROUP_GOLDEN_FIXTURES[0]);
@@ -49,7 +50,68 @@ describe("private medication checks in real group computation", () => {
 
   it("requires review when menus lack ingredient evidence", () => {
     const input = structuredClone(GROUP_GOLDEN_FIXTURES[0]);
-    expect(() => prepareGroupMedicationChecks(input, [account(input.members[0].member.userId)])).toThrow(/Review the menus/);
+    input.venues.forEach((venue) => venue.menuItems.forEach((item) => { item.dish.ingredients = []; }));
+    try {
+      prepareGroupMedicationChecks(input, [account(input.members[0].member.userId)]);
+      expect.fail("Missing ingredients must not produce assignments.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(GroupSessionError);
+      const review = (error as GroupSessionError).review;
+      expect(review).toEqual({
+        kind: "menu-review-required",
+        checkedMembers: 1,
+        totalMembers: input.members.length,
+        venues: input.venues.map((venue) => ({ venueId: venue.id, venueName: venue.name, totalDishes: venue.menuItems.length, missingIngredientDishes: venue.menuItems.length })),
+      });
+      expect(JSON.stringify(review)).not.toMatch(/simvastatin|revision|user_id|memberId|profile/);
+    }
+  });
+
+  it.each(["simvastatin", "unverified test medicine"])("keeps %s review blocked even when ingredient details are present", (medicine) => {
+    const input = fixture();
+    input.venues.forEach((venue) => venue.menuItems.forEach((item) => {
+      item.dish.name = "Grapefruit bowl";
+      item.dish.description = "Grapefruit and rice";
+      item.dish.ingredients = ["grapefruit", "rice"];
+      item.dish.features.unknownFields = [];
+    }));
+    try {
+      prepareGroupMedicationChecks(input, [account(input.members[0].member.userId, { medications: [medicine] })]);
+      expect.fail("Warnings and unsupported medicines still require private review.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(GroupSessionError);
+      expect((error as GroupSessionError).review?.venues.every((venue) => venue.missingIngredientDishes === 0)).toBe(true);
+      expect(JSON.stringify((error as GroupSessionError).review)).not.toContain(medicine);
+    }
+  });
+
+  it("does not blame medications when only meal preferences prevent all assignments", () => {
+    const input = fixture();
+    input.venues.forEach((venue) => venue.menuItems.forEach((item) => {
+      item.dish.name = "Rice bowl";
+      item.dish.description = "Steamed rice";
+      item.dish.ingredients = ["rice"];
+      item.dish.features.majorIngredients = ["rice"];
+      item.dish.features.unknownFields = [];
+    }));
+    input.members[0].member.mealPreferenceState.excludedIngredients = ["rice"];
+    try {
+      prepareGroupMedicationChecks(input, [account(input.members[0].member.userId)]);
+      expect.fail("The opted-in group must still have an eligible dish for each member.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(GroupSessionError);
+      expect((error as GroupSessionError).message).toMatch(/meal preferences/);
+      expect((error as GroupSessionError).review).toBeUndefined();
+    }
+  });
+
+  it("preserves taste-only behavior for an opted-in empty list even with meal exclusions", () => {
+    const input = fixture();
+    input.members[0].member.mealPreferenceState.excludedIngredients = ["rice"];
+    const checked = prepareGroupMedicationChecks(input, [account(input.members[0].member.userId, { medications: [] })]);
+    expect(checked.input).toBe(input);
+    expect(checked.summary).toMatchObject({ checkedMembers: 1, flaggedDishOptions: 0, withheldVenues: 0 });
+    expect(computeGroupRecommendation(checked.input)).toEqual(computeGroupRecommendation(input));
   });
 
   it("ignores lists belonging to outsiders and members who declined", () => {

@@ -9,6 +9,12 @@ const VENUE_IDS = [
   "c3000000-0000-4000-8000-000000000003",
 ];
 const NOW = "2026-09-12T12:00:00.000Z";
+const REVIEW = {
+  kind: "menu-review-required",
+  venues: [{ venueId: VENUE_IDS[0], venueName: "Lunch cafe", totalDishes: 4, missingIngredientDishes: 3 }],
+  checkedMembers: 1,
+  totalMembers: 2,
+};
 
 function response(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -97,5 +103,27 @@ describe("group session browser client", () => {
       vi.fn().mockResolvedValue(response({ session: { id: "not-a-uuid" } })),
     );
     await expect(client.get(SESSION_ID)).rejects.toBeInstanceOf(GroupSessionClientError);
+  });
+
+  it("passes validated review details to the group recovery UI", async () => {
+    const client = createGroupSessionClient(vi.fn().mockResolvedValue(response({ error: "Review menus before choosing.", review: REVIEW }, 409)));
+    await expect(client.compute(SESSION_ID)).rejects.toMatchObject({ status: 409, review: REVIEW });
+  });
+
+  it.each([
+    { ...REVIEW, medications: ["private medicine"] },
+    { ...REVIEW, venues: [{ ...REVIEW.venues[0], medications: ["private medicine"] }] },
+    { ...REVIEW, venues: [{ ...REVIEW.venues[0], venueId: "javascript:alert(1)" }] },
+    { ...REVIEW, venues: [{ ...REVIEW.venues[0], missingIngredientDishes: 5 }] },
+    { ...REVIEW, venues: [REVIEW.venues[0], REVIEW.venues[0]] },
+    { ...REVIEW, checkedMembers: 3 },
+  ])("discards malformed or private recovery fields but retains the actionable error", async (review) => {
+    const client = createGroupSessionClient(vi.fn().mockResolvedValue(response({ error: "Review menus before choosing.", review }, 409)));
+    await expect(client.compute(SESSION_ID)).rejects.toMatchObject({ message: "Review menus before choosing.", status: 409, review: undefined });
+  });
+
+  it("does not attach review data to an authorization error", async () => {
+    const client = createGroupSessionClient(vi.fn().mockResolvedValue(response({ error: "Access denied.", review: REVIEW }, 403)));
+    await expect(client.compute(SESSION_ID)).rejects.toMatchObject({ status: 403, review: undefined });
   });
 });
