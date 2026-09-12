@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Dish, DishFeatures, Rating, TasteFeatureVector } from "@/types";
 import { TASTE_DIMENSIONS } from "@/types";
-import { generateAttributePreferences, generateTasteVector } from "./profile";
+import { buildTasteProfile, generateAttributePreferences, generatePreferenceRepresentations, generateTasteVector } from "./profile";
 
 function features(values: Partial<TasteFeatureVector>): DishFeatures {
   return { ...Object.fromEntries(TASTE_DIMENSIONS.map((key) => [key, values[key] ?? 0])) as TasteFeatureVector, cuisines: ["Test"], majorIngredients: [], proteinTypes: [], carbohydrateTypes: [], cookingMethods: [] };
@@ -23,5 +23,28 @@ describe("taste profile generation", () => {
     const preferences = generateAttributePreferences([rating("hot", 5), rating("sweet", 1)], dishes);
     expect(preferences.spicy).toBeGreaterThan(0);
     expect(preferences.sweet).toBeLessThan(0);
+  });
+
+  it("keeps liked and disliked representations separate", () => {
+    const representations = generatePreferenceRepresentations([rating("hot", 5), rating("sweet", 1)], dishes);
+    expect(representations.positiveSemanticVector).toEqual([1, 0]);
+    expect(representations.negativeSemanticVector).toEqual([0, 1]);
+    expect(representations.positiveAttributePreferences.spicy).toBeGreaterThan(0);
+    expect(representations.negativeAttributePreferences.sweet).toBeGreaterThan(0);
+    expect(representations.positiveWeight).toBe(1);
+    expect(representations.negativeWeight).toBe(1);
+  });
+
+  it("keeps zero and neutral ratings as an early, non-directional profile", () => {
+    const profile = buildTasteProfile("u", [rating("hot", 3), rating("sweet", 3)], dishes);
+    expect(profile.semanticVector).toEqual([0, 0]);
+    expect(profile.attributePreferences.spicy).toBe(0);
+    expect(profile.confidence).toBe("early read");
+  });
+
+  it("documents the profile confidence thresholds", () => {
+    expect(buildTasteProfile("u", Array.from({ length: 9 }, (_, index) => rating(index % 2 ? "hot" : "sweet", 4)), dishes).confidence).toBe("early read");
+    expect(buildTasteProfile("u", Array.from({ length: 10 }, (_, index) => rating(index % 2 ? "hot" : "sweet", 4)), dishes).confidence).toBe("taking shape");
+    expect(buildTasteProfile("u", Array.from({ length: 18 }, (_, index) => rating(index % 2 ? "hot" : "sweet", 4)), dishes).confidence).toBe("well defined");
   });
 });

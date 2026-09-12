@@ -4,6 +4,21 @@ import { normalizeVector, ratingToWeight } from "./math";
 
 const TEXTURE_KEYS: TasteDimension[] = ["crispy", "creamy", "chewy", "fresh"];
 
+/**
+ * Separate affinity representations let later scorers reward similarity to foods a
+ * person likes and penalize similarity to foods they reject.  They intentionally
+ * stay separate from TasteProfile for now: that shared contract is consumed by the
+ * UI and persistence layers and needs a coordinated change before being extended.
+ */
+export interface PreferenceRepresentations {
+  positiveSemanticVector: number[];
+  negativeSemanticVector: number[];
+  positiveAttributePreferences: TasteFeatureVector;
+  negativeAttributePreferences: TasteFeatureVector;
+  positiveWeight: number;
+  negativeWeight: number;
+}
+
 function emptyTasteVector(): TasteFeatureVector {
   return Object.fromEntries(TASTE_DIMENSIONS.map((key) => [key, 0])) as TasteFeatureVector;
 }
@@ -44,6 +59,55 @@ export function generateAttributePreferences(ratings: Rating[], dishes: Dish[]) 
   if (absoluteWeight === 0) return totals;
   for (const dimension of TASTE_DIMENSIONS) totals[dimension] /= absoluteWeight;
   return totals;
+}
+
+export function generatePreferenceRepresentations(
+  ratings: Rating[],
+  dishes: Dish[],
+): PreferenceRepresentations {
+  const dishMap = new Map(dishes.map((dish) => [dish.id, dish]));
+  const dimensions = dishes[0]?.embedding.length ?? 0;
+  const positiveSemantic = Array.from({ length: dimensions }, () => 0);
+  const negativeSemantic = Array.from({ length: dimensions }, () => 0);
+  const positiveAttributes = emptyTasteVector();
+  const negativeAttributes = emptyTasteVector();
+  let positiveWeight = 0;
+  let negativeWeight = 0;
+
+  for (const rating of ratings) {
+    const dish = dishMap.get(rating.dishId);
+    if (!dish || dish.embedding.length !== dimensions) continue;
+    const signedWeight = ratingToWeight(rating.value);
+    if (signedWeight === 0) continue;
+
+    const isPositive = signedWeight > 0;
+    const weight = Math.abs(signedWeight);
+    const semantic = isPositive ? positiveSemantic : negativeSemantic;
+    const attributes = isPositive ? positiveAttributes : negativeAttributes;
+    if (isPositive) positiveWeight += weight;
+    else negativeWeight += weight;
+
+    dish.embedding.forEach((value, index) => {
+      semantic[index] += weight * value;
+    });
+    for (const dimension of TASTE_DIMENSIONS) {
+      attributes[dimension] += weight * dish.features[dimension];
+    }
+  }
+
+  for (const dimension of TASTE_DIMENSIONS) {
+    if (positiveWeight > 0) positiveAttributes[dimension] /= positiveWeight;
+    if (negativeWeight > 0) negativeAttributes[dimension] /= negativeWeight;
+  }
+
+  return {
+    positiveSemanticVector: normalizeVector(positiveSemantic),
+    negativeSemanticVector: normalizeVector(negativeSemantic),
+    positiveAttributePreferences: positiveAttributes,
+    negativeAttributePreferences: negativeAttributes,
+    positiveWeight,
+    negativeWeight,
+  };
 }
 
 function categoricalPreferences(
