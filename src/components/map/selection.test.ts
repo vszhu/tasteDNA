@@ -1,88 +1,89 @@
 import { describe, expect, it } from "vitest";
 import { getVenueAvailability, isCandidateSetComplete, isSelectable, MAX_CANDIDATES, toggleCandidate } from "./selection";
-import type { VenueSummary } from "./venue-types";
+import type { Venue } from "@/types/group";
+import type { Dish, MenuItem } from "@/types";
 
-const NOW = new Date("2026-09-15T12:00:00.000Z");
+function dish(id: string): Dish {
+  return {
+    id,
+    name: id,
+    description: "",
+    cuisine: "Fixture",
+    ingredients: [],
+    embedding: [],
+    features: { sweet: 0, salty: 0, sour: 0, bitter: 0, umami: 0, spicy: 0, rich: 0, fresh: 0, crispy: 0, creamy: 0, chewy: 0, smoky: 0, cuisines: [], majorIngredients: [], proteinTypes: [], carbohydrateTypes: [], cookingMethods: [] },
+  };
+}
 
-function venue(overrides: Partial<VenueSummary> = {}): VenueSummary {
+function menuItem(id: string): MenuItem {
+  return { id, menuId: "menu-1", menuOrder: 0, price: 10, dish: dish(`dish-${id}`) };
+}
+
+function venue(overrides: Partial<Venue> = {}): Venue {
   return {
     id: "v1",
     name: "Test Venue",
-    shortDescription: "",
-    locationLabel: "",
-    coordinates: { lat: 40.44, lng: -79.94 },
-    dishCount: 5,
-    acceptsOnlineOrders: false,
-    lastSyncedAt: NOW.toISOString(),
+    location: { latitude: 40.44, longitude: -79.94 },
+    menuItems: [menuItem("item-1")],
+    menuFreshness: "fresh",
     ...overrides,
   };
 }
 
 describe("getVenueAvailability", () => {
-  it("flags missing coordinates", () => {
-    expect(getVenueAvailability(venue({ coordinates: null }), NOW)).toBe("missing-location");
-  });
-
   it("flags venues with no digitized dishes", () => {
-    expect(getVenueAvailability(venue({ dishCount: 0 }), NOW)).toBe("no-menu");
+    expect(getVenueAvailability(venue({ menuItems: [] }))).toBe("no-menu");
   });
 
-  it("flags data synced more than 24h ago as stale", () => {
-    const staleTimestamp = new Date(NOW.getTime() - 25 * 60 * 60 * 1000).toISOString();
-    expect(getVenueAvailability(venue({ lastSyncedAt: staleTimestamp }), NOW)).toBe("stale");
+  it("flags stale menu freshness", () => {
+    expect(getVenueAvailability(venue({ menuFreshness: "stale" }))).toBe("stale");
   });
 
-  it("flags a venue that has never synced as stale", () => {
-    expect(getVenueAvailability(venue({ lastSyncedAt: null }), NOW)).toBe("stale");
+  it("reports a fully-formed, fresh venue as available", () => {
+    expect(getVenueAvailability(venue())).toBe("available");
   });
 
-  it("reports a fully-formed, freshly-synced venue as available", () => {
-    expect(getVenueAvailability(venue(), NOW)).toBe("available");
+  it("treats unknown freshness as available as long as dishes exist", () => {
+    expect(getVenueAvailability(venue({ menuFreshness: "unknown" }))).toBe("available");
   });
 });
 
 describe("isSelectable", () => {
   it("allows available and stale venues", () => {
-    expect(isSelectable(venue(), NOW)).toBe(true);
-    const staleTimestamp = new Date(NOW.getTime() - 48 * 60 * 60 * 1000).toISOString();
-    expect(isSelectable(venue({ lastSyncedAt: staleTimestamp }), NOW)).toBe(true);
+    expect(isSelectable(venue())).toBe(true);
+    expect(isSelectable(venue({ menuFreshness: "stale" }))).toBe(true);
   });
 
-  it("rejects venues missing a location or a menu", () => {
-    expect(isSelectable(venue({ coordinates: null }), NOW)).toBe(false);
-    expect(isSelectable(venue({ dishCount: 0 }), NOW)).toBe(false);
+  it("rejects venues with no menu", () => {
+    expect(isSelectable(venue({ menuItems: [] }))).toBe(false);
   });
 });
 
 describe("toggleCandidate", () => {
-  const venues = [venue({ id: "a" }), venue({ id: "b" }), venue({ id: "c", coordinates: null }), venue({ id: "d", dishCount: 0 })];
+  const venues = [venue({ id: "a" }), venue({ id: "b" }), venue({ id: "d", menuItems: [] })];
 
   it("adds a selectable venue not yet selected", () => {
-    expect(toggleCandidate([], "a", venues, NOW)).toEqual(["a"]);
+    expect(toggleCandidate([], "a", venues)).toEqual(["a"]);
   });
 
   it("removes a venue already selected", () => {
-    expect(toggleCandidate(["a", "b"], "a", venues, NOW)).toEqual(["b"]);
-  });
-
-  it("refuses to add a venue with missing coordinates", () => {
-    expect(toggleCandidate([], "c", venues, NOW)).toEqual([]);
+    expect(toggleCandidate(["a", "b"], "a", venues)).toEqual(["b"]);
   });
 
   it("refuses to add a venue with no digitized menu", () => {
-    expect(toggleCandidate([], "d", venues, NOW)).toEqual([]);
+    expect(toggleCandidate([], "d", venues)).toEqual([]);
   });
 
   it("refuses to add beyond the max candidate cap", () => {
     const manyVenues = Array.from({ length: MAX_CANDIDATES + 1 }, (_, index) => venue({ id: `v${index}` }));
     const atCap = manyVenues.slice(0, MAX_CANDIDATES).map((entry) => entry.id);
     const overflowId = manyVenues[MAX_CANDIDATES].id;
-    expect(toggleCandidate(atCap, overflowId, manyVenues, NOW)).toBe(atCap);
+    expect(toggleCandidate(atCap, overflowId, manyVenues)).toBe(atCap);
   });
 
   it("is a no-op (same reference) for an unknown venue id", () => {
     const selected = ["a"];
-    expect(toggleCandidate(selected, "missing", venues, NOW)).toBe(selected);
+    expect(toggleCandidate(selected, "missing", venues)).toBe(selected);
   });
 });
 
