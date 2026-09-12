@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Dna, House, ScanLine, Sparkles } from "lucide-react";
 import { BrandMark } from "@/components/brand/mark";
+import { SessionNavItem } from "@/components/layout/session-nav-item";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -28,7 +29,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link key={item.href} href={item.href} className={cn("rounded-full px-4 py-2 text-sm font-medium transition-colors", pathname.startsWith(item.href) ? "bg-[var(--ink)] text-white" : "text-[var(--muted)] hover:bg-black/5 hover:text-[var(--ink)]")}>{item.label}</Link>
             ))}
           </nav>
-          <Link href="/decode" className="hidden rounded-full bg-[var(--tomato)] px-4 py-2 text-sm font-semibold text-white transition-transform active:scale-95 md:block">Decode a menu</Link>
+          <div className="flex items-center gap-3">
+            <Link href="/decode" className="hidden rounded-full bg-[var(--tomato)] px-4 py-2 text-sm font-semibold text-white transition-transform active:scale-95 md:block">Decode a menu</Link>
+            <SessionNavItem />
+          </div>
         </div>
       </header>
       <main className="min-h-[calc(100vh-4rem)] pb-24 sm:pb-0">{children}</main>
