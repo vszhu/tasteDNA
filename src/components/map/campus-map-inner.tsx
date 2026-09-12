@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import type { Venue } from "@/types/group";
 import { getVenueAvailability } from "./selection";
@@ -21,6 +21,21 @@ function markerIcon(color: string, selected: boolean) {
   });
 }
 
+function pickedLocationIcon() {
+  return L.divIcon({
+    className: "",
+    html: `<span style="display:block;width:26px;height:26px;border-radius:9999px 9999px 9999px 0;transform:rotate(-45deg);background:#d6533e;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4)"></span>`,
+    iconSize: [26, 26],
+    iconAnchor: [13, 26],
+  });
+}
+
+/** Listens for map clicks and reports them when pick mode is active — no other behavior change. */
+function LocationPicker({ onPick }: { onPick: (lat: number, lng: number) => void }) {
+  useMapEvents({ click: (event) => onPick(event.latlng.lat, event.latlng.lng) });
+  return null;
+}
+
 function FlyToVenue({ target }: { target: Venue | null }) {
   const map = useMap();
   useEffect(() => {
@@ -35,12 +50,17 @@ export function CampusMapInner({
   selectedIds,
   hoveredId,
   onSelectVenue,
+  pickedLocation,
+  onPickLocation,
 }: {
   venues: Venue[];
   center: [number, number];
   selectedIds: string[];
   hoveredId: string | null;
   onSelectVenue: (id: string) => void;
+  /** When set alongside onPickLocation, clicking the map drops/moves a pin here instead of selecting a venue. */
+  pickedLocation?: { lat: number; lng: number } | null;
+  onPickLocation?: (lat: number, lng: number) => void;
 }) {
   const flyTarget = useMemo(() => venues.find((venue) => venue.id === hoveredId) ?? null, [venues, hoveredId]);
 
@@ -48,6 +68,8 @@ export function CampusMapInner({
     <MapContainer center={center} zoom={16} scrollWheelZoom className="h-full w-full">
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <FlyToVenue target={flyTarget} />
+      {onPickLocation && <LocationPicker onPick={onPickLocation} />}
+      {pickedLocation && <Marker position={[pickedLocation.lat, pickedLocation.lng]} icon={pickedLocationIcon()} />}
       {venues.map((venueEntry) => {
         const availability = getVenueAvailability(venueEntry);
         const selected = selectedIds.includes(venueEntry.id);
