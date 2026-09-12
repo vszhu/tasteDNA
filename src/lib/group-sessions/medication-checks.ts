@@ -43,22 +43,7 @@ export function prepareGroupMedicationChecks(input: GroupRankingInput, accounts:
     if (!flaggedDishOptions) {
       throw new GroupSessionError("missing-input", "No candidate has an available dish for every member's meal preferences. Review meal check-ins or change venues.");
     }
-    throw new GroupSessionError(
-      "missing-input",
-      "The group meal needs a menu or private medication review before dishes can be assigned. Review the menus and saved lists; no unchecked dish was assigned.",
-      {
-        kind: "menu-review-required",
-        venues: input.venues.map((venue) => ({
-          venueId: venue.id,
-          venueName: venue.name,
-          totalDishes: venue.menuItems.length,
-          // Completeness is public menu evidence, independent of anyone's list.
-          missingIngredientDishes: venue.menuItems.filter((item) => checkDishMedications(item.dish, []).needsIngredientDetails).length,
-        })),
-        checkedMembers,
-        totalMembers: active.length,
-      },
-    );
+    throw new GroupSessionError("missing-input", "These menus still need ingredient or medication review for someone in the group. Ingredient estimates are not confirmed recipes; add restaurant menu details or review your saved list before choosing.");
   }
   const versions = savedVersions ?? medicationVersions(active.map((entry) => entry.member.userId), accounts);
   return {

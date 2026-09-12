@@ -90,23 +90,4 @@ describe("group session computation", () => {
     ).rejects.toMatchObject({ code: "missing-input" });
     expect(persistRecommendation).not.toHaveBeenCalled();
   });
-
-  it("returns public menu recovery without calling the engine or persisting when every candidate needs review", async () => {
-    const input = structuredClone(rankingInput);
-    input.venues.forEach((venue) => venue.menuItems.forEach((item) => { item.dish.ingredients = []; }));
-    const repo = repository({ loadComputationInput: vi.fn().mockResolvedValue({
-      rankingInput: input,
-      identity: {},
-      medicationVersions: {},
-      medicationAccounts: [{ user_id: input.members[0].member.userId, medications: ["simvastatin"], use_in_groups: true, revision: "private-revision", updated_at: "2026-09-12T12:00:00Z" }],
-    }) });
-    const engine = { algorithmVersion: "stub-v1", compute: vi.fn() };
-
-    await expect(computeGroupSessionRecommendation(repo, USER_ID, SESSION_ID, engine)).rejects.toMatchObject({
-      code: "missing-input",
-      review: { kind: "menu-review-required", checkedMembers: 1 },
-    });
-    expect(engine.compute).not.toHaveBeenCalled();
-    expect(repo.persistRecommendation).not.toHaveBeenCalled();
-  });
 });

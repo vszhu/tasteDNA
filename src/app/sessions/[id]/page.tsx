@@ -7,6 +7,7 @@ import { AlertCircle, Check, Clock, Copy, RefreshCw, Sparkles, UserPlus, Users, 
 import { VenueCard } from "@/components/map/venue-card";
 import { isCandidateSetComplete, isSelectable, toggleCandidate } from "@/components/map/selection";
 import { useVenues } from "@/components/map/use-venues";
+import { VenueIngredientDetails } from "@/components/group/venue-ingredient-details";
 import { GroupMedicationCard } from "@/components/medications/group-medication-card";
 import { useSession } from "@/components/providers/session-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -325,7 +326,7 @@ function SessionRoomAccount() {
                 <div className="mt-4 flex gap-3"><Button variant="accent" disabled={usingFallback || savingCandidates || !isCandidateSetComplete(editingCandidates)} onClick={() => void saveCandidates()}>{savingCandidates ? "Saving…" : "Save candidates"}</Button><Button variant="outline" disabled={savingCandidates} onClick={() => setEditingCandidates(null)}>Cancel</Button></div>
               </div>
             ) : (
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">{candidateVenues.map((venue) => <Card key={venue.id}><CardContent className="p-4"><p className="font-bold">{venue.name}</p><p className="mt-1 text-xs text-[var(--muted)]">{venue.location.label}</p></CardContent></Card>)}{candidateVenues.length < detail.session.candidateVenueIds.length && <p className="text-sm text-[var(--muted)]">Some venue details are temporarily unavailable.</p>}</div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">{candidateVenues.map((venue) => <Card key={venue.id}><CardContent className="p-4"><p className="font-bold">{venue.name}</p><p className="mt-1 text-xs text-[var(--muted)]">{venue.location.label}</p><VenueIngredientDetails items={venue.menuItems} /></CardContent></Card>)}{candidateVenues.length < detail.session.candidateVenueIds.length && <p className="text-sm text-[var(--muted)]">Some venue details are temporarily unavailable.</p>}</div>
             )}
           </section>
 

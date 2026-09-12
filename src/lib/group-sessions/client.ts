@@ -1,10 +1,9 @@
 import { z } from "zod";
 import type { GroupRecommendation, MealPreferenceState } from "@/types/group";
-import { groupMenuReviewSchema, mealPreferenceStateSchema } from "./schemas";
+import { mealPreferenceStateSchema } from "./schemas";
 import type {
   CreateGroupSessionInput,
   GroupSessionDetail,
-  GroupMenuReview,
   InvitationResponseAction,
   RecommendationSnapshot,
 } from "./types";
@@ -63,13 +62,12 @@ const membershipResponseSchema = z.object({ member: memberSchema }).or(
   z.object({ membership: memberSchema }),
 );
 const recommendationResponseSchema = z.object({ result: recommendationSnapshotSchema });
-const errorResponseSchema = z.object({ error: z.string().min(1).max(300), review: z.unknown().optional() });
+const errorResponseSchema = z.object({ error: z.string().min(1).max(300) });
 
 export class GroupSessionClientError extends Error {
   constructor(
     message = "Group sessions are temporarily unavailable. Please try again.",
     readonly status?: number,
-    readonly review?: GroupMenuReview,
   ) {
     super(message);
     this.name = "GroupSessionClientError";
@@ -88,11 +86,9 @@ async function successfulBody(response: Response): Promise<unknown> {
   const body = await responseBody(response);
   if (!response.ok) {
     const parsed = errorResponseSchema.safeParse(body);
-    const review = groupMenuReviewSchema.safeParse(parsed.success ? parsed.data.review : undefined);
     throw new GroupSessionClientError(
       parsed.success ? parsed.data.error : undefined,
       response.status,
-      response.status === 409 && review.success ? review.data : undefined,
     );
   }
   return body;

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { isNearTie, otherVenueScores, runnerUpGap } from "./result-helpers";
+import { DishIngredientDetails } from "./venue-ingredient-details";
 import type { GroupRecommendation, VenueMenuFreshness } from "@/types/group";
 
 const FRESHNESS_COPY: Record<VenueMenuFreshness, { label: string; className: string } | null> = {
@@ -82,6 +83,7 @@ export function GroupResultsView({ recommendation, memberNames = {} }: { recomme
                     </div>
                     <div className="grid size-12 shrink-0 place-items-center rounded-full bg-[var(--cream)] text-sm font-bold">{dishUtility.utility}</div>
                   </div>
+                  <div className="mt-3"><DishIngredientDetails dish={dishUtility.dish} /></div>
                   {dishUtility.excluded ? (
                     <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-[var(--tomato)]"><AlertTriangle className="size-3.5" /> {dishUtility.exclusionReason ?? "Excluded by this meal's preferences"}</p>
                   ) : (

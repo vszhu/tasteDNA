@@ -258,33 +258,4 @@ describe("group session HTTP handlers", () => {
     expect(engine.compute).toHaveBeenCalledOnce();
     expect(JSON.stringify(body).toLowerCase()).not.toContain("profile");
   });
-
-  it("returns public menu recovery data without exposing private inputs or creating a result", async () => {
-    const input = structuredClone(rankingInput);
-    input.venues.forEach((venue, index) => {
-      venue.id = VENUE_IDS[index];
-      venue.menuItems.forEach((item) => { item.dish.ingredients = []; });
-    });
-    const repo = repository({ loadComputationInput: vi.fn().mockResolvedValue({
-      rankingInput: input,
-      identity: {},
-      medicationVersions: {},
-      medicationAccounts: [{ user_id: input.members[0].member.userId, medications: ["simvastatin"], use_in_groups: true, revision: "private-revision", updated_at: "2026-09-12T12:00:00Z" }],
-    }) });
-    const response = await computeGroupSession(SESSION_ID, context(repo));
-    const body = await response.json();
-
-    expect(response.status).toBe(409);
-    expect(body.review).toEqual({ kind: "menu-review-required", checkedMembers: 1, totalMembers: input.members.length, venues: input.venues.map((venue) => ({ venueId: venue.id, venueName: venue.name, totalDishes: venue.menuItems.length, missingIngredientDishes: venue.menuItems.length })) });
-    expect(body.result).toBeUndefined();
-    expect(JSON.stringify(body)).not.toMatch(/simvastatin|private-revision|user_id|profile|memberId/);
-    expect(repo.persistRecommendation).not.toHaveBeenCalled();
-  });
-
-  it("drops unexpected private fields from invalid server recovery objects", async () => {
-    const review = { kind: "menu-review-required" as const, checkedMembers: 1, totalMembers: 1, venues: [{ venueId: VENUE_IDS[0], venueName: "Cafe", totalDishes: 1, missingIngredientDishes: 1 }], medications: ["private medicine"] };
-    const response = await computeGroupSession(SESSION_ID, context(repository({ loadComputationInput: vi.fn().mockRejectedValue(new GroupSessionError("missing-input", "Review the menu.", review)) })));
-    expect(response.status).toBe(409);
-    expect(await response.json()).toEqual({ error: "Review the menu." });
-  });
 });

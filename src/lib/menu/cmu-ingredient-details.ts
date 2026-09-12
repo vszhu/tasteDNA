@@ -1,4 +1,6 @@
 import type { MenuItem } from "@/types";
+import { CMU_ADDITIONAL_PUBLISHED_COMPONENTS } from "./cmu-additional-published-components";
+import { CMU_CAPITAL_GRAINS_COMPONENTS } from "./cmu-capital-grains-components";
 import { estimateCmuDishIngredients } from "./cmu-ingredient-estimates";
 
 export const CMU_ABP_MENU_URL = "https://apps.studentaffairs.cmu.edu/dining/dashboard_images/Production/menus/113/abp-online-menu.pdf";
@@ -40,9 +42,10 @@ const ABP_COMPONENTS: Readonly<Record<string, readonly string[]>> = {
 
 /** Read-time repair preserves persisted identities, prices, ordering, and taste data. */
 export function applyConfirmedCmuIngredientDetails(item: MenuItem, source: CmuMenuSource): MenuItem {
-  if (!isOriginalCmuDatasetSource(source) || source.sourceMetadata?.datasetId !== 113 ||
-    source.sourceUri !== CMU_ABP_MENU_URL || item.dish.ingredients.length > 0) return item;
-  const components = ABP_COMPONENTS[item.dish.name];
+  if (!isOriginalCmuDatasetSource(source) || item.dish.ingredients.length > 0) return item;
+  const additional = [...CMU_ADDITIONAL_PUBLISHED_COMPONENTS, ...CMU_CAPITAL_GRAINS_COMPONENTS].find((entry) => entry.datasetId === source.sourceMetadata?.datasetId && entry.sourceUri === source.sourceUri && entry.dishName === item.dish.name);
+  const abp = source.sourceMetadata?.datasetId === 113 && source.sourceUri === CMU_ABP_MENU_URL && Object.hasOwn(ABP_COMPONENTS, item.dish.name) ? ABP_COMPONENTS[item.dish.name] : undefined;
+  const components = additional?.ingredients ?? abp;
   if (!components) return item;
   const ingredients = [...components];
   return {
@@ -53,7 +56,7 @@ export function applyConfirmedCmuIngredientDetails(item: MenuItem, source: CmuMe
       ingredients,
       ingredientSource: {
         kind: "published-menu", label: "CMU published menu components",
-        url: CMU_ABP_MENU_URL, checkedAt: CMU_INGREDIENT_SOURCE_CHECKED_AT,
+        url: additional?.sourceUri ?? CMU_ABP_MENU_URL, checkedAt: CMU_INGREDIENT_SOURCE_CHECKED_AT,
       },
       features: {
         ...item.dish.features,

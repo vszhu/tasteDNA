@@ -3,7 +3,6 @@ import type { z } from "zod";
 import { computeGroupSessionRecommendation } from "./compute";
 import {
   createGroupSessionSchema,
-  groupMenuReviewSchema,
   invitationResponseSchema,
   inviteSessionMemberSchema,
   mealPreferenceStateSchema,
@@ -34,11 +33,7 @@ function apiFailure(error: unknown) {
         : error.code === "invalid-state" || error.code === "missing-input"
           ? 409
           : 500;
-    const review = groupMenuReviewSchema.safeParse(error.review);
-    return NextResponse.json({
-      error: error.message,
-      ...(error.code === "missing-input" && review.success ? { review: review.data } : {}),
-    }, { status });
+    return NextResponse.json({ error: error.message }, { status });
   }
   console.error("Group session API failed", {
     name: error instanceof Error ? error.name : "unknown_error",

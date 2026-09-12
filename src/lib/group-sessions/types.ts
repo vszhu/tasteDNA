@@ -85,24 +85,10 @@ export type GroupSessionErrorCode =
   | "not-found"
   | "storage";
 
-/** Public menu evidence and aggregate coverage only; never member-specific medication details. */
-export interface GroupMenuReview {
-  kind: "menu-review-required";
-  venues: {
-    venueId: string;
-    venueName: string;
-    totalDishes: number;
-    missingIngredientDishes: number;
-  }[];
-  checkedMembers: number;
-  totalMembers: number;
-}
-
 export class GroupSessionError extends Error {
   constructor(
     readonly code: GroupSessionErrorCode,
     message: string,
-    readonly review?: GroupMenuReview,
   ) {
     super(message);
     this.name = "GroupSessionError";

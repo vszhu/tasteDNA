@@ -6,6 +6,9 @@ import { prepareGroupMedicationChecks } from "@/lib/group-sessions/medication-ch
 import { computeGroupRecommendation } from "@/lib/group/ranking";
 import type { MenuItem } from "@/types";
 import { applyCmuIngredientDetails, applyConfirmedCmuIngredientDetails, CMU_ABP_MENU_URL, type CmuMenuSource } from "./cmu-ingredient-details";
+import { CMU_ADDITIONAL_PUBLISHED_COMPONENTS } from "./cmu-additional-published-components";
+import { CMU_CAPITAL_GRAINS_COMPONENTS } from "./cmu-capital-grains-components";
+import dataset from "../../../scripts/data/cmu-dining-menus.json";
 
 const source: CmuMenuSource = {
   sourceProvider: "cmu-dining-dataset-v2", sourceUri: CMU_ABP_MENU_URL,
@@ -22,6 +25,33 @@ function importedItem(name = "Extra Bacon BLT"): MenuItem {
 }
 
 describe("published CMU ingredient details", () => {
+  it("accounts for every imported entry without labeling estimates as published", () => {
+    const counts = { published: 0, estimated: 0, unavailable: 0 };
+    for (const venue of dataset.restaurants) {
+      const currentSource = { ...source, sourceUri: venue.menu_url, sourceMetadata: { ...source.sourceMetadata, datasetId: venue.id } };
+      for (const name of venue.items) {
+        const item = applyCmuIngredientDetails(importedItem(name), currentSource);
+        if (item.dish.ingredientSource?.kind === "published-menu") counts.published++;
+        else if (item.dish.ingredientSource?.kind === "estimated") {
+          counts.estimated++;
+          expect(checkDishMedications(item.dish, ["simvastatin"]).status).not.toBe("no-listed-match");
+        } else counts.unavailable++;
+      }
+    }
+    expect(counts).toEqual({ published: 23, estimated: 451, unavailable: 140 });
+  });
+  it("uses exact K-Station and Capital Grains source records and keeps unsupported medication checks active", () => {
+    for (const record of [...CMU_ADDITIONAL_PUBLISHED_COMPONENTS, ...CMU_CAPITAL_GRAINS_COMPONENTS]) {
+      const currentSource = { ...source, sourceUri: record.sourceUri, sourceMetadata: { ...source.sourceMetadata, datasetId: record.datasetId } };
+      const original = importedItem(record.dishName);
+      const item = applyConfirmedCmuIngredientDetails(original, currentSource);
+      expect(item.dish.ingredients).toEqual(record.ingredients);
+      expect(item.dish.ingredientSource?.url).toBe(record.sourceUri);
+      expect(checkDishMedications(item.dish, ["unknown medicine"]).status).toBe("review");
+      expect(applyConfirmedCmuIngredientDetails(original, { ...currentSource, sourceUri: "https://example.test/other.pdf" })).toBe(original);
+    }
+    expect(applyConfirmedCmuIngredientDetails(importedItem("constructor"), source).dish.ingredients).toEqual([]);
+  });
   it("repairs the exact source dish without mutating identity, taste data, or other unknowns", () => {
     const original = importedItem();
     const snapshot = structuredClone(original);
