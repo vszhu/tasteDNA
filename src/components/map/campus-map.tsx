@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { VenueSummary } from "./venue-types";
+import type { Venue } from "@/types/group";
 
 const CampusMapInner = dynamic(() => import("./campus-map-inner").then((mod) => mod.CampusMapInner), {
   ssr: false,
@@ -9,7 +9,7 @@ const CampusMapInner = dynamic(() => import("./campus-map-inner").then((mod) => 
 });
 
 export function CampusMap(props: {
-  venues: VenueSummary[];
+  venues: Venue[];
   center: [number, number];
   selectedIds: string[];
   hoveredId: string | null;

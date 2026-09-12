@@ -3,14 +3,13 @@
 import { useEffect, useMemo } from "react";
 import { MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
+import type { Venue } from "@/types/group";
 import { getVenueAvailability } from "./selection";
-import type { VenueSummary } from "./venue-types";
 
 const AVAILABILITY_COLOR: Record<string, string> = {
   available: "#4b8a70",
   stale: "#e6a83c",
   "no-menu": "#a9a69e",
-  "missing-location": "#a9a69e",
 };
 
 function markerIcon(color: string, selected: boolean) {
@@ -22,10 +21,10 @@ function markerIcon(color: string, selected: boolean) {
   });
 }
 
-function FlyToVenue({ target }: { target: VenueSummary | null }) {
+function FlyToVenue({ target }: { target: Venue | null }) {
   const map = useMap();
   useEffect(() => {
-    if (target?.coordinates) map.flyTo([target.coordinates.lat, target.coordinates.lng], Math.max(map.getZoom(), 17), { duration: 0.5 });
+    if (target) map.flyTo([target.location.latitude, target.location.longitude], Math.max(map.getZoom(), 17), { duration: 0.5 });
   }, [target, map]);
   return null;
 }
@@ -37,26 +36,25 @@ export function CampusMapInner({
   hoveredId,
   onSelectVenue,
 }: {
-  venues: VenueSummary[];
+  venues: Venue[];
   center: [number, number];
   selectedIds: string[];
   hoveredId: string | null;
   onSelectVenue: (id: string) => void;
 }) {
-  const locatable = useMemo(() => venues.filter((venue) => venue.coordinates), [venues]);
-  const flyTarget = useMemo(() => locatable.find((venue) => venue.id === hoveredId) ?? null, [locatable, hoveredId]);
+  const flyTarget = useMemo(() => venues.find((venue) => venue.id === hoveredId) ?? null, [venues, hoveredId]);
 
   return (
     <MapContainer center={center} zoom={16} scrollWheelZoom className="h-full w-full">
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <FlyToVenue target={flyTarget} />
-      {locatable.map((venueEntry) => {
+      {venues.map((venueEntry) => {
         const availability = getVenueAvailability(venueEntry);
         const selected = selectedIds.includes(venueEntry.id);
         return (
           <Marker
             key={venueEntry.id}
-            position={[venueEntry.coordinates!.lat, venueEntry.coordinates!.lng]}
+            position={[venueEntry.location.latitude, venueEntry.location.longitude]}
             icon={markerIcon(AVAILABILITY_COLOR[availability], selected)}
             eventHandlers={{ click: () => onSelectVenue(venueEntry.id) }}
           >
