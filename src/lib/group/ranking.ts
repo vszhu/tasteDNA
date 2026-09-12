@@ -1,5 +1,6 @@
 import type {
   DiningSession,
+  GroupExplanationFact,
   GroupDecisionMember,
   GroupRecommendation,
   MemberDishAssignment,
@@ -110,6 +111,75 @@ function assignments(
 }
 
 /**
+ * Produces presentation-ready facts exclusively from the already-computed
+ * ranking intermediates. Labels are deterministic summaries, not generated
+ * explanations; consumers can instead render the typed values directly.
+ */
+function explanationFacts(
+  winnerScore: VenueGroupScore,
+  runnerUpScore: VenueGroupScore | undefined,
+  venueScores: VenueGroupScore[],
+  winnerAssignments: MemberDishAssignment[],
+  members: GroupDecisionMember[],
+  compromiseRequired: boolean,
+): GroupExplanationFact[] {
+  const facts: GroupExplanationFact[] = [
+    {
+      kind: "winner-advantage",
+      value: winnerScore.groupScore,
+      label: `Highest fairness-adjusted group score: ${winnerScore.groupScore}`,
+      venueId: winnerScore.venue.id,
+    },
+    {
+      kind: "worst-member-protection",
+      value: winnerScore.worstMemberUtility,
+      label: `Lowest member utility: ${winnerScore.worstMemberUtility}`,
+      venueId: winnerScore.venue.id,
+    },
+  ];
+
+  if (runnerUpScore) {
+    const gap = winnerScore.groupScore - runnerUpScore.groupScore;
+    facts.push({
+      kind: "runner-up-gap",
+      value: gap,
+      label: `Lead over ${runnerUpScore.venue.name}: ${gap}`,
+      venueId: runnerUpScore.venue.id,
+    });
+  }
+
+  facts.push(...venueScores
+    .filter((score) => !score.clearsMiseryFloor)
+    .map((score) => ({
+      kind: "misery-floor" as const,
+      value: score.worstMemberUtility,
+      label: `${score.venue.name} is below the misery floor of ${GROUP_RANKING_WEIGHTS.miseryFloor}`,
+      venueId: score.venue.id,
+    })));
+
+  if (compromiseRequired) {
+    facts.push({
+      kind: "compromise",
+      value: winnerScore.worstMemberUtility - GROUP_RANKING_WEIGHTS.miseryFloor,
+      label: `No venue met the misery floor of ${GROUP_RANKING_WEIGHTS.miseryFloor}; selected the best compromise`,
+      venueId: winnerScore.venue.id,
+    });
+  }
+
+  const memberNames = new Map(members.map((member) => [member.member.userId, member.member.displayName]));
+  facts.push(...winnerAssignments.map((assignment) => ({
+    kind: "member-dish-choice" as const,
+    value: assignment.dishUtility.utility,
+    label: `${memberNames.get(assignment.memberId) ?? assignment.memberId}'s best available dish: ${assignment.dishUtility.dish.name}`,
+    venueId: assignment.dishUtility.venueId,
+    memberId: assignment.memberId,
+    dishId: assignment.dishUtility.dish.id,
+  })));
+
+  return facts;
+}
+
+/**
  * Selects a restaurant fairly from actual dishes. If no venue clears the misery
  * floor, returns the best compromise and labels it instead of returning nothing.
  */
@@ -130,7 +200,9 @@ export function computeGroupRecommendation(input: GroupRankingInput): GroupRecom
   const winnerScore = rankedCandidates[0];
   const winnerVenue = venueById.get(winnerScore.venue.id);
   if (!winnerVenue) return null;
-  const runnerUp = venueScores.find((score) => score.venue.id !== winnerScore.venue.id);
+  const runnerUpScore = venueScores.find((score) => score.venue.id !== winnerScore.venue.id);
+  const winnerAssignments = assignments(winnerScore, winnerVenue);
+  const compromiseRequired = floorClearers.length === 0;
 
   return {
     sessionId: input.session.id,
@@ -139,11 +211,18 @@ export function computeGroupRecommendation(input: GroupRankingInput): GroupRecom
     groupMeanUtility: winnerScore.groupMeanUtility,
     worstMemberUtility: winnerScore.worstMemberUtility,
     miseryFloor: GROUP_RANKING_WEIGHTS.miseryFloor,
-    compromiseRequired: floorClearers.length === 0,
-    assignments: assignments(winnerScore, winnerVenue),
+    compromiseRequired,
+    assignments: winnerAssignments,
     restaurantUtilities: winnerScore.restaurantUtilities,
     venueScores,
-    runnerUp: runnerUp?.venue,
-    explanationFacts: [],
+    runnerUp: runnerUpScore?.venue,
+    explanationFacts: explanationFacts(
+      winnerScore,
+      runnerUpScore,
+      venueScores,
+      winnerAssignments,
+      activeMembers,
+      compromiseRequired,
+    ),
   };
 }
