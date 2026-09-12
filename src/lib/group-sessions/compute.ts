@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { computeGroupRecommendation } from "@/lib/group/ranking";
 import { prepareGroupMedicationChecks } from "./medication-checks";
+import { GROUP_RECOMMENDATION_VERSION } from "./version";
 import {
   GroupSessionError,
   type GroupRecommendationEngine,
@@ -9,7 +10,7 @@ import {
 } from "./types";
 
 export const productionGroupRecommendationEngine: GroupRecommendationEngine = {
-  algorithmVersion: "fair-group-v1.1.0-meds",
+  algorithmVersion: GROUP_RECOMMENDATION_VERSION,
   compute: computeGroupRecommendation,
 };
 

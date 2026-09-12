@@ -5,6 +5,7 @@ import { GROUP_GOLDEN_FIXTURES } from "@/types/group.fixtures";
 import { computeGroupRecommendation } from "@/lib/group/ranking";
 import { MEDICATION_RULES_VERSION } from "@/lib/medications/catalog";
 import { medicationVersionFingerprint } from "./medication-checks";
+import { GROUP_RECOMMENDATION_VERSION } from "./version";
 
 const USER_ID = "c1000000-0000-4000-8000-000000000001";
 const FRIEND_ID = "c1000000-0000-4000-8000-000000000002";
@@ -29,7 +30,7 @@ function asClient(from: (table: string) => unknown): SupabaseClient {
 }
 
 describe("SupabaseGroupSessionRepository", () => {
-  it.each(["current", "changed-list", "changed-rules", "legacy"])("checks %s snapshots without exposing private lists", async (version) => {
+  it.each(["current", "changed-list", "changed-rules", "legacy", "older-engine"])("checks %s snapshots without exposing private lists", async (version) => {
     const revision = "c4000000-0000-4000-8000-000000000001";
     const recommendation = { ...computeGroupRecommendation(GROUP_GOLDEN_FIXTURES[0])!, sessionId: SESSION_ID,
       ...(version === "legacy" ? {} : { medicationSummary: { checkedMembers: 1, uncheckedMembers: 0, flaggedDishOptions: 1, withheldVenues: 0, rulesVersion: version === "changed-rules" ? "old" : MEDICATION_RULES_VERSION, revisionFingerprint: medicationVersionFingerprint({ [USER_ID]: version === "changed-list" ? "old" : revision }) } }) };
@@ -39,7 +40,7 @@ describe("SupabaseGroupSessionRepository", () => {
       if (table === "group_session_members") return query([{ session_id: SESSION_ID, user_id: USER_ID, status: "accepted", accepted_at: NOW, declined_at: null, created_at: NOW, updated_at: NOW }]);
       if (table === "group_session_candidates") return query([{ venue_id: VENUE_ID }]);
       if (table === "group_session_meal_preferences") return query([], null);
-      if (table === "group_recommendation_results") return query([], { id: "c5000000-0000-4000-8000-000000000001", algorithm_version: "v1", input_hash: "hash", result_snapshot: recommendation, created_at: NOW });
+      if (table === "group_recommendation_results") return query([], { id: "c5000000-0000-4000-8000-000000000001", algorithm_version: version === "older-engine" ? "fair-group-v1.1.0-meds" : GROUP_RECOMMENDATION_VERSION, input_hash: "hash", result_snapshot: recommendation, created_at: NOW });
       throw new Error(table);
     });
     const admin = asClient((table) => {
@@ -51,6 +52,7 @@ describe("SupabaseGroupSessionRepository", () => {
     const detail = await new SupabaseGroupSessionRepository(userClient, admin).getForUser(USER_ID, SESSION_ID);
     expect(Boolean(detail?.latestRecommendation)).toBe(version === "current");
     expect(Boolean(detail?.recommendationNeedsRefresh)).toBe(version !== "current");
+    if (version === "current") expect(detail?.latestRecommendation?.algorithmVersion).toBe(GROUP_RECOMMENDATION_VERSION);
     expect(medicationQuery.select).toHaveBeenCalledWith("user_id,use_in_groups,revision");
     expect(medicationQuery.in).toHaveBeenCalledWith("user_id", [USER_ID]);
     expect(JSON.stringify(detail)).not.toContain(revision);
