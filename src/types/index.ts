@@ -30,6 +30,7 @@ export interface Dish {
   id: string;
   name: string;
   description: string;
+  category?: string;
   cuisine: string;
   ingredients: string[];
   features: DishFeatures;

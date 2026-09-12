@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import { extractMenuWithOpenAI } from "@/lib/menu/openai-extract";
-import { parsePastedMenu, processExtractedMenu } from "@/lib/menu/process";
+import { extractMenuWithOpenAI, MenuExtractionFailedError } from "@/lib/menu/openai-extract";
+import { parsePastedMenu, processExtractedMenu, processExtractedMenuWithEmbeddings } from "@/lib/menu/process";
 import { SAMPLE_MENU_MODEL } from "@/lib/menu/sample";
 
 export const runtime = "nodejs";
@@ -9,7 +9,23 @@ export const runtime = "nodejs";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
 
+function extractionErrorResponse(error: MenuExtractionFailedError) {
+  const reasons = [error.primaryReason, error.fallbackReason].filter(Boolean);
+  const terminalReason = error.fallbackReason ?? error.primaryReason;
+  if (reasons.every((reason) => reason === "rate_limit")) {
+    return NextResponse.json({ error: "The menu reader is busy right now. Please wait a moment and try again." }, { status: 429 });
+  }
+  if (terminalReason === "timeout") {
+    return NextResponse.json({ error: "The menu took too long to read. Try a smaller or clearer photo." }, { status: 504 });
+  }
+  if (terminalReason === "empty_menu" || terminalReason === "invalid_structured_output") {
+    return NextResponse.json({ error: "The menu was read, but no complete dishes were found. Try a clearer photo." }, { status: 422 });
+  }
+  return NextResponse.json({ error: "We couldn’t decode that menu. Try a clearer photo or paste the menu text." }, { status: 502 });
+}
+
 export async function POST(request: Request) {
+  const requestStarted = performance.now();
   try {
     const formData = await request.formData();
     const rawText = formData.get("text");
@@ -35,17 +51,28 @@ export async function POST(request: Request) {
     }
 
     const base64 = image ? Buffer.from(await image.arrayBuffer()).toString("base64") : undefined;
-    const model = await extractMenuWithOpenAI({
+    const extraction = await extractMenuWithOpenAI({
       text: text || undefined,
       image: image && base64 ? { mimeType: image.type, base64 } : undefined,
     });
-    if (model.dishes.length === 0) return NextResponse.json({ error: "The menu was readable, but no dishes were found." }, { status: 422 });
-    return NextResponse.json(processExtractedMenu(model, image ? "image" : "text", false));
+    const result = await processExtractedMenuWithEmbeddings(extraction.menu, image ? "image" : "text", false);
+    if (process.env.NODE_ENV === "development") {
+      console.info("[TasteDNA timing] menu API total", {
+        durationMs: Math.round(performance.now() - requestStarted),
+        extractionMs: extraction.extractionMs,
+        model: extraction.model,
+        fallback: extraction.usedModelFallback,
+        dishes: result.items.length,
+        uploadBytes: image?.size ?? 0,
+      });
+    }
+    return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof MenuExtractionFailedError) return extractionErrorResponse(error);
     if (error instanceof ZodError) {
       return NextResponse.json({ error: "The menu was read, but its structure was incomplete. Please try a clearer image." }, { status: 422 });
     }
-    console.error("Menu extraction failed", error);
+    console.error("Menu extraction failed", { name: error instanceof Error ? error.name : "unknown_error" });
     return NextResponse.json({ error: "We couldn’t decode that menu. Try a clearer photo or paste the menu text." }, { status: 500 });
   }
 }
