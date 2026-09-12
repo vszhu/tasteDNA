@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, ChefHat, Dna, Flame, RotateCcw, ScanLine, Sparkles } from "lucide-react";
 import { ProfileRadar } from "@/components/taste/profile-radar";
+import { MedicationSummary } from "@/components/medications/medication-summary";
 import { useTaste } from "@/components/providers/taste-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export default function DashboardPage() {
         <Link href="/decode" className={cn(buttonVariants({ variant: "accent", size: "lg" }), "shrink-0")}>Decode a menu <ScanLine className="size-4" /></Link>
       </div>
 
+      <MedicationSummary className="mt-7" />
       <div className="mt-9 grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
         <Card className="overflow-hidden"><CardContent className="grid items-center gap-2 p-5 sm:grid-cols-[1fr_.8fr] sm:p-8"><div><p className="text-xs font-bold tracking-[.16em] text-[var(--muted)]">YOUR PALATE SHAPE</p><ProfileRadar profile={profile} /></div><div className="rounded-[1.3rem] bg-[var(--ink)] p-6 text-white"><Dna className="size-7 text-[var(--saffron)]" /><h2 className="mt-5 text-3xl">You chase {titleCase(positives[0])}.</h2><p className="mt-3 text-sm leading-6 text-white/65">Your strongest rated foods share {positives.slice(0, 3).map(titleCase).join(", ").toLowerCase()} cues. We’ll favor those signals without hiding interesting outliers.</p><div className="mt-6 border-t border-white/15 pt-5"><p className="text-[10px] font-bold tracking-[.16em] text-white/45">PROFILE CONFIDENCE</p><div className="mt-3 flex gap-1.5">{[0, 1, 2, 3, 4].map((segment) => <span key={segment} className={cn("h-1.5 flex-1 rounded-full", segment < Math.min(5, Math.ceil(profile.ratingCount / 4)) ? "bg-[var(--saffron)]" : "bg-white/15")} />)}</div></div></div></CardContent></Card>
 

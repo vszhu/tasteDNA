@@ -3,6 +3,7 @@ import "./globals.css";
 import { AppShell } from "@/components/layout/app-shell";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { TasteProvider } from "@/components/providers/taste-provider";
+import { MedicationProvider } from "@/components/providers/medication-provider";
 
 export const metadata: Metadata = {
   title: { default: "TasteDNA — Your palate, decoded", template: "%s | TasteDNA" },
@@ -15,7 +16,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <SessionProvider><TasteProvider><AppShell>{children}</AppShell></TasteProvider></SessionProvider>
+        <SessionProvider><TasteProvider><MedicationProvider><AppShell>{children}</AppShell></MedicationProvider></TasteProvider></SessionProvider>
       </body>
     </html>
   );

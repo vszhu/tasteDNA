@@ -6,6 +6,8 @@ This repository is a hackathon-ready vertical slice: onboarding, a live TasteDNA
 
 ## Product flow
 
+Medication-aware dining is now available under **Meds** (`/medications`). Add a medication list to prioritize review of covered food interactions before taste ranking. Every finding includes its source, and unsupported medicines remain visibly unverified. The list stays in this browser tab, separate from cloud taste data. See [medication coverage, demo, and limitations](docs/MEDICATION_CHECKS.md).
+
 1. Rate 12 diverse, actively selected foods.
 2. See cuisine, flavor, texture, and cooking-style preferences.
 3. Upload a menu photo, take one on mobile, or paste menu text.

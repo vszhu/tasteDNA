@@ -83,7 +83,7 @@ export default function SessionResultsPage() {
       <Link href={`/sessions/${params.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)] hover:text-[var(--ink)]"><ArrowLeft className="size-4" /> Back to session</Link>
 
       <p className="mt-6 flex items-center gap-2 rounded-2xl border border-[#e7d29f] bg-[#fff8e7] p-4 text-sm text-[#71561d]">
-        <Info className="size-4 shrink-0" /> Previewing the real ranking engine against a sample scenario — there&rsquo;s no reveal API yet to score your actual session.
+        <Info className="size-4 shrink-0" /> Previewing the real ranking engine against a sample scenario — there&rsquo;s no reveal API yet to score your actual session. Group previews do not use medication lists. Medication checks apply to the solo menu decoder.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">

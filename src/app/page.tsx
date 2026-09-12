@@ -8,6 +8,7 @@ import { BrandMark } from "@/components/brand/mark";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTaste } from "@/components/providers/taste-provider";
+import { MedicationSummary } from "@/components/medications/medication-summary";
 import { cn } from "@/lib/utils";
 
 const steps = [
@@ -52,6 +53,7 @@ export default function HomePage() {
               <Button size="lg" variant="outline" onClick={() => { loadDemo(); router.push("/dashboard"); }}>Try the instant demo</Button>
             </div>
             <p className="mt-4 flex items-center gap-2 text-xs font-medium text-[var(--muted)]"><Check className="size-3.5 text-[#4e866d]" /> No sign-up. About 90 seconds.</p>
+            <MedicationSummary className="mt-6 max-w-xl" />
           </div>
           <div className="fade-up-delay relative lg:-mr-24">
             <div className="absolute -left-5 top-10 z-10 rounded-2xl bg-white p-3 shadow-xl sm:-left-8 sm:p-4">
