@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { lastGoodPublicVenues, storedVenueToPublicVenue } from "./public-venues";
+import type { SharedVenueMenu } from "@/lib/menu/shared-types";
 import type { StoredVenueRow } from "./types";
 
 const row: StoredVenueRow = {
@@ -39,6 +40,25 @@ describe("public venue mapping", () => {
 
   it("does not expose rows with incomplete coordinate pairs", () => {
     expect(storedVenueToPublicVenue({ ...row, longitude: null })).toBeNull();
+  });
+
+  it("attaches the selected shared menu and freshness to the venue contract", () => {
+    const sharedMenu: SharedVenueMenu = {
+      menuId: "30000000-0000-0000-0000-000000000001",
+      venueId: row.id,
+      version: 2,
+      observedAt: "2026-09-12T12:00:00.000Z",
+      validFrom: "2026-09-12T12:00:00.000Z",
+      validUntil: null,
+      freshness: "fresh",
+      items: [],
+    };
+
+    expect(storedVenueToPublicVenue(row, sharedMenu)).toMatchObject({
+      menuFreshness: "fresh",
+      menuUpdatedAt: sharedMenu.observedAt,
+      menuItems: [],
+    });
   });
 
   it("provides valid shared venue objects from the checked-in fallback", () => {
