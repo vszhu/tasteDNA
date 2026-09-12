@@ -18,6 +18,8 @@ import type { GroupSessionDetail, SessionMemberSummary } from "@/lib/group-sessi
 import { cycleTagPreference, EMPTY_MEAL_PREFERENCE_STATE, setMaxPrice, tagPreference, toggleExcludedIngredient, toggleExcludedProteinType } from "@/lib/session/meal-preferences";
 import { MEAL_PREFERENCE_TAGS } from "@/types/group";
 import { cn } from "@/lib/utils";
+import { signInPath } from "@/lib/auth/callback";
+import { sessionInviteUrl } from "@/lib/group-sessions/invite-link";
 
 const PROTEIN_PRESETS = ["Chicken", "Beef", "Pork", "Shellfish", "Fish", "Tofu", "Dairy"];
 const groupSessionClient = createGroupSessionClient();
@@ -48,6 +50,7 @@ function SessionRoomAccount() {
   const { venues, loadState: venuesLoadState, usingFallback } = useVenues();
   const [detail, setDetail] = useState<GroupSessionDetail | null | undefined>(undefined);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadStatus, setLoadStatus] = useState<number | undefined>();
   const [preferenceState, setPreferenceState] = useState(EMPTY_MEAL_PREFERENCE_STATE);
   const initializedPreferences = useRef<string | null>(null);
   const [ingredientInput, setIngredientInput] = useState("");
@@ -56,6 +59,7 @@ function SessionRoomAccount() {
   const [computing, setComputing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [declined, setDeclined] = useState(false);
   const [friends, setFriends] = useState<FriendshipApiSummary[]>([]);
   const [invitingUserId, setInvitingUserId] = useState<string | null>(null);
@@ -67,6 +71,7 @@ function SessionRoomAccount() {
       const next = await groupSessionClient.get(sessionId, signal);
       setDetail(next);
       setLoadError(null);
+      setLoadStatus(undefined);
       if (user && initializedPreferences.current !== `${sessionId}:${user.id}` && next.ownMealPreferenceState) {
         setPreferenceState(next.ownMealPreferenceState);
         initializedPreferences.current = `${sessionId}:${user.id}`;
@@ -75,6 +80,7 @@ function SessionRoomAccount() {
       if (signal?.aborted) return;
       setDetail(null);
       setLoadError(errorMessage(error, "We couldn’t load this session."));
+      setLoadStatus(error instanceof GroupSessionClientError ? error.status : undefined);
     }
   }, [sessionId, user]);
 
@@ -163,11 +169,21 @@ function SessionRoomAccount() {
   }
 
   async function copyLink() {
+    setActionError(null);
+    setFeedback(null);
+    let url: string;
     try {
-      await navigator.clipboard.writeText(window.location.href);
-      setFeedback("Session link copied.");
+      url = sessionInviteUrl(sessionId, window.location.origin, process.env.NEXT_PUBLIC_APP_URL);
+      setShareUrl(url);
     } catch {
-      setActionError("Copy failed. Copy the address from your browser instead.");
+      setActionError("Open this meal on your published TasteDNA site to share a link that works on another device.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setFeedback("Session link copied. Send it to the friends you invited to this meal.");
+    } catch {
+      setActionError("Your browser couldn't copy the link. Select and copy the invite link below.");
     }
   }
 
@@ -218,7 +234,7 @@ function SessionRoomAccount() {
           <Users className="mx-auto size-9 text-[var(--tomato)]" />
           <h1 className="mt-5 text-4xl">Sign in to join this session.</h1>
           <p className="mt-3 text-[var(--muted)]">Use the account that received the invitation.</p>
-          <Link href="/sign-in" className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>Sign in</Link>
+          <Link href={signInPath(`/sessions/${sessionId}`)} className={cn(buttonVariants({ size: "lg", variant: "accent" }), "mt-7")}>Sign in</Link>
         </div>
       </section>
     );
@@ -233,12 +249,21 @@ function SessionRoomAccount() {
   }
 
   if (detail === null) {
+    let liveMealUrl: string | null = null;
+    if (loadStatus === 503 && process.env.NEXT_PUBLIC_APP_URL) {
+      try {
+        const candidate = sessionInviteUrl(sessionId, "", process.env.NEXT_PUBLIC_APP_URL);
+        if (typeof window !== "undefined" && new URL(candidate).origin !== window.location.origin) liveMealUrl = candidate;
+      } catch { /* Keep the original retry path for invalid configuration. */ }
+    }
     return (
       <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-lg items-center px-4 py-16 text-center">
         <div className="w-full">
           <h1 className="text-4xl">Session unavailable.</h1>
-          <p role="alert" className="mt-3 text-[var(--muted)]">{loadError ?? "This session may be closed, or you may not have access."}</p>
-          <div className="mt-7 flex justify-center gap-3"><Button onClick={() => void loadSession()}><RefreshCw className="size-4" /> Retry</Button><Link href="/sessions/new" className={buttonVariants({ variant: "outline" })}>Start a new one</Link></div>
+          <p role="alert" className="mt-3 text-[var(--muted)]">{liveMealUrl ? "This copy of TasteDNA can’t load shared meals. Continue on the live site." : loadError ?? "This session may be closed, or you may not have access."}</p>
+          {liveMealUrl && <a href={liveMealUrl} className={cn(buttonVariants({ variant: "accent" }), "mt-5")}>Open this meal on the live site</a>}
+          <p className="mt-4 text-sm text-[var(--muted)]">Signed in as {user.email}. Use the account the host invited, or ask them to add you to this meal.</p>
+          <div className="mt-7 flex flex-wrap justify-center gap-3"><Button onClick={() => void loadSession()}><RefreshCw className="size-4" /> Retry</Button><Link href={signInPath(`/sessions/${sessionId}`)} className={buttonVariants({ variant: "outline" })}>Switch account</Link><Link href="/sessions/new" className={buttonVariants({ variant: "outline" })}>Start a new one</Link></div>
         </div>
       </section>
     );
@@ -258,6 +283,7 @@ function SessionRoomAccount() {
 
       {actionError && <p role="alert" className="mt-6 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700"><AlertCircle className="mt-0.5 size-4 shrink-0" /> {actionError}</p>}
       {feedback && <p role="status" className="mt-6 rounded-2xl bg-[#e5efe7] p-4 text-sm font-semibold text-[#315e4b]">{feedback}</p>}
+      {shareUrl && <div className="mt-4 rounded-2xl border border-[var(--line)] bg-white p-4"><label htmlFor="session-invite-link" className="text-sm font-bold">Session invite link</label><input id="session-invite-link" readOnly value={shareUrl} onFocus={(event) => event.currentTarget.select()} className="mt-2 w-full rounded-xl border border-[var(--line)] px-3 py-2 text-sm" /><p className="mt-2 text-xs text-[var(--muted)]">Only invited accounts can join. Your friend signs in, returns to this meal, then accepts.</p></div>}
 
       {invitationPending && (
         <section className="mt-8 rounded-[1.6rem] border border-[var(--tomato)]/30 bg-[#fff8f6] p-6">

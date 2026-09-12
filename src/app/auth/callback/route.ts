@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ensurePublicUser } from "@/lib/auth/bootstrap";
-import { parseEmailOtpType, safeNextPath } from "@/lib/auth/callback";
+import { parseEmailOtpType, safeNextPath, signInPath } from "@/lib/auth/callback";
 import { sessionUserFromSupabase } from "@/lib/auth/supabase-adapter";
 import { createAuthenticatedSupabaseServerClient } from "@/lib/db/supabase-auth-server";
 
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const otpType = parseEmailOtpType(url.searchParams.get("type"));
   const client = await createAuthenticatedSupabaseServerClient();
 
-  if (!client) return NextResponse.redirect(new URL("/sign-in?error=not-configured", url.origin));
+  if (!client) return NextResponse.redirect(new URL(signInPath(next, "not-configured"), url.origin));
 
   const result = code
     ? await client.auth.exchangeCodeForSession(code)
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   const user = result.data.user;
   if (result.error || !user) {
-    return NextResponse.redirect(new URL("/sign-in?error=invalid-link", url.origin));
+    return NextResponse.redirect(new URL(signInPath(next, "invalid-link"), url.origin));
   }
 
   await ensurePublicUser(client, sessionUserFromSupabase(user));

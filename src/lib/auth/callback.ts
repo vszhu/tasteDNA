@@ -16,7 +16,20 @@ const EMAIL_OTP_TYPES = new Set<SupportedEmailOtpType>([
 ]);
 
 export function safeNextPath(value: string | null, fallback = "/friends") {
-  return value?.startsWith("/") && !value.startsWith("//") ? value : fallback;
+  if (!value?.startsWith("/") || value.startsWith("//") || value.includes("\\") ||
+      [...value].some((character) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127)) return fallback;
+  try {
+    const url = new URL(value, "https://tastedna.invalid");
+    return url.origin === "https://tastedna.invalid" ? `${url.pathname}${url.search}${url.hash}` : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export function signInPath(next: string, error?: string) {
+  const params = new URLSearchParams({ next: safeNextPath(next) });
+  if (error) params.set("error", error);
+  return `/sign-in?${params}`;
 }
 
 export function parseEmailOtpType(value: string | null): SupportedEmailOtpType | null {
