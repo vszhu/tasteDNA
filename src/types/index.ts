@@ -33,6 +33,12 @@ export interface Dish {
   category?: string;
   cuisine: string;
   ingredients: string[];
+  ingredientSource?: {
+    kind: "published-menu" | "estimated";
+    label: string;
+    url?: string;
+    checkedAt?: string;
+  };
   features: DishFeatures;
   embedding: number[];
   imageHint?: string;

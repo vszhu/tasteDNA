@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { TASTE_DIMENSIONS, type DishFeatures, type MenuItem } from "@/types";
 import { selectNewestValidMenus } from "./shared-selection";
+import { applyConfirmedCmuIngredientDetails } from "./cmu-ingredient-details";
 import type {
   SharedMenuIngestionInput,
   SharedMenuIngestionResult,
@@ -58,6 +59,9 @@ const menuRowSchema = z.object({
   observed_at: z.string(),
   valid_from: z.string(),
   valid_until: z.string().nullable(),
+  source_provider: z.string().nullable().optional(),
+  source_uri: z.string().nullable().optional(),
+  source_metadata: z.record(z.string(), z.unknown()).nullable().optional(),
   menu_items: z.array(z.object({
     id: z.string().uuid(),
     menu_id: z.string().uuid(),
@@ -81,6 +85,9 @@ const SHARED_MENU_SELECT = `
   observed_at,
   valid_from,
   valid_until,
+  source_provider,
+  source_uri,
+  source_metadata,
   menu_items (
     id,
     menu_id,
@@ -136,7 +143,7 @@ function rpcInput(input: SharedMenuIngestionInput) {
 }
 
 function menuItems(row: z.infer<typeof menuRowSchema>): MenuItem[] {
-  return row.menu_items
+  return [...row.menu_items]
     .sort((left, right) => left.menu_order - right.menu_order)
     .map((item) => {
       const dish = item.dishes;
@@ -145,7 +152,7 @@ function menuItems(row: z.infer<typeof menuRowSchema>): MenuItem[] {
         TASTE_DIMENSIONS.map((dimension) => [dimension, storedFeatures[dimension]]),
       ) as Pick<DishFeatures, (typeof TASTE_DIMENSIONS)[number]>;
 
-      return {
+      const mapped: MenuItem = {
         id: item.id,
         menuId: item.menu_id,
         menuOrder: item.menu_order,
@@ -170,6 +177,11 @@ function menuItems(row: z.infer<typeof menuRowSchema>): MenuItem[] {
           },
         },
       };
+      return applyConfirmedCmuIngredientDetails(mapped, {
+        sourceProvider: row.source_provider,
+        sourceUri: row.source_uri,
+        sourceMetadata: row.source_metadata,
+      });
     });
 }
 
