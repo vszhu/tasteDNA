@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Info, MapPin } from "lucide-react";
+import Link from "next/link";
+import { Info, MapPin, Plus } from "lucide-react";
 import { CampusMap } from "@/components/map/campus-map";
 import { VenueCard } from "@/components/map/venue-card";
 import { CMU_CAMPUS_CENTER } from "@/components/map/fixtures";
@@ -27,8 +28,15 @@ export default function VenuesPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-14 lg:px-8">
-      <p className="text-xs font-bold tracking-[.18em] text-[var(--tomato)]">CMU DINING</p>
-      <h1 className="mt-3 text-5xl sm:text-6xl">Where’s everyone eating?</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold tracking-[.18em] text-[var(--tomato)]">CMU DINING</p>
+          <h1 className="mt-3 text-5xl sm:text-6xl">Where’s everyone eating?</h1>
+        </div>
+        <Link href="/venues/new" className="mt-2 flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-semibold transition-colors hover:border-[var(--ink)]">
+          <Plus className="size-4" /> Add a nearby spot
+        </Link>
+      </div>
       <p className="mt-4 max-w-xl leading-7 text-[var(--muted)]">
         <MapPin className="mr-1 inline size-4 -translate-y-0.5" /> {helperText}
       </p>

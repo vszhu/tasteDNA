@@ -14,6 +14,8 @@ export function CampusMap(props: {
   selectedIds: string[];
   hoveredId: string | null;
   onSelectVenue: (id: string) => void;
+  pickedLocation?: { lat: number; lng: number } | null;
+  onPickLocation?: (lat: number, lng: number) => void;
 }) {
   return <CampusMapInner {...props} />;
 }

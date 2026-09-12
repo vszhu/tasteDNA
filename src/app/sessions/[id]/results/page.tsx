@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 const SCENARIO_LABELS: Record<GroupGoldenFixture["id"], string> = {
   "clear-winner": "Clear winner",
   "misery-floor": "Fairness saves the day",
+  "all-fail-compromise": "Best of a bad bunch",
   "near-tie": "Near tie",
   "stale-menu": "Stale menu",
   "preference-flip": "Meal preference flips the pick",
