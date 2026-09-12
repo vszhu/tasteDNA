@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronsUpDown, Info, RotateCcw, ScanLine, Sparkles } from "lucide-react";
 import { MenuResultCard } from "@/components/recommendation/menu-result-card";
 import { useTaste } from "@/components/providers/taste-provider";
@@ -11,12 +11,38 @@ import { rankMenuItems } from "@/lib/recommendation/scoring";
 import { cn } from "@/lib/utils";
 
 type SortMode = "match" | "menu" | "price";
+const ANALYZE_STARTED_AT_KEY = "tastedna-analyze-started-at";
+
+function rankWithTiming(...input: Parameters<typeof rankMenuItems>) {
+  const started = performance.now();
+  const items = rankMenuItems(...input);
+  return { items, durationMs: performance.now() - started };
+}
 
 export default function ResultsPage() {
   const { extractedMenu, profile, ratings, giveFeedback, loadDemo } = useTaste();
   const [sort, setSort] = useState<SortMode>("match");
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
-  const ranked = useMemo(() => extractedMenu ? rankMenuItems(extractedMenu.items, profile) : [], [extractedMenu, profile]);
+  const ranking = useMemo(
+    () => extractedMenu ? rankWithTiming(extractedMenu.items, profile) : { items: [], durationMs: 0 },
+    [extractedMenu, profile],
+  );
+  const ranked = ranking.items;
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development" || !extractedMenu) return;
+    console.info("[TasteDNA timing] local ranking", {
+      durationMs: Math.round(ranking.durationMs * 100) / 100,
+      dishes: extractedMenu.items.length,
+    });
+    const analyzeStartedAt = Number(sessionStorage.getItem(ANALYZE_STARTED_AT_KEY));
+    if (Number.isFinite(analyzeStartedAt) && analyzeStartedAt > 0) {
+      console.info("[TasteDNA timing] total Analyze Menu", {
+        durationMs: Date.now() - analyzeStartedAt,
+        dishes: extractedMenu.items.length,
+      });
+      sessionStorage.removeItem(ANALYZE_STARTED_AT_KEY);
+    }
+  }, [extractedMenu, ranking]);
   const displayed = useMemo(() => [...ranked].sort((left, right) => {
     if (sort === "menu") return left.menuOrder - right.menuOrder;
     if (sort === "price") return (left.price ?? Number.POSITIVE_INFINITY) - (right.price ?? Number.POSITIVE_INFINITY);

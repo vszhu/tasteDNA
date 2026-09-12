@@ -6,6 +6,7 @@ export const extractedDishSchema = z.object({
   name: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500),
   price: z.number().nonnegative().nullable(),
+  category: z.string().trim().min(1).max(80),
   cuisine: z.string().trim().max(80),
   ingredients: z.array(z.string().trim().min(1)).max(20),
   sweet: normalized,

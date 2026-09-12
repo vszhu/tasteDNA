@@ -89,7 +89,9 @@ On Windows PowerShell, use `Copy-Item .env.example .env.local` instead of `cp` i
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `OPENAI_API_KEY` | No | Enables live server-side multimodal menu extraction. Never expose this with a `NEXT_PUBLIC_` prefix. |
-| `OPENAI_MENU_MODEL` | No | Menu extraction model; defaults to `gpt-5-mini`. |
+| `OPENAI_MENU_MODEL` | No | Primary menu extraction model; defaults to `gpt-5.6-luna`. |
+| `OPENAI_MENU_FALLBACK_MODEL` | No | Backup used only after an unusable primary result; defaults to `gpt-5.6-terra`. |
+| `OPENAI_MENU_TIMEOUT_MS` | No | Timeout for each menu model attempt; defaults to 30 seconds. |
 | `NEXT_PUBLIC_SUPABASE_URL` | No | Browser Supabase project URL. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No | Public Supabase anon key; RLS still controls access. |
 | `SUPABASE_SERVICE_ROLE_KEY` | No | Reserved for server-side persistence jobs. Never expose it to the browser. |
@@ -99,10 +101,10 @@ On Windows PowerShell, use `Copy-Item .env.example .env.local` instead of `cp` i
 
 1. Create an API key in the OpenAI dashboard.
 2. Put `OPENAI_API_KEY=...` in `.env.local`; do not commit the file.
-3. Optionally change `OPENAI_MENU_MODEL` to another image-capable model that supports JSON Schema output.
+3. Optionally override the primary or fallback with image-capable models that support structured output.
 4. Restart `npm run dev`.
 
-OpenAI calls only occur in `src/app/api/menu/extract/route.ts`. Images are validated by MIME type and limited to 8 MB before processing. Model output is parsed through a strict Zod schema. Empty or malformed output becomes a concise UI error rather than a stack trace.
+OpenAI calls only occur behind `src/app/api/menu/extract/route.ts`. The primary request uses `gpt-5.6-luna` with no reasoning; `gpt-5.6-terra` runs only when the primary request fails or returns unusable structured data. Browser-supported images are resized to a maximum 1,920-pixel long edge and compressed before upload when useful. Uploaded images are validated by MIME type and limited to 8 MB after preprocessing. Model output is parsed through a strict Zod schema. Empty or malformed output becomes a concise UI error rather than a stack trace.
 
 ## Supabase setup
 
