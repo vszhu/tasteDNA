@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ensurePublicUser } from "@/lib/auth/bootstrap";
-import { createSupabaseAuthAdapter, type AuthAdapter, type MagicLinkResult } from "@/lib/auth/supabase-adapter";
+import { createSupabaseAuthAdapter, type AuthAdapter, type MagicLinkResult, type PasswordAuthResult } from "@/lib/auth/supabase-adapter";
 import type { SessionStatus, SessionUser } from "@/lib/auth/types";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase";
 
@@ -15,6 +15,8 @@ interface SessionContextValue {
   user: SessionUser | null;
   status: SessionStatus;
   requestMagicLink: (email: string) => Promise<MagicLinkResult>;
+  signInWithPassword: (email: string, password: string) => Promise<PasswordAuthResult>;
+  signUp: (email: string, password: string) => Promise<PasswordAuthResult>;
   signOut: () => Promise<void>;
 }
 
@@ -32,24 +34,33 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     if (!client) return;
 
     let active = true;
+    let revision = 0;
     const adapter = createSupabaseAuthAdapter(client);
     adapterRef.current = adapter;
 
-    void adapter.getCurrentUser().then(async (currentUser) => {
-      if (currentUser) await ensurePublicUser(client, currentUser);
-      if (!active) return;
+    async function publishUser(currentUser: SessionUser | null, currentRevision: number) {
+      if (!active || revision !== currentRevision) return;
+      // Password sign-in has no callback route to create the public profile.
+      if (currentUser) await ensurePublicUser(client!, currentUser);
+      if (!active || revision !== currentRevision) return;
       setUser(currentUser);
       setStatus(currentUser ? "signed-in" : "signed-out");
-    }).catch(() => {
-      if (!active) return;
+    }
+
+    function failedBootstrap(currentRevision: number) {
+      if (!active || revision !== currentRevision) return;
       setUser(null);
       setStatus("signed-out");
-    });
+    }
+
+    const initialRevision = revision;
+    void adapter.getCurrentUser().then((currentUser) => publishUser(currentUser, initialRevision))
+      .catch(() => failedBootstrap(initialRevision));
 
     const unsubscribe = adapter.subscribe((nextUser) => {
       if (!active) return;
-      setUser(nextUser);
-      setStatus(nextUser ? "signed-in" : "signed-out");
+      const currentRevision = ++revision;
+      void publishUser(nextUser, currentRevision).catch(() => failedBootstrap(currentRevision));
     });
 
     return () => {
@@ -57,6 +68,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       adapterRef.current = null;
       unsubscribe();
     };
+  }, []);
+
+  const signInWithPassword = useCallback(async (email: string, password: string): Promise<PasswordAuthResult> => {
+    if (!adapterRef.current) return { ok: false, message: "Supabase sign-in is not configured." };
+    return adapterRef.current.signInWithPassword(email, password);
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string): Promise<PasswordAuthResult> => {
+    if (!adapterRef.current) return { ok: false, message: "Supabase sign-in is not configured." };
+    return adapterRef.current.signUp(email, password);
   }, []);
 
   const requestMagicLink = useCallback(async (email: string): Promise<MagicLinkResult> => {
@@ -71,7 +92,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setStatus("signed-out");
   }, []);
 
-  return <SessionContext.Provider value={{ user, status, requestMagicLink, signOut }}>{children}</SessionContext.Provider>;
+  return <SessionContext.Provider value={{ user, status, requestMagicLink, signInWithPassword, signUp, signOut }}>{children}</SessionContext.Provider>;
 }
 
 export function useSession() {

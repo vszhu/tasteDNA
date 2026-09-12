@@ -54,10 +54,11 @@ async function successfulBody(response: Response): Promise<unknown> {
 
 export function createFriendshipClient(fetcher: typeof fetch = fetch) {
   return {
-    async list(): Promise<FriendshipApiSummary[]> {
+    async list(signal?: AbortSignal): Promise<FriendshipApiSummary[]> {
       const response = await fetcher("/api/friendships", {
         method: "GET",
         cache: "no-store",
+        ...(signal ? { signal } : {}),
       });
       const parsed = listResponseSchema.safeParse(await successfulBody(response));
       if (!parsed.success) throw new FriendshipClientError();
