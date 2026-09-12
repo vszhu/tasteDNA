@@ -4,13 +4,13 @@ Read [LLM_HANDOFF.md](LLM_HANDOFF.md), [MEDICATION_CHECKS.md](../MEDICATION_CHEC
 
 ## Reproduced problem
 
-The live `Group lunch` session had accepted members and saved medication settings, but computing returned “Every candidate needs a medication or ingredient review.” The September 11 campus dataset contained 614 entries across 37 venues; its import intentionally left ingredient arrays empty and flagged inferred descriptions. Every nonempty opted-in medication list therefore held these dishes for review. This was separate from the earlier account-storage and invitation-link repairs.
+The live `Group lunch` session had accepted members and saved medication settings, but computing returned “Every candidate needs a medication or ingredient review.” The September 11 campus dataset contained 614 entries across 37 venues; its import generated estimated ingredients and marked descriptions uncertain. The live follow-up confirmed that populated ingredient arrays were still estimates, not published evidence. Every nonempty opted-in medication list therefore held these dishes for review. This was separate from the earlier account-storage and invitation-link repairs.
 
 An additional bug engaged medication venue filtering for an explicitly saved empty list, potentially blaming meal-preference exclusions on medication checks. Empty lists now preserve the original taste-only behavior while still counting as connected settings.
 
 ## Ingredient evidence
 
-Shared-menu reads enrich existing imported rows; no database rewrite, account changes, or secrets are needed. The source gate requires the original `cmu-dining-dataset-v2` provider, September 11 dataset date, and `dishDetailsInferredFromNames` metadata. Exact dataset IDs and dish names prevent cross-venue guesses. Published components additionally require the matching source URL. New user-uploaded menus remain authoritative and are not overwritten.
+Shared-menu reads enrich existing imported rows; no database rewrite, account changes, or secrets are needed. The source gate requires the original `cmu-dining-dataset-v2` provider, September 11 dataset date, and `dishDetailsInferredFromNames` metadata. Exact dataset IDs and dish names prevent cross-venue guesses. Published components additionally require the matching source URL. Published components replace original importer estimates even when those arrays are nonempty. New user-uploaded menus remain authoritative and are not overwritten.
 
 - `src/lib/menu/cmu-ingredient-details.ts` adds factual components from the linked CMU menus. These are menu descriptions, not complete recipes or allergen declarations. Sauces, preparation, subingredients, and current availability still require confirmation.
 - Recipe estimates are explicitly identified as estimates. Their `ingredients-estimated` marker remains in `unknownFields`, so medication screening cannot promote them to a checked shortlist. An estimate can identify a question to review; it cannot establish absence of an interaction.
@@ -26,10 +26,12 @@ The initial published source is [CMU’s Au Bon Pain menu](https://apps.studenta
 
 The existing group flow is retained. Review and warning dishes remain excluded; if none remain, the existing error explains that estimated ingredients still need confirmation. No new group workflow or API contract is introduced. Explicitly empty saved lists no longer trigger medication-based venue filtering.
 
-`GROUP_RECOMMENDATION_VERSION` is `fair-group-v1.2.0-menu-evidence`; the server invalidates older snapshots even if account revisions match, because a read-time ingredient update does not fire a database invalidation trigger.
+`GROUP_RECOMMENDATION_VERSION` is `fair-group-v1.2.1-published-ingredients`; the server invalidates older snapshots even if account revisions match, because a read-time ingredient update does not fire a database invalidation trigger.
 
 ## Verification
 
-Focused tests cover public ingredient provenance, unchanged persisted identities/taste vectors, source gating, unsupported medicines, empty-list behavior, ingredient labels, and old-result invalidation. The full application suite passed 394 tests in 63 files; the final coverage assertion then passed with all 17 ingredient-detail tests. ESLint, TypeScript, and production build passed. Hosted verification follows deployment and must be recorded separately.
+Focused tests cover public ingredient provenance, unchanged persisted identities/taste vectors, source gating, unsupported medicines, empty-list behavior, ingredient labels, and old-result invalidation. The full application suite passed 395 tests in 63 files. ESLint, TypeScript, and production build passed. Hosted verification follows deployment and must be recorded separately.
 
 No medication rules or dose guidance were changed. Do not disable checks, clear anyone’s list, or fabricate restaurant ingredients to force a successful recommendation.
+
+Production follow-up: the first deployment preserved populated importer estimates, so the original group remained blocked. The follow-up removes that extra guard only inside the exact original-source gate. The regression uses the observed nonempty BLT estimate with an uncertain-description marker. Final live outcome is recorded in the release PR after deployment.
