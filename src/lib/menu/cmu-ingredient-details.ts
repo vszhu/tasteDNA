@@ -1,4 +1,5 @@
 import type { MenuItem } from "@/types";
+import { estimateCmuDishIngredients } from "./cmu-ingredient-estimates";
 
 export const CMU_ABP_MENU_URL = "https://apps.studentaffairs.cmu.edu/dining/dashboard_images/Production/menus/113/abp-online-menu.pdf";
 export const CMU_INGREDIENT_SOURCE_CHECKED_AT = "2026-09-12";
@@ -58,6 +59,38 @@ export function applyConfirmedCmuIngredientDetails(item: MenuItem, source: CmuMe
         ...item.dish.features,
         majorIngredients: [...ingredients],
         unknownFields: item.dish.features.unknownFields?.filter((field) => !/ingredient|description/i.test(field)),
+      },
+    },
+  };
+}
+
+/**
+ * Confirmed menu facts take precedence. Estimated recipes are useful context but
+ * deliberately retain missing-evidence review in the medication checker.
+ */
+export function applyCmuIngredientDetails(item: MenuItem, source: CmuMenuSource): MenuItem {
+  const published = applyConfirmedCmuIngredientDetails(item, source);
+  if (published !== item || !isOriginalCmuDatasetSource(source)) return published;
+  const datasetId = source.sourceMetadata?.datasetId;
+  if (typeof datasetId !== "number") return item;
+  const hasImportedIngredients = item.dish.ingredients.length > 0;
+  const ingredients = hasImportedIngredients ? item.dish.ingredients : estimateCmuDishIngredients(datasetId, item.dish.name);
+  if (!ingredients?.length) return item;
+  return {
+    ...item,
+    dish: {
+      ...item.dish,
+      // Guessed foods belong in inferred fields, not in observed menu text.
+      description: "Estimated recipe ingredients based on the dish name. Confirm the actual recipe and subingredients with the restaurant.",
+      ingredients,
+      ingredientSource: {
+        kind: "estimated",
+        label: hasImportedIngredients ? "Estimated ingredients from the original menu import" : "Estimated recipe ingredients",
+      },
+      features: {
+        ...item.dish.features,
+        majorIngredients: hasImportedIngredients ? item.dish.features.majorIngredients : [...ingredients],
+        unknownFields: [...new Set([...(item.dish.features.unknownFields ?? []), "ingredients-estimated"])],
       },
     },
   };

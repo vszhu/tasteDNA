@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { TASTE_DIMENSIONS, type DishFeatures, type MenuItem } from "@/types";
 import { selectNewestValidMenus } from "./shared-selection";
-import { applyConfirmedCmuIngredientDetails } from "./cmu-ingredient-details";
+import { applyCmuIngredientDetails } from "./cmu-ingredient-details";
 import type {
   SharedMenuIngestionInput,
   SharedMenuIngestionResult,
@@ -177,7 +177,7 @@ function menuItems(row: z.infer<typeof menuRowSchema>): MenuItem[] {
           },
         },
       };
-      return applyConfirmedCmuIngredientDetails(mapped, {
+      return applyCmuIngredientDetails(mapped, {
         sourceProvider: row.source_provider,
         sourceUri: row.source_uri,
         sourceMetadata: row.source_metadata,

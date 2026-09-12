@@ -5,7 +5,7 @@ import { MEDICATION_CATALOG } from "@/lib/medications/catalog";
 import { prepareGroupMedicationChecks } from "@/lib/group-sessions/medication-checks";
 import { computeGroupRecommendation } from "@/lib/group/ranking";
 import type { MenuItem } from "@/types";
-import { applyConfirmedCmuIngredientDetails, CMU_ABP_MENU_URL, type CmuMenuSource } from "./cmu-ingredient-details";
+import { applyCmuIngredientDetails, applyConfirmedCmuIngredientDetails, CMU_ABP_MENU_URL, type CmuMenuSource } from "./cmu-ingredient-details";
 
 const source: CmuMenuSource = {
   sourceProvider: "cmu-dining-dataset-v2", sourceUri: CMU_ABP_MENU_URL,
@@ -88,5 +88,48 @@ describe("published CMU ingredient details", () => {
     expect(checked.input.members[0].medicationExcludedItemIds).toEqual([incomplete.id]);
     const result = computeGroupRecommendation(checked.input)!;
     expect(result.assignments.find((assignment) => assignment.memberId === userId)?.dishUtility).toMatchObject({ menuItemId: item.id, excluded: false });
+  });
+});
+
+describe("estimated CMU ingredient context", () => {
+  it("uses published components before an estimated recipe", () => {
+    const result = applyCmuIngredientDetails(importedItem(), source);
+    expect(result.dish.ingredientSource?.kind).toBe("published-menu");
+    expect(result.dish.features.unknownFields).not.toContain("ingredients-estimated");
+  });
+
+  it("adds useful estimated ingredients without making a dish eligible for medication screening", () => {
+    const item = importedItem("Hot Oatmeal");
+    const result = applyCmuIngredientDetails(item, source);
+    expect(item.dish.ingredients).toEqual([]);
+    expect(result.dish.ingredients.length).toBeGreaterThan(0);
+    expect(result.dish.ingredientSource?.kind).toBe("estimated");
+    expect(result.dish.ingredientSource?.url).toBeUndefined();
+    expect(result.dish.features.unknownFields).toContain("ingredients-estimated");
+    expect(checkDishMedications(result.dish, ["simvastatin"])).toMatchObject({ status: "review", needsIngredientDetails: true });
+  });
+
+  it("labels inherited importer estimates while preserving their ingredient arrays and taste data", () => {
+    const item = importedItem("A named dish");
+    item.dish.ingredients = ["grapefruit juice"];
+    item.dish.features.majorIngredients = ["grapefruit juice", "rice"];
+    item.dish.description = "An inferred recipe containing grapefruit juice.";
+    item.dish.features.unknownFields = [];
+    const result = applyCmuIngredientDetails(item, source);
+    expect(result.dish.ingredients).toBe(item.dish.ingredients);
+    expect(result.dish.features.majorIngredients).toBe(item.dish.features.majorIngredients);
+    expect(result.dish.embedding).toBe(item.dish.embedding);
+    expect(result.dish.ingredientSource).toMatchObject({ kind: "estimated", label: "Estimated ingredients from the original menu import" });
+    const check = checkDishMedications(result.dish, ["simvastatin"]);
+    expect(check).toMatchObject({ status: "review", needsIngredientDetails: true });
+    expect(check.findings[0].evidence).toBe("inferred-ingredient");
+    expect(item.dish.features.unknownFields).toEqual([]);
+  });
+
+  it("does not alter user-created menus or fill unspecified categories", () => {
+    const item = importedItem("Hot Oatmeal");
+    expect(applyCmuIngredientDetails(item, { ...source, sourceProvider: "text" })).toBe(item);
+    const category = importedItem("Unspecified daily special");
+    expect(applyCmuIngredientDetails(category, source)).toBe(category);
   });
 });
