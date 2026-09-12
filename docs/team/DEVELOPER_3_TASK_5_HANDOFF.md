@@ -4,7 +4,9 @@ Last updated: 2026-09-12
 
 Branch: `codex/platform-friendship-api`
 
-State: implemented and verified locally; not committed, pushed, merged, or deployed
+State: merged to `main` in `542f87a`; hosted migration deployment still requires verification
+
+Post-merge UI/auth integration work is documented in [the auth and friendship fix handoff](./DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md).
 
 Read [the Tasks 1–4 handoff](./DEVELOPER_3_TASK_4_HANDOFF.md) first. Task 5 reuses its authentication helpers, `friendships` table, transition trigger, participant RLS, and unordered uniqueness rule.
 
