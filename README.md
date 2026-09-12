@@ -41,7 +41,7 @@ src/
 supabase/migrations/        # PostgreSQL + pgvector schema and RLS
 ```
 
-The browser state provider is the demo persistence adapter. It stores ratings, extracted menu data, and feedback in `localStorage`, so the full flow survives refreshes and works without Supabase. The Supabase boundary and schema are intentionally separate so a team can replace that adapter without touching the recommendation engine or UI.
+Anonymous ratings, extracted menu data, and feedback stay under the existing `tastedna-v1` localStorage key, so the complete solo flow works without an account or external service. With Supabase configured, a magic-link session instead loads and upserts that account's ratings and derived TasteDNA profile behind owner-only RLS. Signing in does not import anonymous data; an explicit import flow is deferred.
 
 ## Recommendation algorithm
 
@@ -116,11 +116,22 @@ OpenAI calls only occur behind `src/app/api/menu/extract/route.ts`. The primary 
 2. Apply the migrations (or run `supabase db push` with the CLI).
 3. Add the project URL and publishable key to `.env.local` for browser access.
 4. Add `SUPABASE_SECRET_KEY` only to the server environment when privileged persistence is needed.
-5. Add your preferred Supabase Auth flow, then replace the local provider adapter with authenticated reads and upserts.
+5. In Supabase Authentication → URL Configuration, set the local Site URL to `http://localhost:3000` and add `http://localhost:3000/auth/callback` as a redirect URL. Add the deployed callback URL before production use.
+6. Restart the Next.js development server after changing environment variables, then use the sign-in page to request a magic link.
 
 The implementation temporarily accepts the legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
 `SUPABASE_SERVICE_ROLE_KEY` names as fallbacks, but new setups should use publishable and
 secret keys.
+
+Magic-link auth uses Supabase's PKCE-compatible server-side flow. The browser and request-scoped server clients share auth cookies, `proxy.ts` refreshes verified sessions, and `/auth/callback` exchanges the one-time code before redirecting to a token-free application URL. The database trigger creates `public.users` rows for new Auth users. Signed-in ratings retain the app's stable text dish IDs while an optional canonical dish UUID remains available for later shared data.
+
+If you customize the Supabase email template to send a token hash, use a callback shaped like:
+
+```text
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=/friends
+```
+
+Both code-exchange and token-hash callbacks are supported. Never put `SUPABASE_SECRET_KEY` in a `NEXT_PUBLIC_` variable; ordinary auth and TasteDNA persistence use the publishable key plus RLS.
 
 The migration installs `pgcrypto` and `vector`, creates User, Dish, DishFeatures, Rating, TasteProfile, Menu, MenuItem, and Recommendation tables, adds indexes, and enables row-level security. Production OpenAI embeddings use 1,536-dimensional `text-embedding-3-small` vectors. The 46 starter foods live in typed source data so the demo bundle never needs a database round trip; a production sync can upsert them into `dishes` and `dish_features`.
 

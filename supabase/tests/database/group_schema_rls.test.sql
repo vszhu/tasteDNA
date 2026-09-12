@@ -30,15 +30,16 @@ values
   ('00000000-0000-0000-0000-000000000003', 'Invitee'),
   ('00000000-0000-0000-0000-000000000004', 'Declined'),
   ('00000000-0000-0000-0000-000000000005', 'Outsider'),
-  ('00000000-0000-0000-0000-000000000006', 'Transient');
+  ('00000000-0000-0000-0000-000000000006', 'Transient')
+on conflict (id) do update set display_name = excluded.display_name;
 
 insert into public.dishes (id, name)
 values ('10000000-0000-0000-0000-000000000001', 'Policy Test Dish');
 
-insert into public.ratings (id, user_id, dish_id, value, source)
+insert into public.ratings (id, user_id, dish_id, client_id, client_dish_id, value, source)
 values
-  ('11000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 5, 'onboarding'),
-  ('11000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001', 4, 'onboarding');
+  ('11000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'creator-rating', 'policy-test-dish', 5, 'onboarding'),
+  ('11000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001', 'member-rating', 'policy-test-dish', 4, 'onboarding');
 
 insert into public.taste_profiles (id, user_id, rating_count)
 values

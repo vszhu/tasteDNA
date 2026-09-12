@@ -9,7 +9,7 @@ import { isValidEmail } from "@/lib/auth/friend-rules";
 import { cn } from "@/lib/utils";
 
 export default function SignInPage() {
-  const { user, status, requestMagicLink, signInForDemo } = useSession();
+  const { user, status, requestMagicLink } = useSession();
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -20,9 +20,10 @@ export default function SignInPage() {
     if (!isValidEmail(email)) { setError("Enter a valid email address."); return; }
     setError(null);
     setSending(true);
-    await requestMagicLink(email);
+    const result = await requestMagicLink(email);
     setSending(false);
-    setSent(true);
+    if (result.ok) setSent(true);
+    else setError(result.message);
   }
 
   if (status === "signed-in" && user) {
@@ -72,9 +73,9 @@ export default function SignInPage() {
         )}
 
         <div className="mt-8 border-t border-[var(--line)] pt-6">
-          <button type="button" onClick={signInForDemo} className="flex items-center gap-2 text-sm font-semibold text-[var(--muted)] hover:text-[var(--ink)]">
-            <Sparkles className="size-3.5" /> Skip for now — continue with a demo account
-          </button>
+          <Link href="/dashboard" className="flex items-center gap-2 text-sm font-semibold text-[var(--muted)] hover:text-[var(--ink)]">
+            <Sparkles className="size-3.5" /> Skip for now — continue solo
+          </Link>
         </div>
       </div>
     </section>
