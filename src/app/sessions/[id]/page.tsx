@@ -7,6 +7,7 @@ import { AlertCircle, Check, Clock, Copy, RefreshCw, Sparkles, UserPlus, Users, 
 import { VenueCard } from "@/components/map/venue-card";
 import { isCandidateSetComplete, isSelectable, toggleCandidate } from "@/components/map/selection";
 import { useVenues } from "@/components/map/use-venues";
+import { GroupMedicationCard } from "@/components/medications/group-medication-card";
 import { useSession } from "@/components/providers/session-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +35,12 @@ function errorMessage(error: unknown, fallback: string) {
 }
 
 export default function SessionRoomPage() {
+  const { user, status } = useSession();
+  const { id } = useParams<{ id: string }>();
+  return <SessionRoomAccount key={`${status}:${user?.id ?? "anonymous"}:${id}`} />;
+}
+
+function SessionRoomAccount() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const sessionId = params.id;
@@ -278,6 +285,9 @@ export default function SessionRoomPage() {
         </section>
       )}
 
+      {canParticipate && <GroupMedicationCard />}
+      {canParticipate && detail.recommendationNeedsRefresh && <p role="status" className="mt-4 rounded-xl bg-[#fff8e7] p-4 text-sm text-[#71561d]">This meal needs a fresh check. A saved list, membership, or check coverage changed; recompute before choosing.</p>}
+
       {canParticipate && (
         <>
           <section className="mt-9">
@@ -309,7 +319,7 @@ export default function SessionRoomPage() {
           </section>
 
           <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-[1.5rem] border border-[var(--line)] bg-white p-5 sm:flex-row">
-            <div><p className="font-bold">{detail.latestRecommendation ? "A group result is ready." : isCreator ? "Ready to choose fairly?" : "Waiting for the creator to reveal the pick."}</p><p className="mt-1 text-sm text-[var(--muted)]">{detail.latestRecommendation ? `Computed with ${detail.latestRecommendation.algorithmVersion}.` : "Results use saved profiles, current check-ins, and shared menus."}</p></div>
+            <div><p className="font-bold">{detail.latestRecommendation ? "A group result is ready." : isCreator ? "Ready to choose fairly?" : "Waiting for the creator to reveal the pick."}</p><p className="mt-1 text-sm text-[var(--muted)]">{detail.latestRecommendation ? `Computed with ${detail.latestRecommendation.algorithmVersion}.` : "Results use saved taste profiles, current check-ins, shared menus, and each member’s opted-in medication list."}</p></div>
             {isCreator ? <Button size="lg" variant="accent" disabled={computing} onClick={() => void computeRecommendation()}>{computing ? "Computing…" : detail.latestRecommendation ? "Recompute result" : "Compute group result"} <Sparkles className="size-4" /></Button> : detail.latestRecommendation ? <Link href={`/sessions/${sessionId}/results`} className={buttonVariants({ size: "lg", variant: "accent" })}>View group result</Link> : null}
           </div>
         </>

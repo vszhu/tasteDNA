@@ -41,6 +41,8 @@ function repository(overrides: Partial<GroupSessionRepository> = {}): GroupSessi
     replaceCandidates: vi.fn(),
     loadComputationInput: vi.fn().mockResolvedValue({
       rankingInput,
+      medicationAccounts: [],
+      medicationVersions: {},
       identity: { menus: ["menu-a"], members: [{ id: "a", version: 1 }] },
     }),
     persistRecommendation: vi.fn().mockResolvedValue(snapshot),
@@ -70,7 +72,8 @@ describe("group session computation", () => {
       SESSION_ID,
       "stub-v1",
       expect.stringMatching(/^[0-9a-f]{64}$/),
-      recommendation,
+      expect.objectContaining({ ...recommendation, medicationSummary: expect.objectContaining({ checkedMembers: 0 }) }),
+      {},
     );
   });
 

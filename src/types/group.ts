@@ -152,6 +152,15 @@ export interface PreferenceQuestion {
   prompt: string;
 }
 
+export interface GroupMedicationSummary {
+  checkedMembers: number;
+  uncheckedMembers: number;
+  flaggedDishOptions: number;
+  withheldVenues: number;
+  rulesVersion: string;
+  revisionFingerprint: string;
+}
+
 export interface GroupRecommendation {
   sessionId: string;
   winner: VenueSummary;
@@ -167,6 +176,7 @@ export interface GroupRecommendation {
   explanationFacts: GroupExplanationFact[];
   decisionConfidence?: DecisionConfidence;
   preferenceQuestion?: PreferenceQuestion;
+  medicationSummary?: GroupMedicationSummary;
 }
 
 /**
@@ -176,4 +186,6 @@ export interface GroupRecommendation {
 export interface GroupDecisionMember {
   member: DiningSessionMember;
   profile: TasteProfile;
+  /** Server-derived constraints; raw medication names never enter ranking outputs. */
+  medicationExcludedItemIds?: readonly string[];
 }

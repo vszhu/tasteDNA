@@ -16,7 +16,7 @@ Read this before modifying the medication, account, friendship, or group flows. 
 | Password accounts and friendship refresh | [FRIENDSHIP_PASSWORD_FLOW_HANDOFF.md](FRIENDSHIP_PASSWORD_FLOW_HANDOFF.md) |
 | Friendship endpoints, auth configuration, hosted migration dependency | [DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md](DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md), [DEVELOPER_3_TASK_5_HANDOFF.md](DEVELOPER_3_TASK_5_HANDOFF.md) |
 | Persistence, menus, and platform integration | [DEVELOPER_3_TASK_4_HANDOFF.md](DEVELOPER_3_TASK_4_HANDOFF.md) |
-| Real group-session API and remaining UI integration | [DEVELOPER_3_TASK_6_HANDOFF.md](DEVELOPER_3_TASK_6_HANDOFF.md) |
+| Real group-session API and UI integration | [DEVELOPER_3_TASK_6_HANDOFF.md](DEVELOPER_3_TASK_6_HANDOFF.md) |
 | Group scoring and contracts | [DEVELOPER_2_TASK_6_GROUP_CONTRACT_MAINTENANCE.md](DEVELOPER_2_TASK_6_GROUP_CONTRACT_MAINTENANCE.md) |
 
 ## What has merged
@@ -27,10 +27,11 @@ Read this before modifying the medication, account, friendship, or group flows. 
 | `9ea79c4` / PR #25 | Friends page connected to real HTTP endpoints; actionable auth email errors | See the developer 3 handoff |
 | `4516ba0` / [PR #26](https://github.com/vszhu/tasteDNA/pull/26) | Password signup/sign-in, account switching, public-profile bootstrap, reliable friend refresh | 254 tests in 49 files, lint, production build; local Chrome account-screen checks |
 | `945986b`, integrated through `f6b20ba` | Authenticated group-session and recommendation backend, with migration `202609120004_group_session_api.sql` | Developer 3 reports local application and database checks in the Task 6 handoff; combined live verification is still outstanding |
+| `3625ff0`, integrated through `8bdb4c4` | Group UI connected to the real API; mock session/friend adapters removed | Developer 3 reports 271 tests plus lint/build; hosted state must still be verified |
 
 These are historical check results, not substitutes for testing later changes. A GitHub merge is not proof that Vercel deployed it or that a hosted migration ran.
 
-The Task 6 handoff was written before its commit and merge; its “not committed, pushed, merged” state and initial deployment steps are historical. The backend is now in `main`. Do not reimplement it or reapply already-applied migrations based on that older wording.
+The Task 6 backend and UI integration are now in `main`. Do not reimplement them or infer hosted migration state from their presence in the repository.
 
 ## Preserve these integration rules
 
@@ -43,18 +44,19 @@ The Task 6 handoff was written before its commit and merge; its “not committed
 - Friendship APIs live under `src/app/api/friendships/`; authorization and persistence live in `src/lib/friendships/`. Verify the requester server-side. Keep privileged email lookup on the server and ordinary participant access protected by RLS.
 - Preserve neutral request responses for created, existing, and unknown-email cases. Do not reveal whether an arbitrary email is registered. Only the pending request's addressee can accept or decline it.
 - Rejected relationships currently remain terminal because of the unique unordered-pair schema. Do not assume a declined pair can be reused for another request without an explicit product/schema change.
-- `src/app/sessions/new/page.tsx` still uses `mockFriendsAdapter` and `mockSessionAdapter`. Real friendship acceptance is **not** evidence that real group invitations or shared group sessions work. Treat that integration as separate unfinished work.
-- The backend for that integration now exists in `src/app/api/group-sessions/` and `src/lib/group-sessions/`. Use its validated route contracts when replacing the mock UI. Keep raw member profiles and other members' meal preferences private on the server; only the creator can compute the derived recommendation. Read the Task 6 handoff before wiring these routes.
+- The session pages now use the real clients in `src/lib/group-sessions/client.ts` and `src/lib/friendships/client.ts`; the old mock adapters were removed. Preserve this integration and verify the live service separately from local UI tests.
+- The backend lives in `src/app/api/group-sessions/` and `src/lib/group-sessions/`. Keep raw member profiles and other members' meal preferences private on the server; only the creator can compute the derived recommendation. Read the Task 6 handoff before changing these routes or the connected UI.
 
 ### Medication map and taste data
 
 - Provider composition is Session → Taste → Medication inside the application layout. Medication state is separate from the taste profile.
-- Medication lists stay in account-scoped browser-tab `sessionStorage`. Never include them in Supabase taste records, shared menus, group payloads, extraction prompts, or recommendation-learning inputs. Keep account-switch masking and storage-error handling.
+- The user explicitly extended the original tab-only medication scope to private account saving and group use. Anonymous/unsaved lists stay in account-scoped `sessionStorage`; explicit saves go to owner-only `user_medication_profiles`. Group use is off by default and requires saved consent. The server uses each accepted member’s opted-in list to exclude review-needed dish options. Never include medication names in taste records, shared menus, shared group payloads, extraction prompts, or learning inputs. Preserve account-switch masking, RLS, error states, and revision-based result invalidation. Read the expansion/group handoff before editing this boundary.
 - `src/lib/medications/catalog.ts`, `check.ts`, and `map.ts` define rule coverage, deterministic screening, and graph paths. `src/components/medications/interaction-explorer.tsx` renders the shared explorer used by medications and results.
 - The map connects medicines to covered food terms and dishes; shared nodes must not imply drug–drug interactions. Preserve rule ownership and evidence on every highlighted path.
 - Keep medication review order separate from taste scores. With no medications, preserve the original taste ranking and explanation behavior. Unknown medicines and incomplete evidence must remain visibly unverified; “No listed match” is not a safety guarantee.
 - Example-lab medicines are temporary and separate from the user's actual list. Adopting a sample menu from medications, decoder, or empty results changes the menu only; it must not replace saved ratings or medications. Explicit full-profile demo actions are different.
 - Check the medication document before expanding coverage. Verify exact formulations and authoritative sources; do not invent clinical claims or turn taste scores into medical safety probabilities.
+- Catalog `2026-09-12.2` covers 12 forms. Preserve the distinction between tablet timing, portion review, and explicit ingredient warnings. Alcohol-related contextual phrases qualify only overlapping evidence; they must not hide a separate explicit alcohol ingredient. See the [expansion handoff](MEDICATION_CATALOG_EXPANSION_HANDOFF.md) for the added medicines and verification.
 
 ## Local setup and meaningful checks
 
@@ -79,22 +81,14 @@ Relevant regressions include `src/app/friends/page.test.ts`, `src/app/sign-in/pa
 
 Test the changed browser flow too. A mocked API test is not a live two-account test. Documentation-only edits need link/path and diff checks; do not rerun the application suite solely for prose changes.
 
-## Live blockers and next steps
+## Current verification and release status — September 12, 2026
 
-The following was observed during the September 12 test and push:
+- Both user-authorized accounts have now been created through the deployed TasteDNA signup UI, and password sign-in succeeded. The Gmail account sent a friendship request to the CMU account; the CMU account received and accepted it. This supersedes the earlier signup/email-limit blocker. See the friendship handoff for the completed browser steps.
+- The expansion started at `8bdb4c4` and then incorporated latest main `ccb1fc1`, including PR #29’s menu ingestion and PR #30’s submission docs, without overwriting them. Fetch again immediately before integrating; preserve other contributors’ commits. The group UI already uses the real backend. Do not reintroduce mock adapters.
+- The twelve-form catalog and private group integration pass 334 application tests in 57 files, lint, and the production build. The isolated database harness applied all seven migrations and passed 29 checks covering RLS, validation, consent defaults, invalidation, stale revision rejection, and RPC authorization. This is local verification, not a hosted migration or multi-connection concurrency test.
+- Local browser auth is configured using the deployed app’s public Supabase URL/publishable key in ignored `.env.local`. No privileged server key was obtained. Local friend/group server operations still require the documented server-only environment variables.
+- The hosted private-medication migration is not applied or verified. Automatic approval review rejected opening the Supabase dashboard because private console access had not been explicitly authorized. Do not bypass that decision using admin APIs or another surface. Ask for explicit project-console/database authorization after the migration and app changes are reviewable.
+- Apply `202609120005_medication_profiles.sql` after existing migrations and before deploying the new group code. Preserve existing data and settings. Then test account save/reload, opt-in/out, two-account isolation, group recompute, and stale-result invalidation on the hosted service. Remove synthetic test medication lists afterward.
+- Historical Vercel status for `4516ba0` was “Deployment was blocked,” but later teammate code is now deployed with password auth and real friendships. Check the new revision’s actual deployment status; a merge is not deployment proof. Never spoof commit authorship to bypass hosting controls.
 
-- Both authorized account password sign-ins returned `invalid_credentials`. A signup attempt returned HTTP 429 `over_email_send_rate_limit`, and further signup attempts stopped. Neither requested account was verified as created. No real request/acceptance between those accounts was completed.
-- The earlier developer 3 handoff reported `supabase/migrations/202609120003_friendship_api.sql` pending on the hosted project. This later test could not verify its current application status. Migration presence in Git does not mean it exists in the hosted database.
-- The newly merged group backend also requires `supabase/migrations/202609120004_group_session_api.sql`. Its hosted application status is unverified; inspect pending migrations and preserve their order before testing the real group API.
-- At the time of testing, the local checkout had no configured Supabase credentials or linked project, and the dashboard required sign-in. Browser auth needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (legacy anon-key fallback exists). The friendship server also requires `SUPABASE_SECRET_KEY` (legacy service-role fallback exists). Privileged keys must never be public browser variables.
-- Vercel's GitHub status for merged commit `4516ba0` said **“Deployment was blocked.”** The exact dashboard reason was not available. Do not label this a compilation failure: the local production build passed. Do not change commit authorship to impersonate someone else as a workaround.
-
-To finish live verification when the required access is available:
-
-1. Inspect Vercel's current deployment details and resolve the actual reported blocker through the project owner's access/settings. Confirm the deployed commit before testing new UI.
-2. Inspect Supabase email delivery, confirmation, and callback configuration. Resolve the provider's mail restriction; do not bypass confirmation or repeatedly retry a rate-limited signup. Password login avoids a new magic-link email only after a usable account exists.
-3. Confirm the Supabase project identity and review pending migrations with `supabase db push --dry-run`. Apply the required migration within authorized scope after reviewing its effects. Verify server environment configuration without exposing key values.
-4. Complete signup and email confirmation for the user-authorized accounts. Obtain test credentials through the current authorized session; none are stored here. Do not create unrelated accounts or alter a Google account's password.
-5. Sign in as A and request B. Confirm A sees outgoing pending; sign in as B and confirm incoming pending. Accept, then verify both accounts show the friendship after focus/refresh. Also check a reload, sign-out, and switching accounts for stale data.
-6. Use a separate relationship to test decline because rejected pairs are terminal. Verify unauthorized users cannot accept someone else's request. Do not describe group invitations as verified unless their separate real implementation has been exercised.
-7. Record the actual deployed revision, results, and remaining limitations in the feature handoff. Update this document's status if a blocker is resolved.
+The detailed implementation and release checklist are in [MEDICATION_CATALOG_EXPANSION_HANDOFF.md](MEDICATION_CATALOG_EXPANSION_HANDOFF.md). Do not label uncompleted hosted medicine/group checks as passed.

@@ -24,17 +24,23 @@ function StatTile({ label, value, sublabel }: { label: string; value: string; su
 /**
  * Presentation-only: renders exactly the fields on a computed
  * `GroupRecommendation`, nothing invented client-side. Works the same
- * whether that recommendation came from a golden fixture (today) or a real
- * reveal API (once one exists).
+ * whether that recommendation came from a golden fixture or the real API.
  */
 export function GroupResultsView({ recommendation, memberNames = {} }: { recommendation: GroupRecommendation; memberNames?: Record<string, string> }) {
   const winnerFreshness = FRESHNESS_COPY[recommendation.winner.menuFreshness];
   const gap = runnerUpGap(recommendation);
   const nearTie = isNearTie(recommendation);
   const others = otherVenueScores(recommendation);
+  const medications = recommendation.medicationSummary;
 
   return (
     <div className="space-y-8">
+      {medications && <section aria-label="Group medication coverage" className="rounded-2xl border border-[#d5dcd8] bg-[#eef2ec] p-5">
+        <h3 className="text-sm font-bold">Private lists, shared meal guidance</h3>
+        <p className="mt-2 text-sm leading-6">{medications.checkedMembers} of {medications.checkedMembers + medications.uncheckedMembers} members connected their saved medication settings.</p>
+        <p className="mt-2 text-xs leading-6 text-[var(--muted)]">{medications.checkedMembers ? `${medications.flaggedDishOptions} dish–member options held for review; ${medications.withheldVenues} candidate venues withheld because someone had no eligible option. Medication names stay private.` : "No medication lists were applied to this result. Members can connect their own list from medication settings."} {medications.uncheckedMembers > 0 && `${medications.uncheckedMembers} members were not checked for medications.`}</p>
+        <p className="mt-2 text-xs leading-6 text-[var(--muted)]">These are selected food checks, not a safety clearance. Timing or portion questions may require review. Confirm ingredients and medication guidance before ordering; taste scores measure preferences.</p>
+      </section>}
       <div className="relative overflow-hidden rounded-[1.8rem] bg-[var(--ink)] p-6 text-white sm:p-8">
         <p className="flex items-center gap-2 text-xs font-bold tracking-[.18em] text-[var(--saffron)]">
           <Award className="size-3.5" /> {recommendation.compromiseRequired ? "BEST COMPROMISE" : "THE GROUP’S PICK"}

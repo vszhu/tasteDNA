@@ -42,7 +42,7 @@ function normalizedWords(value: string): string {
     .replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-function mentions(value: string, term: string): { found: boolean; qualified: boolean } {
+function mentions(value: string, term: string, qualifiedPhrases: readonly string[] = []): { found: boolean; qualified: boolean } {
   const text = normalizedWords(value);
   const needle = normalizedWords(term);
   const pattern = new RegExp(`\\b${needle}\\b`, "g");
@@ -52,6 +52,14 @@ function mentions(value: string, term: string): { found: boolean; qualified: boo
     qualified: matches.length > 0 && matches.every((match) => {
       const before = text.slice(0, match.index).split(" ").slice(-5).join(" ");
       const after = text.slice((match.index ?? 0) + needle.length).trim().split(" ").slice(0, 3).join(" ");
+      // Qualify only the occurrence inside this phrase, not another confirmed
+      // ingredient elsewhere (e.g. "root beer and vodka").
+      const contextual = qualifiedPhrases.some((phrase) =>
+        [...text.matchAll(new RegExp(`\\b${normalizedWords(phrase)}\\b`, "g"))].some((context) =>
+          context.index! <= match.index! && context.index! + context[0].length >= match.index! + needle.length,
+        ),
+      );
+      if (contextual) return true;
       return /\b(no|not|without|omit|omitted|optional|substitute|substituted|free of)\b/.test(before) ||
         /^(free|optional|omitted|removed|on request)\b/.test(after);
     }),
@@ -62,8 +70,8 @@ function findingForRule(dish: Dish, medicationName: string, rule: FoodInteractio
   const textFields = [dish.name, dish.description];
   const ingredientFields = [...dish.ingredients, ...dish.features.majorIngredients];
   const matches = rule.terms.flatMap((term) => {
-    const textMentions = textFields.map((value) => mentions(value, term)).filter((mention) => mention.found);
-    const ingredientMentions = ingredientFields.map((value) => mentions(value, term)).filter((mention) => mention.found);
+    const textMentions = textFields.map((value) => mentions(value, term, rule.qualifiedPhrases)).filter((mention) => mention.found);
+    const ingredientMentions = ingredientFields.map((value) => mentions(value, term, rule.qualifiedPhrases)).filter((mention) => mention.found);
     if (!textMentions.length && !ingredientMentions.length) return [];
     // A negated or optional menu mention must never be overridden by AI-inferred ingredients.
     const evidence: MedicationFinding["evidence"] = textMentions.length

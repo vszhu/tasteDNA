@@ -91,6 +91,8 @@ function repository(overrides: Partial<GroupSessionRepository> = {}): GroupSessi
     replaceCandidates: vi.fn().mockResolvedValue(detail),
     loadComputationInput: vi.fn().mockResolvedValue({
       rankingInput,
+      medicationAccounts: [],
+      medicationVersions: {},
       identity: { sessionId: SESSION_ID },
     }),
     persistRecommendation: vi.fn().mockResolvedValue(snapshot),

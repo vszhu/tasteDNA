@@ -55,6 +55,7 @@ const detailSchema = z.object({
   members: z.array(memberSchema),
   ownMealPreferenceState: mealPreferenceStateSchema.optional(),
   latestRecommendation: recommendationSnapshotSchema.optional(),
+  recommendationNeedsRefresh: z.boolean().optional(),
 });
 
 const membershipResponseSchema = z.object({ member: memberSchema }).or(

@@ -69,7 +69,7 @@ A signed-in creator picks 3–5 real campus venues with digitized menus, invites
 
 ### 5. Medication-aware dining
 
-Add a medication list and the app screens the current menu against curated, source-cited food-interaction rules *before* taste ranking, and renders an interactive medicine → food term → dish map. Every finding carries its source and evidence; unsupported medicines stay visibly unverified. **The list never leaves your browser tab.** See [medication screening](#medication-screening).
+Add a medication list and the app screens the current menu against curated, source-cited food-interaction rules *before* taste ranking, and renders an interactive medicine → food term → dish map. Every finding carries its source and evidence; unsupported medicines stay visibly unverified. **Account saving is explicit and private; each member can opt their saved list into group meals. Friends see dish guidance, never medication names.** See [medication screening](#medication-screening).
 
 ---
 
@@ -171,7 +171,7 @@ After ranking, the engine (`src/lib/group/decision.ts`) measures how fragile the
 
 When confidence is low, TasteDNA runs a **counterfactual search**: for every member and every meal tag they haven't answered, it simulates both a "yes" and a "no" through the real ranking pipeline and measures the impact — the change in winner margin, plus a large bonus (1,000) if the winner flips. The single highest-impact question is surfaced. Instead of "here's your restaurant, trust us," the group gets: *"This one was close — Priya, would you like something light for this meal?"* One answer, recomputed, decided.
 
-Every computation is persisted with an algorithm version (`fair-group-v1.0.0`) and a **SHA-256 hash of its canonicalized inputs** (keys sorted recursively), so results are reproducible, cacheable, and attributable to the exact engine revision that produced them.
+Every computation is persisted with an algorithm version (`fair-group-v1.1.0-meds`) and a **SHA-256 hash of its canonicalized inputs** (keys sorted recursively), so results are reproducible, cacheable, and attributable to the exact engine revision that produced them.
 
 ### Privacy inside a group
 
@@ -206,11 +206,12 @@ The **Venues** map is backed by real data, not lorem ipsum:
 
 `src/lib/medications/` is a deliberately conservative, fully deterministic layer that runs *before* taste ranking and never modifies taste scores.
 
-- A **versioned rule catalog** with drug-specific formulations, aliases, severity, evidence, and dated authoritative sources (DailyMed / MedlinePlus). Current coverage: simvastatin, fexofenadine, linezolid, and tacrolimus capsules — chosen because their food guidance is label-explicit.
+- A **versioned rule catalog** with drug-specific formulations, aliases, severity, evidence, and dated authoritative sources (DailyMed / MedlinePlus). Current coverage: 12 exact forms, including the original simvastatin, fexofenadine, linezolid, and tacrolimus capsules plus eight additions documented in the medication guide. Timing and portion guidance stay distinct from ingredient warnings.
 - **Phrase-boundary matching** on the extracted name, description, and ingredient text only. Cuisine, taste dimensions, embeddings, and AI confidence are never used to infer an interaction. Qualified or negated mentions produce *review* findings, not assertions.
 - Results are grouped **No listed match → Needs review → Label warning**; taste ordering is preserved within groups.
 - An interactive graph (`map.ts`) connects medicines → food terms → dishes. Every path retains its rule owner, matched term, and evidence; shared ingredient nodes never imply drug–drug interactions.
-- The list lives in account-scoped **`sessionStorage`** — never in Supabase, shared menus, group payloads, or model prompts.
+- Unsaved lists use account-scoped **`sessionStorage`**. Explicit saves go to an owner-only Supabase table; a saved opt-in applies that member’s list to group recommendations. Medication names never enter shared menus, group responses, taste records, or model prompts.
+- Group results exclude flagged dish options for the affected member and expire after saved medication settings change. The private table and revision-checked persistence require migration `202609120005_medication_profiles.sql` before deployment.
 
 "No listed match" describes only the covered rules and the extracted text; the UI says so. Full coverage, limitations, and the verification checklist are in [docs/MEDICATION_CHECKS.md](docs/MEDICATION_CHECKS.md).
 
@@ -248,24 +249,24 @@ Honest status, so nothing surprises you in a live demo.
 | Campus venue browsing and map | ✅ Working; falls back to a labeled cached snapshot if the database is unreachable |
 | Real CMU venue menus in the database | ✅ 37 venues ingested from the compiled dataset |
 | Group fairness engine and decision questions | ✅ Implemented, unit-tested, and wired to live API routes end to end |
-| **Friend requests and multi-person group sessions** | ⚠️ **Currently unavailable live** — see below |
+| Friend requests | ✅ Two real accounts created; request/accept and both friend lists verified in Chrome |
+| Private account medication lists and group meal checks | ⚠️ Implemented and locally tested; hosted migration and live medicine/group verification pending |
+| Multi-person group sessions | Wired to real APIs; full live medicine-aware workflow still needs verification |
 
-**About friendships.** The friendship and group-session backends are built, migrated, and tested, and the UI calls the real endpoints. What's blocking live multi-account use is Supabase auth email delivery hitting provider rate limits, so test accounts can't complete confirmation. The consequence for a judge: you can explore the group UI and the engine's output, but you can't currently add a second real account to a session. The fairness math itself is exercised by `src/lib/group/ranking.test.ts`, `src/lib/group-sessions/compute.test.ts`, and `src/components/group/result-helpers.test.ts`.
-
-We'd rather flag this than have you discover it mid-demo.
+**About the live checks.** The earlier signup/email-rate-limit blocker is resolved for the two authorized test accounts. Password signup/sign-in, request delivery, acceptance, and both friend lists were verified on the deployed site. The new account-medication integration still requires its hosted migration before deploying; full live group-meal medication checks are not yet verified. The [LLM handoff](docs/team/LLM_HANDOFF.md) records the current release dependency and exact checks.
 
 ---
 
 ## Engineering practices worth noticing
 
-- **Domain math is framework-free.** `src/lib/taste`, `recommendation`, `group`, and `medications` import no React and no service clients. The entire recommendation engine is unit-tested with plain fixtures — no database, no network, no mocking framework.
+- **Domain math is framework-free.** The taste/recommendation/group engines and medication catalog/check/map modules import no React or service clients; medication account persistence is a separate adapter. The entire recommendation engine is unit-tested with plain fixtures — no database, no network, no mocking framework.
 - **Determinism everywhere it matters.** Embeddings, scoring, ranking, tie-breaks, explanations, medication matching, and group recommendations are all pure functions of their inputs, and results are stored with an input hash to prove it.
 - **Honest uncertainty is a first-class value.** Inferred fields are recorded as such, thin rating history is labeled an early read, unverified medications stay visibly unverified, demo fallbacks are labeled in the UI, and every explanation maps back to a computed factor rather than generated prose.
 - **Validation at every boundary.** Zod schemas on model output, API inputs, persisted profiles, and group-session route contracts.
 - **Typed contracts shared across the team.** `src/types/` holds the domain interfaces; `src/types/group.fixtures.ts` provides canonical scenarios used by both engine and UI tests.
 
 ```bash
-npm test     # 271 tests across 53 files
+npm test     # 334 tests across 57 files
 npm run lint
 npm run build
 ```

@@ -4,6 +4,9 @@ import { storedVenueToPublicVenue } from "@/lib/cmu-dining/public-venues";
 import { SupabaseCmuVenueRepository } from "@/lib/cmu-dining/repository";
 import { SupabaseSharedMenuRepository } from "@/lib/menu/shared-repository";
 import { tasteProfileSchema } from "@/lib/taste/persistence-schema";
+import { medicationAccountSchema, MEDICATION_ACCOUNT_SELECT } from "@/lib/medications/account";
+import { MEDICATION_RULES_VERSION } from "@/lib/medications/catalog";
+import { medicationVersionFingerprint, medicationVersions } from "./medication-checks";
 import type { GroupRecommendation, MealPreferenceState, Venue } from "@/types/group";
 import { mealPreferenceStateSchema } from "./schemas";
 import {
@@ -175,6 +178,31 @@ export class SupabaseGroupSessionRepository implements GroupSessionRepository {
     ]));
   }
 
+  private async medicationMetadata(userIds: string[]) {
+    if (!userIds.length) return [];
+    const { data, error } = await this.adminClient.from("user_medication_profiles")
+      .select("user_id,use_in_groups,revision").in("user_id", userIds);
+    if (error) throw new GroupSessionError("storage", "Private medication settings could not be checked. Please try again before choosing a group meal.");
+    const parsed = z.array(medicationAccountSchema.pick({ user_id: true, use_in_groups: true, revision: true })).safeParse(data ?? []);
+    if (!parsed.success) throw storageError();
+    return parsed.data;
+  }
+
+  private async medicationInputs(userIds: string[]) {
+    const metadata = await this.medicationMetadata(userIds);
+    const optedIn = metadata.filter((entry) => entry.use_in_groups);
+    // Do not load the medication names of people who have not opted in.
+    const { data, error } = optedIn.length ? await this.adminClient.from("user_medication_profiles")
+      .select(MEDICATION_ACCOUNT_SELECT).in("user_id", optedIn.map((entry) => entry.user_id)).eq("use_in_groups", true) : { data: [], error: null };
+    if (error) throw storageError();
+    const parsed = z.array(medicationAccountSchema).safeParse(data ?? []);
+    if (!parsed.success) throw storageError();
+    if (parsed.data.length !== optedIn.length || parsed.data.some((entry) => !optedIn.some((saved) => saved.user_id === entry.user_id && saved.revision === entry.revision))) {
+      throw new GroupSessionError("invalid-state", "Medication settings changed during computation. Please recompute.");
+    }
+    return { medicationAccounts: parsed.data, medicationVersions: medicationVersions(userIds, metadata) };
+  }
+
   async getForUser(userId: string, sessionId: string): Promise<GroupSessionDetail | null> {
     const session = await this.sessionRowForUser(sessionId);
     if (!session) return null;
@@ -249,6 +277,18 @@ export class SupabaseGroupSessionRepository implements GroupSessionRepository {
       : null;
     if (parsedLatest && !parsedLatest.success) throw storageError();
 
+    let latest = parsedLatest?.success ? resultSnapshot(parsedLatest.data, sessionId) : undefined;
+    let recommendationNeedsRefresh = session.status === "decided" && !latest;
+    if (latest && ownMembership?.status === "accepted") {
+      const acceptedIds = members.data.filter((entry) => entry.status === "accepted").map((entry) => entry.user_id);
+      const versions = medicationVersions(acceptedIds, await this.medicationMetadata(acceptedIds));
+      const summary = latest.recommendation.medicationSummary;
+      if (!summary || summary.rulesVersion !== MEDICATION_RULES_VERSION || summary.revisionFingerprint !== medicationVersionFingerprint(versions)) {
+        latest = undefined;
+        recommendationNeedsRefresh = true;
+      }
+    }
+
     return {
       session: {
         id: session.id,
@@ -272,9 +312,8 @@ export class SupabaseGroupSessionRepository implements GroupSessionRepository {
               : cloneEmptyPreferences(),
           }
         : {}),
-      ...(parsedLatest?.success
-        ? { latestRecommendation: resultSnapshot(parsedLatest.data, sessionId) }
-        : {}),
+      ...(latest ? { latestRecommendation: latest } : {}),
+      ...(recommendationNeedsRefresh ? { recommendationNeedsRefresh: true } : {}),
     };
   }
 
@@ -470,7 +509,7 @@ export class SupabaseGroupSessionRepository implements GroupSessionRepository {
 
     const memberIds = members.data.map((member) => member.user_id);
     const venueIds = candidates.data.map((candidate) => candidate.venue_id);
-    const [preferencesResult, profilesResult, names, storedVenues, sharedMenus] =
+    const [preferencesResult, profilesResult, names, storedVenues, sharedMenus, medicationInputs] =
       await Promise.all([
         this.adminClient
           .from("group_session_meal_preferences")
@@ -484,6 +523,7 @@ export class SupabaseGroupSessionRepository implements GroupSessionRepository {
         this.displayNames(memberIds),
         new SupabaseCmuVenueRepository(this.adminClient).listActiveVenues(),
         new SupabaseSharedMenuRepository(this.adminClient).listNewestValidForVenues(venueIds),
+        this.medicationInputs(memberIds),
       ]);
     if (preferencesResult.error || profilesResult.error) throw storageError();
 
@@ -554,6 +594,7 @@ export class SupabaseGroupSessionRepository implements GroupSessionRepository {
 
     return {
       rankingInput,
+      ...medicationInputs,
       identity: {
         sessionId: session.id,
         candidateVenueIds: venueIds,
@@ -586,15 +627,18 @@ export class SupabaseGroupSessionRepository implements GroupSessionRepository {
     algorithmVersion: string,
     inputHash: string,
     recommendation: GroupRecommendation,
+    medicationVersions: Record<string, string>,
   ): Promise<RecommendationSnapshot> {
-    const { data, error } = await this.adminClient.rpc("persist_group_recommendation", {
+    const { data, error } = await this.adminClient.rpc("persist_medication_group_recommendation", {
       p_session_id: sessionId,
       p_algorithm_version: algorithmVersion,
       p_input_hash: inputHash,
       p_result_snapshot: recommendation,
       p_computed_by: userId,
+      p_medication_versions: medicationVersions,
     });
     if (error) {
+      if (error.code === "40001") throw new GroupSessionError("invalid-state", "Medication settings or group membership changed. Please recompute before choosing.");
       if (error.code === "42501") {
         throw new GroupSessionError("forbidden", "Only the creator can compute this session.");
       }

@@ -9,6 +9,8 @@ import { MedicationProvider, useMedications } from "./medication-provider";
 const session = vi.hoisted(() => ({ current: { status: "signed-out" as SessionStatus, user: null as SessionUser | null } }));
 vi.mock("@/components/providers/session-provider", () => ({ useSession: () => session.current }));
 
+vi.mock("@/lib/db/supabase", () => ({ getSupabaseBrowserClient: () => null }));
+
 const renderedLists: Array<{ scope: string; medications: string[]; hydrated: boolean }> = [];
 
 function Probe() {
