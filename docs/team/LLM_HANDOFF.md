@@ -16,6 +16,7 @@ Read this before modifying the medication, account, friendship, or group flows. 
 | Password accounts and friendship refresh | [FRIENDSHIP_PASSWORD_FLOW_HANDOFF.md](FRIENDSHIP_PASSWORD_FLOW_HANDOFF.md) |
 | Friendship endpoints, auth configuration, hosted migration dependency | [DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md](DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md), [DEVELOPER_3_TASK_5_HANDOFF.md](DEVELOPER_3_TASK_5_HANDOFF.md) |
 | Persistence, menus, and platform integration | [DEVELOPER_3_TASK_4_HANDOFF.md](DEVELOPER_3_TASK_4_HANDOFF.md) |
+| Real group-session API and remaining UI integration | [DEVELOPER_3_TASK_6_HANDOFF.md](DEVELOPER_3_TASK_6_HANDOFF.md) |
 | Group scoring and contracts | [DEVELOPER_2_TASK_6_GROUP_CONTRACT_MAINTENANCE.md](DEVELOPER_2_TASK_6_GROUP_CONTRACT_MAINTENANCE.md) |
 
 ## What has merged
@@ -25,8 +26,11 @@ Read this before modifying the medication, account, friendship, or group flows. 
 | `aa0a30d` | Medication-aware dining and interactive medicine → food term → dish map | 231 tests, lint, production build, local browser flow checks |
 | `9ea79c4` / PR #25 | Friends page connected to real HTTP endpoints; actionable auth email errors | See the developer 3 handoff |
 | `4516ba0` / [PR #26](https://github.com/vszhu/tasteDNA/pull/26) | Password signup/sign-in, account switching, public-profile bootstrap, reliable friend refresh | 254 tests in 49 files, lint, production build; local Chrome account-screen checks |
+| `945986b`, integrated through `f6b20ba` | Authenticated group-session and recommendation backend, with migration `202609120004_group_session_api.sql` | Developer 3 reports local application and database checks in the Task 6 handoff; combined live verification is still outstanding |
 
 These are historical check results, not substitutes for testing later changes. A GitHub merge is not proof that Vercel deployed it or that a hosted migration ran.
+
+The Task 6 handoff was written before its commit and merge; its “not committed, pushed, merged” state and initial deployment steps are historical. The backend is now in `main`. Do not reimplement it or reapply already-applied migrations based on that older wording.
 
 ## Preserve these integration rules
 
@@ -40,6 +44,7 @@ These are historical check results, not substitutes for testing later changes. A
 - Preserve neutral request responses for created, existing, and unknown-email cases. Do not reveal whether an arbitrary email is registered. Only the pending request's addressee can accept or decline it.
 - Rejected relationships currently remain terminal because of the unique unordered-pair schema. Do not assume a declined pair can be reused for another request without an explicit product/schema change.
 - `src/app/sessions/new/page.tsx` still uses `mockFriendsAdapter` and `mockSessionAdapter`. Real friendship acceptance is **not** evidence that real group invitations or shared group sessions work. Treat that integration as separate unfinished work.
+- The backend for that integration now exists in `src/app/api/group-sessions/` and `src/lib/group-sessions/`. Use its validated route contracts when replacing the mock UI. Keep raw member profiles and other members' meal preferences private on the server; only the creator can compute the derived recommendation. Read the Task 6 handoff before wiring these routes.
 
 ### Medication map and taste data
 
@@ -80,6 +85,7 @@ The following was observed during the September 12 test and push:
 
 - Both authorized account password sign-ins returned `invalid_credentials`. A signup attempt returned HTTP 429 `over_email_send_rate_limit`, and further signup attempts stopped. Neither requested account was verified as created. No real request/acceptance between those accounts was completed.
 - The earlier developer 3 handoff reported `supabase/migrations/202609120003_friendship_api.sql` pending on the hosted project. This later test could not verify its current application status. Migration presence in Git does not mean it exists in the hosted database.
+- The newly merged group backend also requires `supabase/migrations/202609120004_group_session_api.sql`. Its hosted application status is unverified; inspect pending migrations and preserve their order before testing the real group API.
 - At the time of testing, the local checkout had no configured Supabase credentials or linked project, and the dashboard required sign-in. Browser auth needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (legacy anon-key fallback exists). The friendship server also requires `SUPABASE_SECRET_KEY` (legacy service-role fallback exists). Privileged keys must never be public browser variables.
 - Vercel's GitHub status for merged commit `4516ba0` said **“Deployment was blocked.”** The exact dashboard reason was not available. Do not label this a compilation failure: the local production build passed. Do not change commit authorship to impersonate someone else as a workaround.
 
