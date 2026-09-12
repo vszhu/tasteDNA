@@ -30,6 +30,7 @@ Read this before modifying the medication, account, friendship, or group flows. 
 | `945986b`, integrated through `f6b20ba` | Authenticated group-session and recommendation backend, with migration `202609120004_group_session_api.sql` | Developer 3 reports local application and database checks in the Task 6 handoff; combined live verification is still outstanding |
 | `3625ff0`, integrated through `8bdb4c4` | Group UI connected to the real API; mock session/friend adapters removed | Developer 3 reports 271 tests plus lint/build; hosted state must still be verified |
 | `344424d` / [PR #31](https://github.com/vszhu/tasteDNA/pull/31) | Twelve medication forms, private account lists, and each member's saved consent/list in group dining | 334 tests in 57 files, lint/build, 29 isolated database checks; production migration and two-account workflow verified afterward as detailed below |
+| `ad0a796` / [PR #33](https://github.com/vszhu/tasteDNA/pull/33) | Invitation links retained through sign-in/account switching, safer copied URLs, and local-to-live recovery | 367 tests in 60 files, lint/build, Vercel deployment success; real CMU-to-Gmail invitation accepted after the signed-out recipient automatically returned to it |
 
 These are historical check results, not substitutes for testing later changes. A GitHub merge is not proof that Vercel deployed it or that a hosted migration ran.
 
@@ -86,6 +87,7 @@ Test the changed browser flow too. A mocked API test is not a live two-account t
 
 ## Current verification and release status — September 12, 2026
 
+- Invite-link repair `ad0a796` is deployed and verified with the requested Chrome profiles: CMU created a meal invitation to Gmail; the signed-out Gmail recipient authenticated, returned automatically, and accepted. Both accounts showed Joined; copied and displayed URLs matched. See [INVITE_LINK_HANDOFF.md](INVITE_LINK_HANDOFF.md) for tested paths and the remaining distinction between local group configuration and the working public site.
 - Both user-authorized accounts have now been created through the deployed TasteDNA signup UI, and password sign-in succeeded. The Gmail account sent a friendship request to the CMU account; the CMU account received and accepted it. This supersedes the earlier signup/email-limit blocker. See the friendship handoff for the completed browser steps.
 - The expansion started at `8bdb4c4` and then incorporated latest main `ccb1fc1`, including PR #29’s menu ingestion and PR #30’s submission docs, without overwriting them. Fetch again immediately before integrating; preserve other contributors’ commits. The group UI already uses the real backend. Do not reintroduce mock adapters.
 - The twelve-form catalog and private group integration pass 334 application tests in 57 files, lint, and the production build. The isolated database harness applied all seven migrations and passed 29 checks covering RLS, validation, consent defaults, invalidation, stale revision rejection, and RPC authorization. This is local verification, not a hosted migration or multi-connection concurrency test.
