@@ -44,12 +44,12 @@ describe("private medication checks in real group computation", () => {
 
   it("requires review when an opted-in member has an unsupported medicine", () => {
     const input = fixture();
-    expect(() => prepareGroupMedicationChecks(input, [account(input.members[0].member.userId, { medications: ["unverified test medicine"] })])).toThrow(/no unchecked dish was assigned/);
+    expect(() => prepareGroupMedicationChecks(input, [account(input.members[0].member.userId, { medications: ["unverified test medicine"] })])).toThrow(/ingredient or medication review/);
   });
 
   it("requires review when menus lack ingredient evidence", () => {
     const input = structuredClone(GROUP_GOLDEN_FIXTURES[0]);
-    expect(() => prepareGroupMedicationChecks(input, [account(input.members[0].member.userId)])).toThrow(/Review the menus/);
+    expect(() => prepareGroupMedicationChecks(input, [account(input.members[0].member.userId)])).toThrow(/ingredient or medication review/);
   });
 
   it("ignores lists belonging to outsiders and members who declined", () => {
@@ -63,8 +63,12 @@ describe("private medication checks in real group computation", () => {
 
   it("lets a member explicitly save an empty list without inventing a medication warning", () => {
     const input = fixture();
+    input.venues.forEach((venue) => venue.menuItems.forEach((item) => { item.price = 50; }));
+    input.members[0].member.mealPreferenceState.maxPrice = 1;
     const checked = prepareGroupMedicationChecks(input, [account(input.members[0].member.userId, { medications: [] })]);
     expect(checked.summary).toMatchObject({ checkedMembers: 1, flaggedDishOptions: 0, withheldVenues: 0 });
+    expect(checked.input).toBe(input);
+    expect(computeGroupRecommendation(checked.input)).toEqual(computeGroupRecommendation(input));
   });
 
   it("fingerprints random account revisions and changes when consent/list versions change", () => {

@@ -7,6 +7,7 @@ import { tasteProfileSchema } from "@/lib/taste/persistence-schema";
 import { medicationAccountSchema, MEDICATION_ACCOUNT_SELECT } from "@/lib/medications/account";
 import { MEDICATION_RULES_VERSION } from "@/lib/medications/catalog";
 import { medicationVersionFingerprint, medicationVersions } from "./medication-checks";
+import { GROUP_RECOMMENDATION_VERSION } from "./version";
 import type { GroupRecommendation, MealPreferenceState, Venue } from "@/types/group";
 import { mealPreferenceStateSchema } from "./schemas";
 import {
@@ -283,7 +284,7 @@ export class SupabaseGroupSessionRepository implements GroupSessionRepository {
       const acceptedIds = members.data.filter((entry) => entry.status === "accepted").map((entry) => entry.user_id);
       const versions = medicationVersions(acceptedIds, await this.medicationMetadata(acceptedIds));
       const summary = latest.recommendation.medicationSummary;
-      if (!summary || summary.rulesVersion !== MEDICATION_RULES_VERSION || summary.revisionFingerprint !== medicationVersionFingerprint(versions)) {
+      if (latest.algorithmVersion !== GROUP_RECOMMENDATION_VERSION || !summary || summary.rulesVersion !== MEDICATION_RULES_VERSION || summary.revisionFingerprint !== medicationVersionFingerprint(versions)) {
         latest = undefined;
         recommendationNeedsRefresh = true;
       }

@@ -13,6 +13,7 @@ Read this before modifying the medication, account, friendship, or group flows. 
 | Area | Read first |
 | --- | --- |
 | Medication map, menu screening, privacy | [MEDICATION_CHECKS.md](../MEDICATION_CHECKS.md) |
+| Imported ingredient data and blocked group-meal recovery | [GROUP_MENU_INGREDIENT_REPAIR.md](GROUP_MENU_INGREDIENT_REPAIR.md) |
 | Password accounts and friendship refresh | [FRIENDSHIP_PASSWORD_FLOW_HANDOFF.md](FRIENDSHIP_PASSWORD_FLOW_HANDOFF.md) |
 | Meal invite links, sign-in return paths, and local-to-live sharing | [INVITE_LINK_HANDOFF.md](INVITE_LINK_HANDOFF.md) |
 | Friendship endpoints, auth configuration, hosted migration dependency | [DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md](DEVELOPER_3_AUTH_FRIENDSHIP_FIX_HANDOFF.md), [DEVELOPER_3_TASK_5_HANDOFF.md](DEVELOPER_3_TASK_5_HANDOFF.md) |
@@ -58,6 +59,7 @@ The Task 6 backend and UI integration are now in `main`. Do not reimplement them
 - `src/lib/medications/catalog.ts`, `check.ts`, and `map.ts` define rule coverage, deterministic screening, and graph paths. `src/components/medications/interaction-explorer.tsx` renders the shared explorer used by medications and results.
 - The map connects medicines to covered food terms and dishes; shared nodes must not imply drug–drug interactions. Preserve rule ownership and evidence on every highlighted path.
 - Keep medication review order separate from taste scores. With no medications, preserve the original taste ranking and explanation behavior. Unknown medicines and incomplete evidence must remain visibly unverified; “No listed match” is not a safety guarantee.
+- Imported campus menus now support published ingredient components and explicitly labeled recipe estimates. Estimates remain unverified for medication screening. The existing group flow is preserved; explicitly empty saved lists no longer trigger medication venue filtering. Read the ingredient-repair handoff before changing source gates, provenance markers, or group recovery.
 - Example-lab medicines are temporary and separate from the user's actual list. Adopting a sample menu from medications, decoder, or empty results changes the menu only; it must not replace saved ratings or medications. Explicit full-profile demo actions are different.
 - Check the medication document before expanding coverage. Verify exact formulations and authoritative sources; do not invent clinical claims or turn taste scores into medical safety probabilities.
 - Catalog `2026-09-12.2` covers 12 forms. Preserve the distinction between tablet timing, portion review, and explicit ingredient warnings. Alcohol-related contextual phrases qualify only overlapping evidence; they must not hide a separate explicit alcohol ingredient. See the [expansion handoff](MEDICATION_CATALOG_EXPANSION_HANDOFF.md) for the added medicines and verification.
