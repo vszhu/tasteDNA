@@ -8,6 +8,8 @@ This folder splits TasteDNA into three areas that can be developed in parallel w
 | Developer 2 | Taste engine and ranking | [DEVELOPER_2_TASTE_ENGINE.md](./DEVELOPER_2_TASTE_ENGINE.md) | `codex/taste-` |
 | Developer 3 | Menu API, persistence, and infrastructure | [DEVELOPER_3_PLATFORM.md](./DEVELOPER_3_PLATFORM.md) | `codex/platform-` |
 
+Developer 3's implemented Tasks 1–4, deviations, troubleshooting history, and downstream integration notes are tracked in [DEVELOPER_3_TASK_4_HANDOFF.md](./DEVELOPER_3_TASK_4_HANDOFF.md). Read that handoff before building friendship, group-session, ranking, or venue-menu integrations.
+
 ## Rules everyone follows
 
 1. Each developer uses a separate clone of the repository. Never run two LLM agents in the same folder.
@@ -139,4 +141,3 @@ Only one open PR should modify a shared file at a time. Announce the change befo
 - Developer 2 reviews Developer 3.
 - Developer 3 reviews Developer 1.
 - Any PR touching shared files gets a second quick review from the affected area owner.
-

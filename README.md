@@ -133,6 +133,10 @@ If you customize the Supabase email template to send a token hash, use a callbac
 
 Both code-exchange and token-hash callbacks are supported. Never put `SUPABASE_SECRET_KEY` in a `NEXT_PUBLIC_` variable; ordinary auth and TasteDNA persistence use the publishable key plus RLS.
 
+Authenticated menu extraction requests may include a `venueId` form field to publish the normalized result as that venue's shared menu. The route verifies the user and active venue before extraction, then calls a service-only database transaction. Identical normalized content reuses its existing menu version; changed content closes the previous current version and creates the next one. Raw uploaded images and base64 data are never written to the database. `GET /api/venues` attaches each venue's newest currently valid menu and reports it as `fresh` for 30 days after observation, otherwise `stale`.
+
+Shared-menu persistence requires `SUPABASE_SECRET_KEY` on the server. Anonymous requests, and authenticated requests without `venueId`, continue through the existing one-off decoder without database writes.
+
 The migration installs `pgcrypto` and `vector`, creates User, Dish, DishFeatures, Rating, TasteProfile, Menu, MenuItem, and Recommendation tables, adds indexes, and enables row-level security. Production OpenAI embeddings use 1,536-dimensional `text-embedding-3-small` vectors. The 46 starter foods live in typed source data so the demo bundle never needs a database round trip; a production sync can upsert them into `dishes` and `dish_features`.
 
 ## Demo mode

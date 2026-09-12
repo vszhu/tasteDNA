@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { lastGoodPublicVenues, storedVenueToPublicVenue } from "@/lib/cmu-dining/public-venues";
 import { SupabaseCmuVenueRepository } from "@/lib/cmu-dining/repository";
 import { getSupabasePublicServerClient } from "@/lib/db/supabase-server";
+import { SupabaseSharedMenuRepository } from "@/lib/menu/shared-repository";
+import type { SharedVenueMenu } from "@/lib/menu/shared-types";
 import type { Venue } from "@/types/group";
 
 export const runtime = "nodejs";
@@ -22,8 +24,15 @@ export async function GET() {
   if (client) {
     try {
       const rows = await new SupabaseCmuVenueRepository(client).listActiveVenues();
+      let sharedMenus = new Map<string, SharedVenueMenu>();
+      try {
+        sharedMenus = await new SupabaseSharedMenuRepository(client)
+          .listNewestValidForVenues(rows.map((row) => row.id));
+      } catch {
+        // Venue discovery remains available while shared-menu reads recover.
+      }
       const venues = rows
-        .map(storedVenueToPublicVenue)
+        .map((row) => storedVenueToPublicVenue(row, sharedMenus.get(row.id)))
         .filter((venue): venue is Venue => venue !== null);
       if (venues.length > 0) return venueResponse(venues, "database");
     } catch {
