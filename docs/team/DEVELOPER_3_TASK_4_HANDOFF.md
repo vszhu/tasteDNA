@@ -1,8 +1,10 @@
 # Developer 3 Platform Handoff: Tasks 1–4
 
-Last updated: 2026-09-12  
-Current Task 4 branch: `feat/dev-3-task-4`  
-Task 4 state at the time of this handoff: implemented and verified locally, but not committed, pushed, or deployed
+Last updated: 2026-09-12
+
+Task 4 merged commit: `f049e6e`
+
+Task 4 state at the time of this update: merged into `main`; remote migration deployment has not been independently confirmed
 
 This is the implementation record for Developer 3's first four backend tasks. Read it with:
 
@@ -20,7 +22,7 @@ The task brief describes intended behavior. This file describes what is actually
 | 1. Group schema and RLS | Merged into `main` at `cc5573b` (with earlier duplicate history described below) | `supabase/migrations/202609110002_group_dining_foundation.sql` | Confirmed pushed to the linked Supabase project |
 | 2. CMU Dining sync and venue API | Merged into `main` at `3fe62c5` | `src/lib/cmu-dining/`, `/api/admin/cmu-dining/sync`, `/api/venues` | Confirmed working; one manual sync inserted 45 live venue records |
 | 3. Auth and durable TasteDNA | Merged into `main` at `3f0400c` | `src/lib/auth/`, authenticated taste repository, auth callback/proxy, migration `202609120001_auth_taste_persistence.sql` | Remote migration deployment has not been independently confirmed in this work log |
-| 4. Shared menu ingestion | Local changes on `feat/dev-3-task-4` | shared-menu modules, extraction integration, venue-menu reads, migration `202609120002_shared_menu_ingestion.sql` | Not pushed to GitHub or Supabase |
+| 4. Shared menu ingestion | Merged into `main` at `f049e6e` | shared-menu modules, extraction integration, venue-menu reads, migration `202609120002_shared_menu_ingestion.sql` | Remote migration deployment has not been independently confirmed in this work log |
 
 Do not infer remote database state from Git history. Before using Tasks 3 or 4 against the hosted project, run a migration dry run and inspect exactly what Supabase plans to apply:
 

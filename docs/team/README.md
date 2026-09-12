@@ -8,7 +8,7 @@ This folder splits TasteDNA into three areas that can be developed in parallel w
 | Developer 2 | Taste engine and ranking | [DEVELOPER_2_TASTE_ENGINE.md](./DEVELOPER_2_TASTE_ENGINE.md) | `codex/taste-` |
 | Developer 3 | Menu API, persistence, and infrastructure | [DEVELOPER_3_PLATFORM.md](./DEVELOPER_3_PLATFORM.md) | `codex/platform-` |
 
-Developer 3's implemented Tasks 1–4, deviations, troubleshooting history, and downstream integration notes are tracked in [DEVELOPER_3_TASK_4_HANDOFF.md](./DEVELOPER_3_TASK_4_HANDOFF.md). Read that handoff before building friendship, group-session, ranking, or venue-menu integrations.
+Developer 3's implemented Tasks 1–4, deviations, troubleshooting history, and downstream integration notes are tracked in [DEVELOPER_3_TASK_4_HANDOFF.md](./DEVELOPER_3_TASK_4_HANDOFF.md). Task 5's real friendship endpoints and Task 6 integration requirements are tracked in [DEVELOPER_3_TASK_5_HANDOFF.md](./DEVELOPER_3_TASK_5_HANDOFF.md). Read both before building social or group-session integrations.
 
 ## Rules everyone follows
 
