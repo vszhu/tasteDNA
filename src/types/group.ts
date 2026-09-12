@@ -109,6 +109,16 @@ export interface RestaurantUtility {
   utility: number;
 }
 
+/** A fairness-aware aggregate for one candidate venue across all group members. */
+export interface VenueGroupScore {
+  venue: VenueSummary;
+  restaurantUtilities: RestaurantUtility[];
+  groupScore: number;
+  groupMeanUtility: number;
+  worstMemberUtility: number;
+  clearsMiseryFloor: boolean;
+}
+
 export interface MemberDishAssignment {
   memberId: string;
   dishUtility: DishUtility;
@@ -143,6 +153,7 @@ export interface GroupRecommendation {
   compromiseRequired: boolean;
   assignments: MemberDishAssignment[];
   restaurantUtilities: RestaurantUtility[];
+  venueScores: VenueGroupScore[];
   runnerUp?: VenueSummary;
   explanationFacts: GroupExplanationFact[];
   decisionConfidence?: DecisionConfidence;
