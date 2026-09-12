@@ -1,2 +1,181 @@
-# tasteDNA
-Project for HackCMU
+# TasteDNA
+
+**Your palate, decoded.** TasteDNA learns a person's food preferences from a short set of ratings, turns those signals into a mathematical taste profile, and ranks every dish on a photographed or pasted restaurant menu for that specific person.
+
+This repository is a hackathon-ready vertical slice: onboarding, a live TasteDNA profile, menu extraction, explainable 0–100 recommendations, and a feedback loop all work without sign-up or external services. Add OpenAI credentials to switch menu reading from the local fallback to multimodal extraction; apply the included Supabase migration when durable multi-user persistence is needed.
+
+## Product flow
+
+1. Rate 12 diverse, actively selected foods.
+2. See cuisine, flavor, texture, and cooking-style preferences.
+3. Upload a menu photo, take one on mobile, or paste menu text.
+4. Get all dishes ranked with transparent match and mismatch factors.
+5. React with “I’d order this” or “Not for me.”
+6. Watch the profile and menu ranking update immediately.
+
+## Architecture
+
+TasteDNA is one strict TypeScript Next.js repository. Domain math is deliberately independent from React and external services.
+
+```text
+src/
+├── app/                    # App Router pages and server-only API route
+│   ├── api/menu/extract/   # Validated OpenAI/fallback extraction endpoint
+│   ├── onboarding/         # Active-learning rating flow
+│   ├── dashboard/          # TasteDNA profile and Recharts visualization
+│   ├── decode/             # Image capture/upload and text ingestion
+│   └── results/            # Ranking, explanations, feedback loop
+├── components/
+│   ├── layout/             # Responsive desktop and mobile navigation
+│   ├── recommendation/     # Expandable result cards
+│   ├── taste/              # Taste profile visualization
+│   └── ui/                 # Small shadcn-style UI primitives
+├── lib/
+│   ├── db/                 # Optional Supabase client boundary
+│   ├── embeddings/         # Swappable embedding providers and text normalization
+│   ├── menu/               # Extraction schema, processing, fallback, sample data
+│   ├── recommendation/     # Candidate scoring, explanation factors, ranking
+│   └── taste/              # Seed foods, rating math, profiles, active learning
+└── types/                  # Shared domain interfaces
+
+supabase/migrations/        # PostgreSQL + pgvector schema and RLS
+```
+
+The browser state provider is the demo persistence adapter. It stores ratings, extracted menu data, and feedback in `localStorage`, so the full flow survives refreshes and works without Supabase. The Supabase boundary and schema are intentionally separate so a team can replace that adapter without touching the recommendation engine or UI.
+
+## Recommendation algorithm
+
+Every dish has two complementary representations:
+
+- A normalized text representation containing its name, cuisine, ingredients, major flavor/texture traits, proteins, bases, and cooking methods. Demo mode projects that text into a stable cached 64-dimensional vector. `EmbeddingProvider` makes the implementation swappable; an OpenAI embedding provider is included for a server-side persisted production pipeline.
+- Twelve interpretable 0–1 attributes: sweet, salty, sour, bitter, umami, spicy, rich, fresh, crispy, creamy, chewy, and smoky, plus categorical cuisine, ingredient, protein, carbohydrate, and cooking-method data.
+
+A rating is converted once through `ratingToWeight`:
+
+```text
+1 → -1.0   2 → -0.5   3 → 0   4 → +0.5   5 → +1.0
+```
+
+For rated dishes with embedding `eᵢ` and preference weight `wᵢ`:
+
+```text
+userVector = normalize(Σ wᵢeᵢ)
+semantic = cosineSimilarity(userVector, candidateEmbedding)
+structured = weightedCompatibility(attributePreferences, candidateAttributes)
+rawScore = 0.70 × semantic + 0.30 × structured
+Taste Match = round(clamp((rawScore + 1) × 50, 0, 100))
+```
+
+The 70/30 weights live in `src/lib/taste/constants.ts`. Scoring is deterministic for identical inputs. Explanation copy is built from the same strongest positive and negative contributions used in the score; it is not invented by a model. Cold start returns a neutral 50 until ratings exist.
+
+Onboarding uses an understandable farthest-first selector. It repeatedly chooses the candidate least similar to foods already selected or rated, covering the taste space without presenting ten versions of the same dish. The extension point is `src/lib/taste/active-learning.ts`.
+
+## Local setup
+
+Requirements: Node.js 22 or newer and npm.
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). No environment values are required for demo mode.
+
+On Windows PowerShell, use `Copy-Item .env.example .env.local` instead of `cp` if needed.
+
+## Environment variables
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | No | Enables live server-side multimodal menu extraction. Never expose this with a `NEXT_PUBLIC_` prefix. |
+| `OPENAI_MENU_MODEL` | No | Menu extraction model; defaults to `gpt-5-mini`. |
+| `NEXT_PUBLIC_SUPABASE_URL` | No | Browser Supabase project URL. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No | Public Supabase anon key; RLS still controls access. |
+| `SUPABASE_SERVICE_ROLE_KEY` | No | Reserved for server-side persistence jobs. Never expose it to the browser. |
+| `TASTEDNA_DEMO_MODE` | No | Set to `true` to force fallback extraction even when OpenAI is configured. |
+
+## OpenAI setup
+
+1. Create an API key in the OpenAI dashboard.
+2. Put `OPENAI_API_KEY=...` in `.env.local`; do not commit the file.
+3. Optionally change `OPENAI_MENU_MODEL` to another image-capable model that supports JSON Schema output.
+4. Restart `npm run dev`.
+
+OpenAI calls only occur in `src/app/api/menu/extract/route.ts`. Images are validated by MIME type and limited to 8 MB before processing. Model output is parsed through a strict Zod schema. Empty or malformed output becomes a concise UI error rather than a stack trace.
+
+## Supabase setup
+
+1. Create a Supabase project.
+2. In the SQL editor, apply `supabase/migrations/202609110001_initial_tastedna.sql` (or run `supabase db push` with the CLI).
+3. Add the Supabase URL and anon key to `.env.local`.
+4. Add your preferred Supabase Auth flow, then replace the local provider adapter with authenticated reads and upserts.
+
+The migration installs `pgcrypto` and `vector`, creates User, Dish, DishFeatures, Rating, TasteProfile, Menu, MenuItem, and Recommendation tables, adds indexes, and enables row-level security. Production OpenAI embeddings use 1,536-dimensional `text-embedding-3-small` vectors. The 46 starter foods live in typed source data so the demo bundle never needs a database round trip; a production sync can upsert them into `dishes` and `dish_features`.
+
+## Demo mode
+
+The application automatically uses demo-safe behavior when credentials are missing:
+
+- “Try the instant demo” loads a seeded 12-rating profile and a seven-item sample menu.
+- Menu images use sample extracted JSON if no OpenAI key is configured.
+- Pasted menus use a deterministic line and keyword parser.
+- Embeddings use a normalized, deterministic local projection.
+- State persists in the browser.
+
+Fallback responses are marked in the results UI. They are isolated in `src/lib/menu/sample.ts`, `src/lib/menu/process.ts`, and `src/lib/embeddings/deterministic.ts`, rather than mixed into production API code.
+
+## Testing and quality checks
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+The unit suite covers rating transformation, vector normalization, cosine similarity, taste-vector generation, attribute preferences, cold start, candidate scoring, and deterministic ranking. The integration test exercises ratings → TasteProfile → candidate menu → ranked recommendations.
+
+## Deployment to Vercel
+
+1. Push the repository to GitHub, GitLab, or Bitbucket.
+2. Import it in Vercel; the framework preset is detected automatically.
+3. Add the desired environment values from `.env.example` in Project Settings.
+4. Deploy. Vercel runs `npm run build` and serves the App Router API route as a server function.
+5. Smoke-test one menu upload. If image requests time out, reduce image size before upload or use pasted text for the demo.
+
+## Hackathon Demo Script
+
+About 90 seconds:
+
+1. **Rate foods (0:00–0:25).** Click “Discover My Taste” and quickly react to 12 recognizable foods. Point out that the set is deliberately diverse rather than random.
+2. **Show generated TasteDNA (0:25–0:40).** Reveal the radar, top flavor signals, cuisines, cooking styles, and representative favorites. Say that these are directional signals, not fake precision.
+3. **Upload a restaurant menu (0:40–0:52).** Open “Decode a menu,” choose a photo or the sample menu, and let the scanning state play.
+4. **Show personalized rankings (0:52–1:05).** Highlight the top pick, 0–100 Taste Match, visual match tiers, and sorting controls.
+5. **Inspect an explanation (1:05–1:16).** Expand a dish. Show the concrete positive/mismatch factors and the 70/30 score breakdown.
+6. **Give feedback (1:16–1:23).** Choose “Not for me” on one item or “I’d order this” on another.
+7. **Show the ranking change (1:23–1:30).** Point to the confirmation message and the immediately recalculated order, then return to the updated TasteDNA.
+
+If venue Wi-Fi is unreliable, click “Try the instant demo” on the landing page. The story remains identical and makes no network call.
+
+## Technical Story
+
+TasteDNA combines six practical ideas in one explainable loop:
+
+- **Semantic food embeddings** capture relationships that exact ingredient matching misses.
+- **Structured interpretable preference features** make flavor, texture, cuisine, and cooking signals visible.
+- **User preference-vector learning** turns positive and negative ratings into a normalized personal direction.
+- **Cosine similarity** measures how closely a candidate dish follows that direction.
+- **Personalized ranking** blends semantic similarity with structured compatibility into a deterministic 0–100 result.
+- **Multimodal menu extraction** turns photos into validated dish records, while feedback-driven profile updates make the next ranking more personal.
+
+The product is designed around honest uncertainty: low-confidence inferred fields are recorded, limited rating history is labeled as an early read, and recommendation explanations always map back to computed factors.
+
+## Team ownership
+
+Three developers can work without file contention:
+
+- **Product/UI:** `src/app/` and `src/components/`
+- **Taste and ranking:** `src/lib/taste/`, `src/lib/recommendation/`, and `src/lib/embeddings/`
+- **Menu, API, and data:** `src/lib/menu/`, `src/app/api/`, `src/lib/db/`, and `supabase/`
+
+Shared contracts live in `src/types/`. Keep external service code behind existing boundaries, and keep recommendation math out of React components.
