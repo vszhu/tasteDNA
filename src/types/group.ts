@@ -125,9 +125,18 @@ export interface MemberDishAssignment {
 }
 
 export interface GroupExplanationFact {
-  kind: "winner-advantage" | "worst-member-protection" | "misery-floor" | "compromise";
+  kind:
+    | "winner-advantage"
+    | "worst-member-protection"
+    | "runner-up-gap"
+    | "misery-floor"
+    | "compromise"
+    | "member-dish-choice";
   value: number;
   label: string;
+  venueId?: string;
+  memberId?: string;
+  dishId?: string;
 }
 
 export interface DecisionConfidence {

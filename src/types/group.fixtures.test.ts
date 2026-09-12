@@ -6,6 +6,7 @@ describe("group-domain golden fixtures", () => {
     expect(GROUP_GOLDEN_FIXTURES.map((fixture) => fixture.id)).toEqual([
       "clear-winner",
       "misery-floor",
+      "all-fail-compromise",
       "near-tie",
       "stale-menu",
       "preference-flip",
@@ -33,5 +34,19 @@ describe("group-domain golden fixtures", () => {
     expect(preferenceFlip?.expected.winnerWithoutPreferenceId).not.toBe(
       preferenceFlip?.expected.winnerWithPreferenceId,
     );
+  });
+
+  it("declares the intended misery-floor and compromise expectations", () => {
+    const miseryFloor = GROUP_GOLDEN_FIXTURES.find((fixture) => fixture.id === "misery-floor");
+    const allFail = GROUP_GOLDEN_FIXTURES.find((fixture) => fixture.id === "all-fail-compromise");
+
+    expect(miseryFloor?.expected).toMatchObject({
+      failingVenueIds: ["one-member-miss"],
+      compromiseRequired: false,
+    });
+    expect(allFail?.expected).toMatchObject({
+      failingVenueIds: ["least-bad", "bad-fit"],
+      compromiseRequired: true,
+    });
   });
 });
