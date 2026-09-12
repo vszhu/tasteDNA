@@ -22,13 +22,19 @@ export function tagPreference(state: MealPreferenceState, tag: MealPreferenceTag
   return "neutral";
 }
 
+/** Sets one mood tag to an exact preference, regardless of its current state. */
+export function setTagPreference(state: MealPreferenceState, tag: MealPreferenceTag, preference: TagPreference): MealPreferenceState {
+  const withoutTag = { desiredTags: state.desiredTags.filter((entry) => entry !== tag), avoidedTags: state.avoidedTags.filter((entry) => entry !== tag) };
+  if (preference === "desired") return { ...state, ...withoutTag, desiredTags: [...withoutTag.desiredTags, tag] };
+  if (preference === "avoided") return { ...state, ...withoutTag, avoidedTags: [...withoutTag.avoidedTags, tag] };
+  return { ...state, ...withoutTag };
+}
+
 /** Cycles one mood tag: neutral -> desired -> avoided -> neutral. */
 export function cycleTagPreference(state: MealPreferenceState, tag: MealPreferenceTag): MealPreferenceState {
   const current = tagPreference(state, tag);
-  const withoutTag = { desiredTags: state.desiredTags.filter((entry) => entry !== tag), avoidedTags: state.avoidedTags.filter((entry) => entry !== tag) };
-  if (current === "neutral") return { ...state, ...withoutTag, desiredTags: [...withoutTag.desiredTags, tag] };
-  if (current === "desired") return { ...state, ...withoutTag, avoidedTags: [...withoutTag.avoidedTags, tag] };
-  return { ...state, ...withoutTag };
+  const next: TagPreference = current === "neutral" ? "desired" : current === "desired" ? "avoided" : "neutral";
+  return setTagPreference(state, tag, next);
 }
 
 function toggleInList(list: string[], value: string): string[] {

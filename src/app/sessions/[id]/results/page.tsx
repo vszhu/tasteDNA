@@ -5,8 +5,12 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Info } from "lucide-react";
 import { GroupResultsView } from "@/components/group/group-results-view";
+import { applyPreferenceAnswer, type PreferenceAnswer } from "@/components/group/preference-question";
+import { PreferenceQuestionCard } from "@/components/group/preference-question-card";
 import { computeGroupRecommendation } from "@/lib/group/ranking";
+import { EMPTY_MEAL_PREFERENCE_STATE } from "@/lib/session/meal-preferences";
 import { GROUP_GOLDEN_FIXTURES, type GroupGoldenFixture } from "@/types/group.fixtures";
+import type { GroupDecisionMember, PreferenceQuestion } from "@/types/group";
 import { cn } from "@/lib/utils";
 
 const SCENARIO_LABELS: Record<GroupGoldenFixture["id"], string> = {
@@ -16,6 +20,29 @@ const SCENARIO_LABELS: Record<GroupGoldenFixture["id"], string> = {
   "stale-menu": "Stale menu",
   "preference-flip": "Meal preference flips the pick",
 };
+
+/**
+ * A mock stand-in for the real engine's PreferenceQuestion output — the
+ * engine never returns one today. Only the preference-flip scenario gets a
+ * question, since it's the one fixture actually designed to change outcome
+ * based on one member's answer (see group.fixtures.ts: winnerWithoutPreference
+ * vs winnerWithPreference). Robust decisions never get a question, matching
+ * "hide the component entirely for robust decisions."
+ */
+const MOCK_QUESTIONS: Partial<Record<GroupGoldenFixture["id"], PreferenceQuestion>> = {
+  "preference-flip": { id: "q-preference-flip", memberId: "alex", tag: "spicy", prompt: "Feeling like something spicy today?" },
+};
+
+function initialMembers(fixture: GroupGoldenFixture, question: PreferenceQuestion | undefined): GroupDecisionMember[] {
+  if (!question) return fixture.members;
+  // Reset the targeted member's preferences so the demo starts unanswered,
+  // instead of the fixture's already-flipped baseline.
+  return fixture.members.map((decisionMember) =>
+    decisionMember.member.userId === question.memberId
+      ? { ...decisionMember, member: { ...decisionMember.member, mealPreferenceState: EMPTY_MEAL_PREFERENCE_STATE } }
+      : decisionMember,
+  );
+}
 
 /**
  * Presentation-only results view. There's no reveal API yet — and computing
@@ -30,14 +57,25 @@ export default function SessionResultsPage() {
   const [scenarioId, setScenarioId] = useState<GroupGoldenFixture["id"]>("clear-winner");
 
   const fixture = useMemo(() => GROUP_GOLDEN_FIXTURES.find((entry) => entry.id === scenarioId)!, [scenarioId]);
-  const recommendation = useMemo(
-    () => computeGroupRecommendation({ session: fixture.session, venues: fixture.venues, members: fixture.members }),
-    [fixture],
+  const question = MOCK_QUESTIONS[scenarioId];
+
+  // Keyed per-scenario so switching scenarios and back preserves an answer,
+  // and so no reset effect is needed when the scenario changes.
+  const [answers, setAnswers] = useState<Partial<Record<GroupGoldenFixture["id"], PreferenceAnswer>>>({});
+  const answer = answers[scenarioId];
+
+  const baselineMembers = useMemo(() => initialMembers(fixture, question), [fixture, question]);
+  const members: GroupDecisionMember[] = useMemo(
+    () => (question && answer ? applyPreferenceAnswer(baselineMembers, question, answer) : baselineMembers),
+    [baselineMembers, question, answer],
   );
-  const memberNames = useMemo(
-    () => Object.fromEntries(fixture.members.map((decisionMember) => [decisionMember.member.userId, decisionMember.member.displayName])),
-    [fixture],
-  );
+
+  const recommendation = useMemo(() => computeGroupRecommendation({ session: fixture.session, venues: fixture.venues, members }), [fixture, members]);
+  const memberNames = useMemo(() => Object.fromEntries(members.map((decisionMember) => [decisionMember.member.userId, decisionMember.member.displayName])), [members]);
+
+  function handleAnswer(nextAnswer: PreferenceAnswer) {
+    setAnswers((current) => ({ ...current, [scenarioId]: nextAnswer }));
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-9 sm:px-6 sm:py-14">
@@ -63,6 +101,18 @@ export default function SessionResultsPage() {
           </button>
         ))}
       </div>
+
+      {question && (
+        <div className="mt-6">
+          <PreferenceQuestionCard
+            key={scenarioId}
+            question={question}
+            memberDisplayName={memberNames[question.memberId] ?? question.memberId}
+            initialAnswer={answer}
+            onAnswer={handleAnswer}
+          />
+        </div>
+      )}
 
       <div className="mt-8">
         {recommendation ? (
