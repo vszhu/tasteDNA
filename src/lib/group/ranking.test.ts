@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { TASTE_DIMENSIONS } from "@/types";
 import type { Dish, DishFeatures, MenuItem, TasteFeatureVector, TasteProfile } from "@/types";
 import type { DiningSession, GroupDecisionMember, MealPreferenceState, Venue } from "@/types/group";
-import { computeGroupRecommendation, scoreRestaurantForMember } from "./ranking";
+import { GROUP_GOLDEN_FIXTURES } from "@/types/group.fixtures";
+import { GROUP_RANKING_WEIGHTS, computeGroupRecommendation, scoreRestaurantForMember } from "./ranking";
 
 const EMPTY_MEAL_STATE: MealPreferenceState = {
   desiredTags: [],
@@ -109,6 +110,18 @@ describe("fair group ranking", () => {
 
     expect(result?.winner.id).toBe("balanced");
     expect(result?.venueScores.find((score) => score.venue.id === "unbalanced")?.clearsMiseryFloor).toBe(false);
+    expect(result?.explanationFacts).toContainEqual({
+      kind: "misery-floor",
+      value: 15,
+      label: "unbalanced is below the misery floor of 45",
+      venueId: "unbalanced",
+    });
+    expect(result?.explanationFacts).toContainEqual({
+      kind: "worst-member-protection",
+      value: 75,
+      label: "Lowest member utility: 75",
+      venueId: "balanced",
+    });
   });
 
   it("returns the best compromise when every venue fails the misery floor", () => {
@@ -119,6 +132,12 @@ describe("fair group ranking", () => {
 
     expect(result?.compromiseRequired).toBe(true);
     expect(result?.winner.id).toBe("second");
+    expect(result?.explanationFacts).toContainEqual({
+      kind: "compromise",
+      value: -23,
+      label: "No venue met the misery floor of 45; selected the best compromise",
+      venueId: "second",
+    });
   });
 
   it("uses candidate order as a deterministic tie breaker and assigns one dish per member", () => {
@@ -129,10 +148,71 @@ describe("fair group ranking", () => {
 
     expect(result?.winner.id).toBe("first");
     expect(result?.assignments.map((assignment) => assignment.memberId)).toEqual(["alex", "blair"]);
+    expect(result?.explanationFacts).toContainEqual({
+      kind: "runner-up-gap",
+      value: 0,
+      label: "Lead over second: 0",
+      venueId: "second",
+    });
+    expect(result?.explanationFacts).toContainEqual({
+      kind: "member-dish-choice",
+      value: 85,
+      label: "alex's best available dish: first-0",
+      venueId: "first",
+      memberId: "alex",
+      dishId: "first-0",
+    });
+  });
+
+  it("reports the winner score and runner-up gap for a clear winner", () => {
+    const alex = member("alex", [1, 0]);
+    const winner = venue("winner", [[1, 0]]);
+    const runnerUp = venue("runner-up", [[0.2, 0.98]]);
+    const result = computeGroupRecommendation({ session: session([winner, runnerUp]), venues: [winner, runnerUp], members: [alex] });
+
+    expect(result?.explanationFacts).toContainEqual({
+      kind: "winner-advantage",
+      value: 85,
+      label: "Highest fairness-adjusted group score: 85",
+      venueId: "winner",
+    });
+    expect(result?.explanationFacts).toContainEqual({
+      kind: "runner-up-gap",
+      value: 28,
+      label: "Lead over runner-up: 28",
+      venueId: "runner-up",
+    });
   });
 
   it("returns null for an empty candidate menu instead of inventing a recommendation", () => {
     const empty = venue("empty", []);
     expect(computeGroupRecommendation({ session: session([empty]), venues: [empty], members: [member("alex", [1, 0])] })).toBeNull();
+  });
+
+  it("keeps the misery-floor golden fixture below the inclusive boundary", () => {
+    const fixture = GROUP_GOLDEN_FIXTURES.find((candidate) => candidate.id === "misery-floor");
+    if (!fixture) throw new Error("Missing misery-floor golden fixture");
+
+    const result = computeGroupRecommendation(fixture);
+    const failedVenue = result?.venueScores.find((score) => score.venue.id === "one-member-miss");
+
+    expect(failedVenue?.worstMemberUtility).toBeLessThan(GROUP_RANKING_WEIGHTS.miseryFloor);
+    expect(failedVenue?.clearsMiseryFloor).toBe(false);
+    expect(result?.compromiseRequired).toBe(false);
+  });
+
+  it("marks the all-fail golden fixture as a compromise", () => {
+    const fixture = GROUP_GOLDEN_FIXTURES.find((candidate) => candidate.id === "all-fail-compromise");
+    if (!fixture) throw new Error("Missing all-fail-compromise golden fixture");
+
+    const result = computeGroupRecommendation(fixture);
+
+    expect(result?.winner.id).toBe(fixture.expected.winnerVenueId);
+    expect(result?.venueScores.every((score) => !score.clearsMiseryFloor)).toBe(true);
+    expect(result?.compromiseRequired).toBe(true);
+    expect(result?.explanationFacts).toContainEqual(expect.objectContaining({
+      kind: "compromise",
+      venueId: "least-bad",
+    }));
   });
 });

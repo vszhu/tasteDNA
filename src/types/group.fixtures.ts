@@ -98,7 +98,13 @@ function member(
 }
 
 export interface GroupGoldenFixture {
-  id: "clear-winner" | "misery-floor" | "near-tie" | "stale-menu" | "preference-flip";
+  id:
+    | "clear-winner"
+    | "misery-floor"
+    | "all-fail-compromise"
+    | "near-tie"
+    | "stale-menu"
+    | "preference-flip";
   session: DiningSession;
   venues: Venue[];
   members: GroupDecisionMember[];
@@ -108,6 +114,7 @@ export interface GroupGoldenFixture {
     staleVenueIds?: string[];
     winnerWithoutPreferenceId?: string;
     winnerWithPreferenceId?: string;
+    compromiseRequired?: boolean;
   };
 }
 
@@ -167,15 +174,31 @@ export const GROUP_GOLDEN_FIXTURES: GroupGoldenFixture[] = [
         dish("balanced-blair", [0, 1], { fresh: 0.8 }),
       ]),
       venue("one-member-miss", [
-        dish("one-member-miss-alex", [1, 0]),
-        dish("one-member-miss-blair", [0, -1]),
+        dish("one-member-miss-alex", [1, -1]),
       ]),
     ],
     [
       decisionMember("session-misery-floor", "alex", [1, 0]),
       decisionMember("session-misery-floor", "blair", [0, 1]),
     ],
-    { winnerVenueId: "balanced-bowls", failingVenueIds: ["one-member-miss"] },
+    {
+      winnerVenueId: "balanced-bowls",
+      failingVenueIds: ["one-member-miss"],
+      compromiseRequired: false,
+    },
+  ),
+  fixture(
+    "all-fail-compromise",
+    [
+      venue("least-bad", [dish("least-bad-dish", [-0.5, 0.866])]),
+      venue("bad-fit", [dish("bad-fit-dish", [-1, 0])]),
+    ],
+    [decisionMember("session-all-fail-compromise", "alex", [1, 0])],
+    {
+      winnerVenueId: "least-bad",
+      failingVenueIds: ["least-bad", "bad-fit"],
+      compromiseRequired: true,
+    },
   ),
   fixture(
     "near-tie",
